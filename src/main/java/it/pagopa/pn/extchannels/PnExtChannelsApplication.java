@@ -14,6 +14,5 @@ public class PnExtChannelsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PnExtChannelsApplication.class, args);
 	}
-
-
+        
 }
