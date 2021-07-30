@@ -11,10 +11,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <java.version>11</java.version>
         <spring.cloud-version>2020.0.3</spring.cloud-version>
+        <spring.boot-version>2.5.2</spring.boot-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -29,7 +31,7 @@
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.5.2</version>
+                <version>${spring.boot-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -63,7 +65,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>2.3.9.RELEASE</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -75,13 +76,11 @@
         <!-- Spring Cloud Stream -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream</artifactId>
-            <version>3.0.12.RELEASE</version>
+            <artifactId>spring-cloud-stream</artifactId>            
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-stream-kafka</artifactId>
-            <version>3.0.12.RELEASE</version>
+            <artifactId>spring-cloud-starter-stream-kafka</artifactId>            
         </dependency>
         <dependency>
             <groupId>ch.qos.logback.contrib</groupId>
@@ -95,18 +94,15 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.3</version>
+            <artifactId>logback-core</artifactId>            
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <artifactId>logback-classic</artifactId>            
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-access</artifactId>
-            <version>1.2.3</version>
+            <artifactId>logback-access</artifactId>            
         </dependency>
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -115,19 +111,16 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <artifactId>commons-lang3</artifactId>            
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.18</version>
+            <artifactId>lombok</artifactId>            
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>2.3.9.RELEASE</version>
+            <artifactId>spring-boot-starter-webflux</artifactId>            
         </dependency>
         <!--<dependency>
             <groupId>org.springdoc</groupId>
@@ -162,8 +155,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
-            <version>2.3.9.RELEASE</version>
+            <artifactId>spring-kafka-test</artifactId>            
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -172,7 +164,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.5.2</version>
+                <version>${spring.boot-version}</version>
                 <configuration>
                     <excludes>
                         <exclude>
