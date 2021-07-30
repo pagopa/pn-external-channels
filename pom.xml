@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
+    <!--<parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.9.RELEASE</version>        
-    </parent>
+    </parent>-->
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -14,6 +14,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <java.version>11</java.version>
+        <spring.cloud-version>2020.0.3</spring.cloud-version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -24,28 +25,40 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.5.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>    
     <dependencies>          
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>2.3.9.RELEASE</version>            
+            <artifactId>spring-boot-starter</artifactId>            
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.3.9.RELEASE</version>
+            <artifactId>spring-boot-starter-web</artifactId>            
         </dependency> 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-            <version>2.3.9.RELEASE</version>
+            <artifactId>spring-boot-starter-actuator</artifactId>           
         </dependency>                
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
-            <version>2.3.9.RELEASE</version>
+ 
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -116,11 +129,11 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
             <version>2.3.9.RELEASE</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-webflux-ui</artifactId>
             <version>1.5.8</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>        
@@ -133,10 +146,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sqs</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-cassandra</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
@@ -147,7 +160,7 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <version>2.3.9.RELEASE</version>
@@ -159,6 +172,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.5.2</version>
                 <configuration>
                     <excludes>
                         <exclude>

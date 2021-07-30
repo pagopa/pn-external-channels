@@ -25,7 +25,7 @@ import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import it.pagopa.pn.extchannels.binding.PNExtChnInboundSink;
+import it.pagopa.pn.externalchannels.binding.PNExtChnInboundSink;
 
 /**
  *

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.support.DefaultKafkaHeaderMapper;
-import it.pagopa.pn.extchannels.binding.PNExtChnInboundSink;
+import it.pagopa.pn.externalchannels.binding.PNExtChnInboundSink;
 
 @Configuration
 @ConfigurationProperties

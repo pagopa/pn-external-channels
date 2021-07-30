@@ -7,14 +7,19 @@ package it.pagopa.pn.externalchannels.event.eventinbound.pnextchnpecevent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  *
  * @author GIANGR40
  */
-@Value @Builder
+@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PnExtChnPecEventHeader {
 
     /**
