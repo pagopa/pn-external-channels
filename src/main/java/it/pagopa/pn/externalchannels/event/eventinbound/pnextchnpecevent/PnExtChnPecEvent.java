@@ -30,7 +30,7 @@ public class PnExtChnPecEvent implements IPnExtChnPecEvent {
     // Header Section    
     
     @Override
-    public String publisher() {
+    public String getPublisher() {
         return pnExtChnPecEventHeader.getPublisher();
     }
 
