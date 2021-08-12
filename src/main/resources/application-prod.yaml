@@ -55,7 +55,10 @@ spring:
                 pnextchnnotifpecinbound:
                     group: pn-extchn-group
                     destination: PN.NotifPecInbound
-                    contentType: application/json               
+                    contentType: application/json    
+                pnextchnnotifprogressstatusoutbound:                    
+                    destination: PN.NotifProgressStatusOutbound
+                    contentType: application/json
             kafka:
                 default:
                     consumer:          
@@ -75,6 +78,10 @@ spring:
                     pnextchnnotifpecinbound:  
                         consumer:
                             dlqName: PN.NotifPecInbound.dlq
+                    pnextchnnotifprogressstatusoutbound:
+                        producer:
+                            batchTimeout: 0
+                            sync: false      
                 binder:                    
                     configuration:
                         isolation.level: read_committed
