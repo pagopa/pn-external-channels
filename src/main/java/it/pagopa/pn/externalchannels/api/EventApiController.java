@@ -24,7 +24,7 @@ public class EventApiController {
     }
 
     @PostMapping("/progressstatusevent")
-    IPnExtChnProgressStatusEvent newPecEvent(@RequestBody IPnExtChnProgressStatusEvent evt) {
+    IPnExtChnProgressStatusEvent newProgressStatusEvent(@RequestBody IPnExtChnProgressStatusEvent evt) {
         return evt;
     }
 
