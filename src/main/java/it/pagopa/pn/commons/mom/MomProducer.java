@@ -4,6 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface MomProducer<T> {
 
-    public CompletableFuture<Void> push(T msg );
+    void push(T msg );
 
 }

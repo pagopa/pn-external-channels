@@ -3,9 +3,10 @@ package it.pagopa.pn.commons.mom;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public interface MomConsumer<T> {
 
-    public CompletableFuture<List<T>> poll(Duration maxPollTime );
+    public void poll(Duration maxPollTime, Consumer<T> handler);
 
 }

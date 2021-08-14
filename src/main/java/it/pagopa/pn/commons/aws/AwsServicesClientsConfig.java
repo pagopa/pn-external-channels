@@ -10,6 +10,7 @@ import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
 @ConditionalOnProperty( name = "pn.mom", havingValue = "sqs" )
@@ -31,9 +32,9 @@ public class AwsServicesClientsConfig {
     }*/
 
     @Bean
-    public SqsAsyncClient dynamoDbEnhancedAsyncClient() {
+    public SqsClient dynamoDbEnhancedAsyncClient() {
         return configureBuilder(
-                  SqsAsyncClient.builder()
+                  SqsClient.builder()
             );
     }
 
