@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: External channel ECS
+Description: Deploy PN-external-channel and ensure infrastructure
 Parameters:
   EnvName:
     Type: String
@@ -42,8 +42,15 @@ Resources:
       # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that grants containers in the task permission to call AWS APIs on your behalf."
       TaskRoleArn: !Ref TaskRole
       ContainerDefinitions:
-        - Name: !Sub '${EnvName}-ext-chan'
-          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/pn-external-channels:latest'
+        - Name: !Sub '${EnvName}-extchannel'
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EnvName}-pn-external-channels:latest'
+          Environment:
+            - Name: AWS_REGIONCODE
+              Value: !Ref AWS::Region
+            - Name: PN_EXTCHANNEL_TOPICS_INPUT
+              Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-input-queue-name' }
+            - Name: PN_EXTCHANNEL_TOPICS_OUTPUT
+              Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-output-queue-name' }
           PortMappings:
             - ContainerPort: 8080
           # Send logs to CloudWatch Logs
@@ -57,7 +64,7 @@ Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ['', [!Ref EnvName, ExtChanExecutionRole]]
+      RoleName: !Join ['', [!Ref EnvName, ExtChannelExecutionRole]]
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -70,7 +77,7 @@ Resources:
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ['', [!Ref EnvName, ExtChanTaskRole]]
+      RoleName: !Join ['', [!Ref EnvName, ExtChannelTaskRole]]
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -91,15 +98,25 @@ Resources:
               - ecr:BatchGetImage
               - ecr:DescribeRepositories
               - ecr:GetDownloadUrlForLayer
-              - sqs:*
-            Resource: "*"
+              - sqs:ChangeMessageVisibility
+              - sqs:ChangeMessageVisibilityBatch
+              - sqs:DeleteMessage
+              - sqs:DeleteMessageBatch
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              - sqs:SendMessageBatch
+            Resource:
+              - !ImportValue { "Fn::Sub": '${EnvName}-extchannel-input-queue-arn' }
+              - !ImportValue { "Fn::Sub": '${EnvName}-extchannel-output-queue-arn' }
       Roles:
         - !Ref TaskRole
   # A role needed for auto scaling
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ['', [!Ref EnvName, ExtChanAutoScalingRole]]
+      RoleName: !Join ['', [!Ref EnvName, ExtChannelAutoScalingRole]]
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -111,7 +128,7 @@ Resources:
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Join ['', [!Ref EnvName, ExtChanContSecGrp]]
+      GroupDescription: !Join ['', [!Ref EnvName, ExtChannelContSecGrp]]
       VpcId: !ImportValue
         "Fn::Sub": '${EnvName}-vpc-id'
       SecurityGroupIngress:
@@ -122,7 +139,7 @@ Resources:
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Join ['', [!Ref EnvName, ExtChanLbSecGrp]]
+      GroupDescription: !Join ['', [!Ref EnvName, ExtChannelLbSecGrp]]
       VpcId: !ImportValue
         "Fn::Sub": '${EnvName}-vpc-id'
       SecurityGroupIngress:
@@ -130,13 +147,13 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-  ExtChanService:
+  ExtChannelService:
     Type: AWS::ECS::Service
     # This dependency is needed so that the load balancer is setup correctly in time
     #DependsOn:
     #  - ListenerHTTP
     Properties:
-      #ServiceName: !Sub '${EnvName}-delivery-push'
+      #ServiceName: !Sub '${EnvName}-extchannel'
       Cluster: !Ref Cluster
       TaskDefinition: !Ref TaskDefinition
       DeploymentConfiguration:
@@ -155,73 +172,17 @@ Resources:
             - !ImportValue { "Fn::Sub": '${EnvName}-subnet2' }
           SecurityGroups:
             - !Ref ContainerSecurityGroup
-        #LoadBalancers:
-        #  - ContainerName: !Ref ServiceName
-        #    ContainerPort: !Ref ContainerPort
-        #    TargetGroupArn: !Ref TargetGroup
-        #TargetGroup:
-        #  Type: AWS::ElasticLoadBalancingV2::TargetGroup
-        #  Properties:
-        #    HealthCheckIntervalSeconds: 10
-        # will look for a 200 status code by default unless specified otherwise
-        #    HealthCheckPath: !Ref HealthCheckPath
-        #    HealthCheckTimeoutSeconds: 5
-        #    UnhealthyThresholdCount: 2
-        #    HealthyThresholdCount: 2
-        #    Name: !Join ['', [!Ref ServiceName, TargetGroup]]
-        #    Port: !Ref ContainerPort
-        #    Protocol: HTTP
-        #    TargetGroupAttributes:
-        #      - Key: deregistration_delay.timeout_seconds
-        #        Value: 60 # default is 300
-        #    TargetType: ip
-        #    VpcId: !Ref VPC
-        #ListenerHTTP:
-        #  Type: AWS::ElasticLoadBalancingV2::Listener
-        #  Properties:
-        #    DefaultActions:
-        #      - TargetGroupArn: !Ref TargetGroup
-        #        Type: forward
-        #    LoadBalancerArn: !Ref LoadBalancer
-        #    Port: !Ref LoadBalancerPort
-        #    Protocol: HTTP
-        #Certificates:
-        #  - CertificateArn: !Ref Certificate
-        #LoadBalancer:
-        #  Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-        #  Properties:
-        #    LoadBalancerAttributes:
-        # this is the default, but is specified here in case it needs to be changed
-      #      - Key: idle_timeout.timeout_seconds
-      #        Value: 60
-      #Name: !Join ['', [!Ref ServiceName, LoadBalancer]]
-      # "internal" is also an option
-  #    Scheme: internal
-  #    SecurityGroups:
-  #      - !Ref LoadBalancerSecurityGroup
-  #    Subnets:
-  #      - !Ref SubnetA
-  #      - !Ref SubnetB
-  #DNSRecord:
-  #  Type: AWS::Route53::RecordSet
-  #  Properties:
-  #    HostedZoneName: !Join ['', [!Ref HostedZoneName, .]]
-  #    Name: !Join ['', [!Ref Subdomain, ., !Ref HostedZoneName, .]]
-  #    Type: A
-  #    AliasTarget:
-  #      DNSName: !GetAtt LoadBalancer.DNSName
-  #      HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Join ['', [/ecs/, !Ref EnvName, ExtChan]]
+      LogGroupName: !Join ['', [/ecs/, !Ref EnvName, ExtChannel]]
       RetentionInDays: 3
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
       MinCapacity: 2
-      MaxCapacity: 4
-      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt ExtChanService.Name]]
+      MaxCapacity: 3
+      ResourceId: !Join ['/', [service, !Ref Cluster, !GetAtt ExtChannelService.Name]]
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
       # "The Amazon Resource Name (ARN) of an AWS Identity and Access Management (IAM) role that allows Application Auto Scaling to modify your scalable target."
@@ -246,4 +207,4 @@ Outputs:
     Value: !Sub '${Cluster.Arn}'
   ServiceName:
     Description: Nome del servizio di cui fare deploy
-    Value: !Sub '${ExtChanService.Name}'
+    Value: !Sub '${ExtChannelService.Name}'

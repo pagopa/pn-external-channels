@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 public class SqsPecRequestMOM extends GenericSqsMOM<PecRequest> implements PecRequestMOM {
 
     public SqsPecRequestMOM(SqsAsyncClient sqs, ObjectMapper objMapper) {
-        super( sqs, objMapper, PecRequest.class, "send_pec_request" );
+        super( sqs, objMapper, PecRequest.class, "demo-main-external_channel_inputs" );
     }
 
 }
