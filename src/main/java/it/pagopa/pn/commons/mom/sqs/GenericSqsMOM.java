@@ -7,12 +7,14 @@ import it.pagopa.pn.commons.mom.MomProducer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
@@ -21,12 +23,12 @@ public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
     private final Class<T> bodyClass;
     private final ObjectMapper objMapper;
 
-    private final SqsAsyncClient sqs;
+    private final SqsClient sqs;
 
     private final String queueUrl;
 
 
-    public GenericSqsMOM(SqsAsyncClient sqs, ObjectMapper objMapper, Class<T> bodyClass, String queueName) {
+    public GenericSqsMOM(SqsClient sqs, ObjectMapper objMapper, Class<T> bodyClass, String queueName) {
         this.queueName = queueName;
         this.bodyClass = bodyClass;
         this.sqs = sqs;
@@ -34,37 +36,30 @@ public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
         queueUrl = getQueueUrl( sqs );
     }
 
-    private String getQueueUrl(SqsAsyncClient sqs) {
+    private String getQueueUrl(SqsClient sqs) {
         GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                 .queueName(queueName)
                 .build();
 
-        try {
-            return sqs.getQueueUrl(getQueueRequest).get().queueUrl();
-        } catch (InterruptedException | ExecutionException exc) {
-            throw new IllegalStateException( exc ); // FIXME Definre trattazione eccezioni
-        }
+        return sqs.getQueueUrl(getQueueRequest).queueUrl();
     }
 
     @Override
-    public synchronized CompletableFuture<List<T>> poll(Duration maxPollTime) {
+    public void poll(Duration maxPollTime, Consumer<T> handler) {
+        long maxPollSeconds = maxPollTime.getSeconds();
+        int maxPollSecondsInt = ( maxPollSeconds > 120 ? 120 : (int) maxPollSeconds);
+
         ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)
+                .maxNumberOfMessages( 10 )
+                .waitTimeSeconds( maxPollSecondsInt )
                 .build();
 
-        return sqs
-                .receiveMessage(receiveRequest)
-                .thenApply( (sqsMessages) ->
-                        sqsMessages
-                                .messages()
-                                .stream()
-                                .map( awsMsg -> {
-                                    T evt = parseJson( awsMsg.body() );
-                                    deleteMessage( awsMsg );
-                                    return evt;
-                                } )
-                                .collect(Collectors.toList())
-            );
+        for( Message sqsMsg: sqs.receiveMessage(receiveRequest).messages() ) {
+            T evt = parseJson( sqsMsg.body() );
+            handler.accept( evt );
+            deleteMessage( sqsMsg );
+        }
     }
 
     private void deleteMessage(Message awsMsg) {
@@ -72,11 +67,8 @@ public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
                 .queueUrl(queueUrl)
                 .receiptHandle( awsMsg.receiptHandle())
                 .build();
-        try {
-            sqs.deleteMessage(deleteMessageRequest).get();
-        } catch (ExecutionException | InterruptedException exc) {
-            throw new IllegalStateException( exc ); // FIXME Definre trattazione eccezioni
-        }
+
+        sqs.deleteMessage(deleteMessageRequest);
     }
 
     private T parseJson(String body) {
@@ -88,7 +80,7 @@ public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
     }
 
     @Override
-    public synchronized CompletableFuture<Void> push(T msg) {
+    public void push(T msg) {
         String jsonMessage = objToJson_handleExceptions(msg);
 
         SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
@@ -96,7 +88,7 @@ public class GenericSqsMOM<T> implements MomProducer<T>, MomConsumer<T> {
                 .messageBody( jsonMessage )
                 .build();
 
-        return sqs.sendMessage(sendMsgRequest).thenApply( (r) -> null);
+        sqs.sendMessage(sendMsgRequest);
     }
 
     private String objToJson_handleExceptions(T msg) {
