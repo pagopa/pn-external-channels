@@ -12,6 +12,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
+import java.net.URI;
+
 @Configuration
 @ConditionalOnProperty( name = "pn.mom", havingValue = "sqs" )
 public class AwsServicesClientsConfig {
@@ -49,6 +51,11 @@ public class AwsServicesClientsConfig {
             String regionCode = props.getRegionCode();
             if( StringUtils.isNotBlank( regionCode )) {
                 builder.region( Region.of( regionCode ));
+            }
+
+            String endpointUrl = props.getEndpointUrl();
+            if( StringUtils.isNotBlank( endpointUrl )) {
+                builder.endpointOverride( URI.create( endpointUrl ));
             }
         }
 
