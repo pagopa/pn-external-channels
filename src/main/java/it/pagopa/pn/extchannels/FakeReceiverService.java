@@ -30,13 +30,15 @@ public class FakeReceiverService {
         pecRequestMom.poll( Duration.ofSeconds(1), (evt) -> {
 
             PnExtChnProgressStatusEvent response = computeResponse( evt );
-            log.info( "PEC request to {} for IUN {} outcome: {} (evt {})",
-                    evt.getPayload().getPecAddress(),
-                    evt.getHeader().getIun(),
-                    response.getPayload().getStatusCode(),
-                    evt.getHeader().getEventId()
+            if( response != null ) {
+                log.info( "PEC request to {} for IUN {} outcome: {} (evt {})",
+                        evt.getPayload().getPecAddress(),
+                        evt.getHeader().getIun(),
+                        response.getPayload().getStatusCode(),
+                        evt.getHeader().getEventId()
                 );
-            pecResponsetMom.push( response );
+                pecResponsetMom.push( response );
+            }
         });
 
     }
@@ -44,7 +46,7 @@ public class FakeReceiverService {
     private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
 
         PnExtChnProgressStatus outcome = decideOutcome( evt );
-        return buildResponse( evt, outcome );
+        return outcome != null ? buildResponse( evt, outcome ) : null;
     }
 
     private PnExtChnProgressStatusEvent buildResponse(PnExtChnPecEvent evt, PnExtChnProgressStatus status) {
@@ -69,22 +71,28 @@ public class FakeReceiverService {
     }
 
     private PnExtChnProgressStatus decideOutcome( PnExtChnPecEvent evt ) {
+        PnExtChnProgressStatus status;
+
         String eventId = evt.getHeader().getEventId();
         String retryNumberPart = eventId.replaceFirst(".*([0-9]+)$", "$1");
 
         String pecAddress = evt.getPayload().getPecAddress();
-        String domainPart = pecAddress.replaceFirst(".*@", "");
+        if( pecAddress != null ) {
+            String domainPart = pecAddress.replaceFirst(".*@", "");
 
-        PnExtChnProgressStatus status;
-        if( domainPart.startsWith("fail-both")
-                || (domainPart.startsWith("fail-first") && "1".equals( retryNumberPart )) ) {
-            status = PnExtChnProgressStatus.RETRYABLE_FAIL;
-        }
-        else if( domainPart.startsWith("do-not-exists") ) {
-            status = PnExtChnProgressStatus.PERMANENT_FAIL;
+            if( domainPart.startsWith("fail-both")
+                    || (domainPart.startsWith("fail-first") && "1".equals( retryNumberPart )) ) {
+                status = PnExtChnProgressStatus.RETRYABLE_FAIL;
+            }
+            else if( domainPart.startsWith("do-not-exists") ) {
+                status = PnExtChnProgressStatus.PERMANENT_FAIL;
+            }
+            else {
+                status = PnExtChnProgressStatus.OK;
+            }
         }
         else {
-            status = PnExtChnProgressStatus.OK;
+            status = null;
         }
 
         return status;
