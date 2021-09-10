@@ -39,7 +39,7 @@ public class InboundMessageType {
                 );
     }
     
-    public Boolean checkIfKnown(String inboundmessagetype) {        
+    public boolean checkIfKnown(String inboundmessagetype) {        
         if (inboundmessagetype!=null)
             return 
                     this.inboundMessageTypeCollection.contains(inboundmessagetype);

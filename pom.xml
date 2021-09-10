@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <!--<parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.9.RELEASE</version>        
+    </parent>-->
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -13,6 +18,21 @@
         <spring.cloud-version>2020.0.3</spring.cloud-version>
         <spring.boot-version>2.5.2</spring.boot-version>
     </properties>
+    <profiles>
+		<profile>
+			<id>java11</id>
+			<activation>
+				<jdk>[11,)</jdk>
+			</activation>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.glassfish.jaxb</groupId>
+					<artifactId>jaxb-runtime</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -55,6 +75,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+ 
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,6 +96,10 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-stream-kafka</artifactId>            
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-security</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback.contrib</groupId>
@@ -115,16 +140,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>            
-        </dependency>        
+        </dependency>
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.10</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
         </dependency>
         <!--<dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-webflux-ui</artifactId>
-            <version>1.5.10</version>
+            <version>1.5.8</version>
         </dependency>-->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -143,6 +168,30 @@
             <artifactId>spring-data-cassandra</artifactId>
         </dependency>-->
         <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-cassandra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.4.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.3</version>
+        </dependency>
+        <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
@@ -157,6 +206,23 @@
             <artifactId>spring-kafka-test</artifactId>            
             <scope>test</scope>
         </dependency>
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+        <dependency>
+            <groupId>it.pagopa.pn</groupId>
+            <artifactId>pn-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>            
@@ -186,7 +252,29 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>      
+            </plugin>
+            <plugin>
+					<groupId>org.codehaus.mojo</groupId>
+            		<artifactId>jaxws-maven-plugin</artifactId>
+            		<version>2.6</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>wsimport</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+        				<wsdlDirectory>${project.basedir}/src/main/resources/jod-wsdl</wsdlDirectory>
+        				<wsdlFiles>
+            				<wsdlFile>UploadSoapService.wsdl</wsdlFile>
+        				</wsdlFiles>
+        				<packageName>it.pagopa.pn.externalchannels.jod.wsclient</packageName>
+				        <sourceDestDir>
+				            src/main/java/
+				        </sourceDestDir>
+    				</configuration>
+			</plugin>      
         </plugins>
     </build>
 </project>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://jod.upload.postecom.it" xmlns:tns="http://jod.upload.postecom.it" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="EndUploadRequestWrapper" type="tns:EndUploadRequestWrapper"/>
+
+  <xs:element name="EndUploadResponseWrapper" type="tns:EndUploadResponseWrapper"/>
+
+  <xs:element name="ErrorDescriptionResponseWrapper" type="tns:ErrorDescriptionResponseWrapper"/>
+
+  <xs:element name="FilePartUploadRequestWrapper" type="tns:FilePartUploadRequestWrapper"/>
+
+  <xs:element name="IdUploadResponseWrapper" type="tns:IdUploadResponseWrapper"/>
+
+  <xs:element name="InitUploadRequestWrapper" type="tns:InitUploadRequestWrapper"/>
+
+  <xs:element name="MacroServicesResponseWrapper" type="tns:MacroServicesResponseWrapper"/>
+
+  <xs:element name="StatusEndUploadRequestWrapper" type="tns:StatusEndUploadRequestWrapper"/>
+
+  <xs:element name="StatusUploadResponseWrapper" type="tns:StatusUploadResponseWrapper"/>
+
+  <xs:element name="UploadResponseWrapper" type="tns:UploadResponseWrapper"/>
+
+  <xs:element name="errorDescription" type="tns:errorDescription"/>
+
+  <xs:element name="macroservices" type="tns:macroservices"/>
+
+  <xs:complexType name="errorDescription">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="ErrorDescriptionResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:errorDescriptionResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="errorDescriptionResponse">
+    <xs:sequence>
+      <xs:element name="errors" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InitUploadRequestWrapper">
+    <xs:sequence>
+      <xs:element name="arg0" type="tns:initUploadRequest" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="initUploadRequest">
+    <xs:sequence>
+      <xs:element name="chunckSize" type="xs:string" minOccurs="0"/>
+      <xs:element name="codiceCliente" type="xs:string" minOccurs="0"/>
+      <xs:element name="codiceServizio" type="xs:string" minOccurs="0"/>
+      <xs:element name="fileName" type="xs:string" minOccurs="0"/>
+      <xs:element name="md5SumFile" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="IdUploadResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:idUploadResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="idUploadResponse">
+    <xs:complexContent>
+      <xs:extension base="tns:uploadResponse">
+        <xs:sequence>
+          <xs:element name="uploadstatus" type="xs:string" minOccurs="0"/>
+          <xs:element name="uuid" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="uploadResponse">
+    <xs:sequence>
+      <xs:element name="descriptiveReason" type="xs:string" minOccurs="0"/>
+      <xs:element name="executiontime" type="xs:long"/>
+      <xs:element name="reason" type="xs:string" minOccurs="0"/>
+      <xs:element name="status" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StatusEndUploadRequestWrapper">
+    <xs:sequence>
+      <xs:element name="arg0" type="tns:statusEndUploadRequest" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="statusEndUploadRequest">
+    <xs:complexContent>
+      <xs:extension base="tns:endUploadRequest">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="endUploadRequest">
+    <xs:sequence>
+      <xs:element name="uuid" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StatusUploadResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:statusUploadResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="statusUploadResponse">
+    <xs:complexContent>
+      <xs:extension base="tns:idUploadResponse">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="EndUploadRequestWrapper">
+    <xs:sequence>
+      <xs:element name="arg0" type="tns:endUploadRequest" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="EndUploadResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:endUploadResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="endUploadResponse">
+    <xs:complexContent>
+      <xs:extension base="tns:idUploadResponse">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="macroservices">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="MacroServicesResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:macroServicesResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="macroServicesResponse">
+    <xs:complexContent>
+      <xs:extension base="tns:uploadResponse">
+        <xs:sequence>
+          <xs:element name="codiceCliente" type="xs:string" minOccurs="0"/>
+          <xs:element name="macroservices">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="key" minOccurs="0" type="xs:anyType"/>
+                      <xs:element name="value" minOccurs="0" type="xs:anyType"/>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="nomeCliente" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="FilePartUploadRequestWrapper">
+    <xs:sequence>
+      <xs:element name="arg0" type="tns:filePartUploadRequest" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="filePartUploadRequest">
+    <xs:complexContent>
+      <xs:extension base="tns:endUploadRequest">
+        <xs:sequence>
+          <xs:element name="filePartAsBase64" type="xs:string" minOccurs="0"/>
+          <xs:element name="filePartIndex" type="xs:int"/>
+          <xs:element name="md5SumFilePartAsBase64" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="UploadResponseWrapper">
+    <xs:sequence>
+      <xs:element name="return" type="tns:idPartUploadResponse" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="idPartUploadResponse">
+    <xs:complexContent>
+      <xs:extension base="tns:idUploadResponse">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>
+

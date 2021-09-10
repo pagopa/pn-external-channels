@@ -26,6 +26,26 @@ server:
 general:
   message:  "PN External Channels Microservice"
 
+logging:
+    level:
+        org:
+            springframework:
+                web: DEBUG
+                ws:
+                    client:
+                        MessageTracing:
+                            received: TRACE
+                            sent: TRACE
+                    server:
+                        MessageTracing:
+                            received: TRACE
+                            sent: TRACE
+
+spring.autoconfigure.exclude:
+    - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
 spring:
     application:
         name: pn-external-channels
@@ -55,10 +75,7 @@ spring:
                 pnextchnnotifpecinbound:
                     group: pn-extchn-group
                     destination: PN.NotifPecInbound
-                    contentType: application/json    
-                pnextchnnotifprogressstatusoutbound:                    
-                    destination: PN.NotifProgressStatusOutbound
-                    contentType: application/json
+                    contentType: application/json               
             kafka:
                 default:
                     consumer:          
@@ -78,10 +95,6 @@ spring:
                     pnextchnnotifpecinbound:  
                         consumer:
                             dlqName: PN.NotifPecInbound.dlq
-                    pnextchnnotifprogressstatusoutbound:
-                        producer:
-                            batchTimeout: 0
-                            sync: false      
                 binder:                    
                     configuration:
                         isolation.level: read_committed
@@ -100,3 +113,41 @@ spring:
                                 max.in.flight.requests.per.connection: 5
                                 retries: 2147483647                                
                                 acks: all                    
+    data:
+        cassandra:
+            password: cassandra
+            username: cassandra
+            keyspaceName: external_channel
+            contactPoints: localhost
+            port: 9042
+            schemaAction: CREATE_IF_NOT_EXISTS
+            local-datacenter: datacenter1
+        mongodb:
+            host: localhost
+            port: 27017
+            database: external_channel
+            username: root
+            password: pass12345
+
+file-transfer-service:
+    implementation: aws
+
+jod-ft:
+    auth:
+        username: user
+        password: pass
+    filepart-size: 1048576
+    url:
+       metadata: https://sinws.test.poste.it:443/jod-ft/metadata
+
+job:
+    cron-expression: "0 0 */3 ? * *" # OGNI 3 ORE
+    # cron-expression: "*/10 * * * * *" # OGNI 10 SEC (TEST)
+    batch-size: 1
+    csv-template-id: 8
+    
+topic:
+  error: error-messages
+
+dev-options:
+    fake-pn-ext-chn-service: true
