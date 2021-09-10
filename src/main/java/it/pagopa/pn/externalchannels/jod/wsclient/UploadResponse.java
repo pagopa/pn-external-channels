@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for uploadResponse complex type.
+ * <p>Classe Java per uploadResponse complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="uploadResponse"&gt;
@@ -48,7 +48,7 @@ public class UploadResponse {
     protected String status;
 
     /**
-     * Gets the value of the descriptiveReason property.
+     * Recupera il valore della proprietà descriptiveReason.
      * 
      * @return
      *     possible object is
@@ -60,7 +60,7 @@ public class UploadResponse {
     }
 
     /**
-     * Sets the value of the descriptiveReason property.
+     * Imposta il valore della proprietà descriptiveReason.
      * 
      * @param value
      *     allowed object is
@@ -72,7 +72,7 @@ public class UploadResponse {
     }
 
     /**
-     * Gets the value of the executiontime property.
+     * Recupera il valore della proprietà executiontime.
      * 
      */
     public long getExecutiontime() {
@@ -80,7 +80,7 @@ public class UploadResponse {
     }
 
     /**
-     * Sets the value of the executiontime property.
+     * Imposta il valore della proprietà executiontime.
      * 
      */
     public void setExecutiontime(long value) {
@@ -88,7 +88,7 @@ public class UploadResponse {
     }
 
     /**
-     * Gets the value of the reason property.
+     * Recupera il valore della proprietà reason.
      * 
      * @return
      *     possible object is
@@ -100,7 +100,7 @@ public class UploadResponse {
     }
 
     /**
-     * Sets the value of the reason property.
+     * Imposta il valore della proprietà reason.
      * 
      * @param value
      *     allowed object is
@@ -112,7 +112,7 @@ public class UploadResponse {
     }
 
     /**
-     * Gets the value of the status property.
+     * Recupera il valore della proprietà status.
      * 
      * @return
      *     possible object is
@@ -124,7 +124,7 @@ public class UploadResponse {
     }
 
     /**
-     * Sets the value of the status property.
+     * Imposta il valore della proprietà status.
      * 
      * @param value
      *     allowed object is

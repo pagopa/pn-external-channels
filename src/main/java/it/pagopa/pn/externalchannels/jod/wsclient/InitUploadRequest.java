@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for initUploadRequest complex type.
+ * <p>Classe Java per initUploadRequest complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="initUploadRequest"&gt;
@@ -46,7 +46,7 @@ public class InitUploadRequest {
     protected String md5SumFile;
 
     /**
-     * Gets the value of the chunckSize property.
+     * Recupera il valore della proprietà chunckSize.
      * 
      * @return
      *     possible object is
@@ -58,7 +58,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Sets the value of the chunckSize property.
+     * Imposta il valore della proprietà chunckSize.
      * 
      * @param value
      *     allowed object is
@@ -70,7 +70,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Gets the value of the codiceCliente property.
+     * Recupera il valore della proprietà codiceCliente.
      * 
      * @return
      *     possible object is
@@ -82,7 +82,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Sets the value of the codiceCliente property.
+     * Imposta il valore della proprietà codiceCliente.
      * 
      * @param value
      *     allowed object is
@@ -94,7 +94,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Gets the value of the codiceServizio property.
+     * Recupera il valore della proprietà codiceServizio.
      * 
      * @return
      *     possible object is
@@ -106,7 +106,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Sets the value of the codiceServizio property.
+     * Imposta il valore della proprietà codiceServizio.
      * 
      * @param value
      *     allowed object is
@@ -118,7 +118,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Gets the value of the fileName property.
+     * Recupera il valore della proprietà fileName.
      * 
      * @return
      *     possible object is
@@ -130,7 +130,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Sets the value of the fileName property.
+     * Imposta il valore della proprietà fileName.
      * 
      * @param value
      *     allowed object is
@@ -142,7 +142,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Gets the value of the md5SumFile property.
+     * Recupera il valore della proprietà md5SumFile.
      * 
      * @return
      *     possible object is
@@ -154,7 +154,7 @@ public class InitUploadRequest {
     }
 
     /**
-     * Sets the value of the md5SumFile property.
+     * Imposta il valore della proprietà md5SumFile.
      * 
      * @param value
      *     allowed object is

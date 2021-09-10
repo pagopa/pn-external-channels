@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for macroServicesResponse complex type.
+ * <p>Classe Java per macroServicesResponse complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="macroServicesResponse"&gt;
@@ -67,7 +67,7 @@ public class MacroServicesResponse
     protected String nomeCliente;
 
     /**
-     * Gets the value of the codiceCliente property.
+     * Recupera il valore della proprietà codiceCliente.
      * 
      * @return
      *     possible object is
@@ -79,7 +79,7 @@ public class MacroServicesResponse
     }
 
     /**
-     * Sets the value of the codiceCliente property.
+     * Imposta il valore della proprietà codiceCliente.
      * 
      * @param value
      *     allowed object is
@@ -91,7 +91,7 @@ public class MacroServicesResponse
     }
 
     /**
-     * Gets the value of the macroservices property.
+     * Recupera il valore della proprietà macroservices.
      * 
      * @return
      *     possible object is
@@ -103,7 +103,7 @@ public class MacroServicesResponse
     }
 
     /**
-     * Sets the value of the macroservices property.
+     * Imposta il valore della proprietà macroservices.
      * 
      * @param value
      *     allowed object is
@@ -115,7 +115,7 @@ public class MacroServicesResponse
     }
 
     /**
-     * Gets the value of the nomeCliente property.
+     * Recupera il valore della proprietà nomeCliente.
      * 
      * @return
      *     possible object is
@@ -127,7 +127,7 @@ public class MacroServicesResponse
     }
 
     /**
-     * Sets the value of the nomeCliente property.
+     * Imposta il valore della proprietà nomeCliente.
      * 
      * @param value
      *     allowed object is
@@ -140,9 +140,9 @@ public class MacroServicesResponse
 
 
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>Classe Java per anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
      * 
      * <pre>
      * &lt;complexType&gt;
@@ -208,9 +208,9 @@ public class MacroServicesResponse
 
 
         /**
-         * <p>Java class for anonymous complex type.
+         * <p>Classe Java per anonymous complex type.
          * 
-         * <p>The following schema fragment specifies the expected content contained within this class.
+         * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
          * 
          * <pre>
          * &lt;complexType&gt;
@@ -238,7 +238,7 @@ public class MacroServicesResponse
             protected Object value;
 
             /**
-             * Gets the value of the key property.
+             * Recupera il valore della proprietà key.
              * 
              * @return
              *     possible object is
@@ -250,7 +250,7 @@ public class MacroServicesResponse
             }
 
             /**
-             * Sets the value of the key property.
+             * Imposta il valore della proprietà key.
              * 
              * @param value
              *     allowed object is
@@ -262,7 +262,7 @@ public class MacroServicesResponse
             }
 
             /**
-             * Gets the value of the value property.
+             * Recupera il valore della proprietà value.
              * 
              * @return
              *     possible object is
@@ -274,7 +274,7 @@ public class MacroServicesResponse
             }
 
             /**
-             * Sets the value of the value property.
+             * Imposta il valore della proprietà value.
              * 
              * @param value
              *     allowed object is

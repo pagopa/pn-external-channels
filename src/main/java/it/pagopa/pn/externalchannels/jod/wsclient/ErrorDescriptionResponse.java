@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for errorDescriptionResponse complex type.
+ * <p>Classe Java per errorDescriptionResponse complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="errorDescriptionResponse"&gt;
@@ -34,7 +34,7 @@ public class ErrorDescriptionResponse {
     protected String errors;
 
     /**
-     * Gets the value of the errors property.
+     * Recupera il valore della proprietà errors.
      * 
      * @return
      *     possible object is
@@ -46,7 +46,7 @@ public class ErrorDescriptionResponse {
     }
 
     /**
-     * Sets the value of the errors property.
+     * Imposta il valore della proprietà errors.
      * 
      * @param value
      *     allowed object is

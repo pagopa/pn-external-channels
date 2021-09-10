@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for StatusEndUploadRequestWrapper complex type.
+ * <p>Classe Java per StatusEndUploadRequestWrapper complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="StatusEndUploadRequestWrapper"&gt;
@@ -34,7 +34,7 @@ public class StatusEndUploadRequestWrapper {
     protected StatusEndUploadRequest arg0;
 
     /**
-     * Gets the value of the arg0 property.
+     * Recupera il valore della proprietà arg0.
      * 
      * @return
      *     possible object is
@@ -46,7 +46,7 @@ public class StatusEndUploadRequestWrapper {
     }
 
     /**
-     * Sets the value of the arg0 property.
+     * Imposta il valore della proprietà arg0.
      * 
      * @param value
      *     allowed object is

@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for filePartUploadRequest complex type.
+ * <p>Classe Java per filePartUploadRequest complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Il seguente frammento di schema specifica il contenuto previsto contenuto in questa classe.
  * 
  * <pre>
  * &lt;complexType name="filePartUploadRequest"&gt;
@@ -42,7 +42,7 @@ public class FilePartUploadRequest
     protected String md5SumFilePartAsBase64;
 
     /**
-     * Gets the value of the filePartAsBase64 property.
+     * Recupera il valore della proprietà filePartAsBase64.
      * 
      * @return
      *     possible object is
@@ -54,7 +54,7 @@ public class FilePartUploadRequest
     }
 
     /**
-     * Sets the value of the filePartAsBase64 property.
+     * Imposta il valore della proprietà filePartAsBase64.
      * 
      * @param value
      *     allowed object is
@@ -66,7 +66,7 @@ public class FilePartUploadRequest
     }
 
     /**
-     * Gets the value of the filePartIndex property.
+     * Recupera il valore della proprietà filePartIndex.
      * 
      */
     public int getFilePartIndex() {
@@ -74,7 +74,7 @@ public class FilePartUploadRequest
     }
 
     /**
-     * Sets the value of the filePartIndex property.
+     * Imposta il valore della proprietà filePartIndex.
      * 
      */
     public void setFilePartIndex(int value) {
@@ -82,7 +82,7 @@ public class FilePartUploadRequest
     }
 
     /**
-     * Gets the value of the md5SumFilePartAsBase64 property.
+     * Recupera il valore della proprietà md5SumFilePartAsBase64.
      * 
      * @return
      *     possible object is
@@ -94,7 +94,7 @@ public class FilePartUploadRequest
     }
 
     /**
-     * Sets the value of the md5SumFilePartAsBase64 property.
+     * Imposta il valore della proprietà md5SumFilePartAsBase64.
      * 
      * @param value
      *     allowed object is
