@@ -30,49 +30,71 @@ public class FakeReceiverService {
         pecRequestMom.poll( Duration.ofSeconds(1), (evt) -> {
 
             PnExtChnProgressStatusEvent response = computeResponse( evt );
-            log.info( "PEC request to {} for IUN {} outcome: {}",
-                    evt.getPayload().getPec(),
-                    evt.getHeader().getIun(),
-                    response.getPayload().getStato()
+            if( response != null ) {
+                log.info( "PEC request to {} for IUN {} outcome: {} (evt {})",
+                        evt.getPayload().getPecAddress(),
+                        evt.getHeader().getIun(),
+                        response.getPayload().getStatusCode(),
+                        evt.getHeader().getEventId()
                 );
-            pecResponsetMom.push( response );
+                pecResponsetMom.push( response );
+            }
         });
 
     }
 
     private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
 
-        String outcome = decideIfOutcomeIsFail( evt ) ? "FAIL" : "OK";
-        return buildResponse( evt, outcome );
+        PnExtChnProgressStatus outcome = decideOutcome( evt );
+        return outcome != null ? buildResponse( evt, outcome ) : null;
     }
 
-    private PnExtChnProgressStatusEvent buildResponse(PnExtChnPecEvent evt, String status) {
+    private PnExtChnProgressStatusEvent buildResponse(PnExtChnPecEvent evt, PnExtChnProgressStatus status) {
         return PnExtChnProgressStatusEvent.builder()
                 .header( StandardEventHeader.builder()
                         .eventId( evt.getHeader().getEventId() + "_response" )
                         .iun( evt.getHeader().getIun() )
-                        .eventType( EventType.SEND_PEC_RESPONSE )
+                        .eventType( EventType.SEND_PEC_RESPONSE.name() )
                         .createdAt( Instant.now() )
-                        .publisher( "PN_EXTERNAL_CHANNEL" )
+                        .publisher( EventPublisher.EXTERNAL_CHANNELS.name() )
                         .build()
                 )
                 .payload(PnExtChnProgressStatusEventPayload.builder()
                         .canale("PEC")
+                        .requestCorrelationId( evt.getPayload().getRequestCorrelationId() )
                         .iun( evt.getHeader().getIun() )
-                        .stato( status )
+                        .statusCode( status )
+                        .statusDate( Instant.now() )
                         .build()
                 )
                 .build();
     }
 
-    private boolean decideIfOutcomeIsFail( PnExtChnPecEvent evt ) {
+    private PnExtChnProgressStatus decideOutcome( PnExtChnPecEvent evt ) {
+        PnExtChnProgressStatus status;
+
         String eventId = evt.getHeader().getEventId();
-        String retryNumberPart = eventId.replaceFirst(".*([0-9]+])^", "$1");
+        String retryNumberPart = eventId.replaceFirst(".*([0-9]+)$", "$1");
 
-        String pecAddress = evt.getPayload().getPec();
-        String domainPart = pecAddress.replaceFirst(".*@", "");
+        String pecAddress = evt.getPayload().getPecAddress();
+        if( pecAddress != null ) {
+            String domainPart = pecAddress.replaceFirst(".*@", "");
 
-        return domainPart.startsWith("fail-both")
-                || (domainPart.startsWith("fail-first") && "1".equals( retryNumberPart ));
+            if( domainPart.startsWith("fail-both")
+                    || (domainPart.startsWith("fail-first") && "1".equals( retryNumberPart )) ) {
+                status = PnExtChnProgressStatus.RETRYABLE_FAIL;
+            }
+            else if( domainPart.startsWith("do-not-exists") ) {
+                status = PnExtChnProgressStatus.PERMANENT_FAIL;
+            }
+            else {
+                status = PnExtChnProgressStatus.OK;
+            }
+        }
+        else {
+            status = null;
+        }
+
+        return status;
     }
 }

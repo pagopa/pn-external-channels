@@ -9,6 +9,7 @@ public class AwsConfigs {
 
     private String profileName;
     private String regionCode;
+    private String endpointUrl;
 
     public void setProfileName(String profileName) {
         this.profileName = profileName;
@@ -24,5 +25,13 @@ public class AwsConfigs {
 
     public String getRegionCode() {
         return regionCode;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
     }
 }
