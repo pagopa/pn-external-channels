@@ -23,7 +23,7 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @RequestMapping("/external-channel")
 public class PnExtChnController {
 	
-	@Autowired
+	//@Autowired
 	private PnExtChnService pnExtChnService;
 	
 	

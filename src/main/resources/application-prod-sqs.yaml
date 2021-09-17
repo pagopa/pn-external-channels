@@ -49,13 +49,13 @@ spring.autoconfigure.exclude:
 cloud:
     aws:
         credentials:
-            accessKey:
-            secretKey: 
+            accessKey: PN-TEST
+            secretKey: PN-TEST
             instanceProfile: false
         region:
             static: eu-west-1
         sqs:
-            endpoint=http://localhost:4566
+            endpoint: http://localhost:4566
 
 spring:
     application:
