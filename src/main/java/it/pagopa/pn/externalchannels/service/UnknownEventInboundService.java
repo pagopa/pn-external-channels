@@ -7,7 +7,6 @@ package it.pagopa.pn.externalchannels.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.MessageBuilder;
@@ -42,8 +41,7 @@ public class UnknownEventInboundService {
             target = PnExtChnProcessor.INPUT,
             condition = "!T(it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType).PN_EXTCHN_PEC_MESSAGE_TYPE.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE])"
     )
-    public void handleUnknownInboundEvent(@Payload String event,
-            @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+    public void handleUnknownInboundEvent(@Payload String event,            
             @Header(name = PN_EVENT_HEADER_EVENT_TYPE, required = false) String tipoMessaggio) {
 
         if (tipoMessaggio == null) {
@@ -55,8 +53,8 @@ public class UnknownEventInboundService {
         pnExtChnService.scartaMessaggio(event, null);
 
         if (!inboundMessageType.checkIfKnown(tipoMessaggio)) {
-            log.warn("Received unknown message type: " + tipoMessaggio + " from P-" + partition + ": message from kafka with id: " + event);
-            throw new java.lang.IllegalStateException("Received unknown message type:" + tipoMessaggio + " from P" + partition + ": message from kafka: " + event);
+            log.warn("Received unknown message type: " + tipoMessaggio + ": message from sqs: " + event);
+            throw new java.lang.IllegalStateException("Received unknown message type:" + tipoMessaggio + ": message from kafka: " + event);
         } // if
 
     }

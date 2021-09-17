@@ -13,9 +13,11 @@ public interface PnExtChnProcessor {
 	public static final String STATUS_OUTPUT = "status-messages";
 
 	@Input(PnExtChnProcessor.INPUT)
-	SubscribableChannel input();    
+	SubscribableChannel input();   
+        /* not supported yet in SQS */
 	@Output(PnExtChnProcessor.ERROR_OUTPUT)
 	MessageChannel errorMessage();
 	@Output(PnExtChnProcessor.STATUS_OUTPUT)
 	MessageChannel statusMessage();
+        
 }

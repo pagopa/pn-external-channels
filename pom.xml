@@ -8,7 +8,7 @@
     </parent>-->
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2-SQS-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,20 +19,20 @@
         <spring.boot-version>2.5.2</spring.boot-version>
     </properties>
     <profiles>
-		<profile>
-			<id>java11</id>
-			<activation>
-				<jdk>[11,)</jdk>
-			</activation>
+        <profile>
+            <id>java11</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
 
-			<dependencies>
-				<dependency>
-					<groupId>org.glassfish.jaxb</groupId>
-					<artifactId>jaxb-runtime</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -93,10 +93,18 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-stream</artifactId>            
         </dependency>
+        <!-- kafka 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-stream-kafka</artifactId>            
-        </dependency>
+        </dependency> 
+        -->       
+        <!-- sqs --> 
+        <dependency>
+            <groupId>de.idealo.spring</groupId>
+            <artifactId>spring-cloud-stream-binder-sqs</artifactId>
+            <version>1.4.0</version>
+        </dependency>        
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-security</artifactId>
@@ -207,15 +215,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web-services</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-tomcat</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <dependency>
             <groupId>it.pagopa.pn</groupId>
@@ -254,27 +262,27 @@
                 </executions>
             </plugin>
             <plugin>
-					<groupId>org.codehaus.mojo</groupId>
-            		<artifactId>jaxws-maven-plugin</artifactId>
-            		<version>2.6</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>wsimport</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-        				<wsdlDirectory>${project.basedir}/src/main/resources/jod-wsdl</wsdlDirectory>
-        				<wsdlFiles>
-            				<wsdlFile>UploadSoapService.wsdl</wsdlFile>
-        				</wsdlFiles>
-        				<packageName>it.pagopa.pn.externalchannels.jod.wsclient</packageName>
-				        <sourceDestDir>
-				            src/main/java/
-				        </sourceDestDir>
-    				</configuration>
-			</plugin>      
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <wsdlDirectory>${project.basedir}/src/main/resources/jod-wsdl</wsdlDirectory>
+                    <wsdlFiles>
+                        <wsdlFile>UploadSoapService.wsdl</wsdlFile>
+                    </wsdlFiles>
+                    <packageName>it.pagopa.pn.externalchannels.jod.wsclient</packageName>
+                    <sourceDestDir>
+                        src/main/java/
+                    </sourceDestDir>
+                </configuration>
+            </plugin>      
         </plugins>
     </build>
 </project>

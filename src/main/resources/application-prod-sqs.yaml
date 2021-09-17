@@ -1,0 +1,122 @@
+app:
+    name: pn-external-channels
+
+management:
+    endpoint:
+        health:
+            enabled: true
+        info:
+            enabled: true
+        metrics:
+            enabled: true
+        prometheus:
+            enabled: true
+        shutdown:
+            enabled: true           
+    endpoints:
+        web:
+            exposure:
+                include: "*"
+
+server:
+  tomcat:
+    connection-timeout: -1
+  port : 8080
+
+general:
+  message:  "PN External Channels Microservice"
+
+logging:
+    level:
+        org:
+            springframework:
+                web: DEBUG
+                ws:
+                    client:
+                        MessageTracing:
+                            received: TRACE
+                            sent: TRACE
+                    server:
+                        MessageTracing:
+                            received: TRACE
+                            sent: TRACE
+
+spring.autoconfigure.exclude:
+    - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+    - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
+cloud:
+    aws:
+        credentials:
+            accessKey:
+            secretKey: 
+            instanceProfile: false
+        region:
+            static: eu-west-1
+        sqs:
+            endpoint=http://localhost:4566
+
+spring:
+    application:
+        name: pn-external-channels
+    main:
+        banner-mode: off
+        log-startup-info: true
+    jackson:
+        deserialization:
+            fail-on-ignored-properties: false
+        default-property-inclusion: non_absent
+
+    cloud:
+        stream:    
+            bindings:    
+                pnextchnnotifpecinbound:                
+                    destination: local-ext-channels-inputs
+            sqs:             
+                bindings:                    
+                    pnextchnnotifpecinbound:  
+                        consumer:
+                            snsFanout: false
+    data:
+        cassandra:
+            password: cassandra
+            username: cassandra
+            keyspaceName: external_channel
+            contactPoints: localhost
+            port: 9042
+            schemaAction: CREATE_IF_NOT_EXISTS
+            local-datacenter: datacenter1
+        mongodb:
+            host: localhost
+            port: 27017
+            database: external_channel
+            username: root
+            password: pass12345
+
+file-transfer-service:
+    implementation: aws
+
+binder:
+    implementation: sqs
+
+jod-ft:
+    auth:
+        username: user
+        password: pass
+    filepart-size: 1048576
+    url:
+       metadata: https://sinws.test.poste.it:443/jod-ft/metadata
+
+job:
+    cron-expression: "0 0 */3 ? * *" # OGNI 3 ORE
+    # cron-expression: "*/10 * * * * *" # OGNI 10 SEC (TEST)
+    batch-size: 1
+    csv-template-id: 8
+    
+topic:
+  error: error-messages
+
+dev-options:
+    fake-pn-ext-chn-service: true
+    

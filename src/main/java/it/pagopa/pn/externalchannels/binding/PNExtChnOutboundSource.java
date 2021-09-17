@@ -14,8 +14,10 @@ import org.springframework.messaging.MessageChannel;
  */
 public interface PNExtChnOutboundSource {
 
+    /* not supported yet in SQS 
     public static final String OUTPUT = "pnextchnnotifprogressstatusoutbound";
 
     @Output(PNExtChnOutboundSource.OUTPUT)
     MessageChannel output();
+    */
 }

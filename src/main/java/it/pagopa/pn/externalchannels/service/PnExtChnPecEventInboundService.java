@@ -27,7 +27,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
@@ -82,7 +81,6 @@ public class PnExtChnPecEventInboundService {
             condition = "headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE]==T(it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType).PN_EXTCHN_PEC_MESSAGE_TYPE"
     )
     public void handlePnExtChnPecEvent(
-            @Header(name = KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
             /*@Header(name=KafkaHeaders.ACKNOWLEDGMENT) Acknowledgment acknowledgement,*/
             @Header(name = PN_EVENT_HEADER_PUBLISHER) String publisher,
             @Header(name = PN_EVENT_HEADER_EVENT_ID) String eventId,
@@ -122,7 +120,7 @@ public class PnExtChnPecEventInboundService {
 			pnExtChnService.scartaMessaggio(event.asText(), errors);
 		} else {
 
-	        log.debug("Received message from P-" + partition + ": message from kafka: " + pnextchnpecevent.toString());        
+	        log.debug("Received message: message from sqs: " + pnextchnpecevent.toString());        
 	        log.debug("object = {}", objectMapper.valueToTree(pnextchnpecevent));
 	        
 	        pnExtChnService.salvaMessaggioDigitale(pnextchnpecevent);
