@@ -9,9 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.api.dto.events.PnExtChnEmailEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnEmailEventPayload;
+import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
-import it.pagopa.pn.externalchannels.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ import static java.time.ZoneOffset.UTC;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public class PnExtChnPecEventInboundService {
+public class PnExtChnEmailEventInboundService {
 
 
     @Autowired
@@ -72,9 +73,9 @@ public class PnExtChnPecEventInboundService {
 
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
-            condition = "headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE]==T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_PEC"
+            condition = "headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE]==T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_EMAIL"
     )
-    public void handlePnExtChnPecEvent(
+    public void handlePnExtChnEmailEvent(
             @Header(name = PN_EVENT_HEADER_PUBLISHER) String publisher,
             @Header(name = PN_EVENT_HEADER_EVENT_ID) String eventId,
             @Header(name = PN_EVENT_HEADER_EVENT_TYPE) String eventType,
@@ -82,9 +83,10 @@ public class PnExtChnPecEventInboundService {
             @Header(name = PN_EVENT_HEADER_CREATED_AT) String createdAt,
             @Payload JsonNode event
     ) {
-        log.info("PnExtChnPecEventInboundService - handlePnExtChnPecEvent - START");
 
-        PnExtChnPecEvent pnextchnpecevent = PnExtChnPecEvent.builder()
+        log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - START");
+
+        PnExtChnEmailEvent pnextchnpecevent = PnExtChnEmailEvent.builder()
             .header(StandardEventHeader.builder()
                     .publisher(publisher)
                     .eventId(eventId)
@@ -92,30 +94,15 @@ public class PnExtChnPecEventInboundService {
                     .iun(iun)
                     .createdAt(Instant.parse(createdAt))
                     .build()
-            ).payload(objectMapper.convertValue(event, PnExtChnPecEventPayload.class))
+            ).payload(objectMapper.convertValue(event, PnExtChnEmailEventPayload.class))
             .build();
-        
-        
-        Set<ConstraintViolation<PnExtChnPecEvent>> errors = null;
+
+
+        Set<ConstraintViolation<PnExtChnEmailEvent>> errors = null;
 		errors = validator.validate(pnextchnpecevent);
-		
-		if(!errors.isEmpty()) {
-			log.error(Constants.MSG_ERRORI_DI_VALIDAZIONE);
-			// Invio il messaggio di errore su topic dedicato
-			pnExtChnService.produceStatusMessage("",
-	        		pnextchnpecevent
-	        		.getPayload().getIun(),
-                    MessageType.PN_EXT_CHN_PEC, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null);
-			// Salvo il messaggio di scartato su una struttura DB dedicata
-			pnExtChnService.discardMessage(event.asText(), errors);
-		} else {
 
-	        log.debug("Received message from sqs: " + pnextchnpecevent.toString());
-	        log.debug("object = {}", objectMapper.valueToTree(pnextchnpecevent));
-	        
-	        pnExtChnService.saveDigitalMessage(pnextchnpecevent);
-		}
+        log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - END");
+        // TODO: continue
 
-        log.info("PnExtChnPecEventInboundService - handlePnExtChnPecEvent - END");
     }
 }

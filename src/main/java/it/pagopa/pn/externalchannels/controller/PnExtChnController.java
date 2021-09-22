@@ -1,12 +1,6 @@
 package it.pagopa.pn.externalchannels.controller;
 
-import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
-import it.pagopa.pn.api.dto.events.StandardEventHeader;
-import it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType;
-import it.pagopa.pn.externalchannels.event.eventinbound.pnextchncartevent.PnExtChnCartEvent;
-import it.pagopa.pn.externalchannels.event.eventinbound.pnextchncartevent.PnExtChnCartEventHeader;
-import it.pagopa.pn.externalchannels.event.eventinbound.pnextchncartevent.PnExtChnCartEventPayload;
+import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.service.PnExtChnService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,44 +17,45 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @RequestMapping("/external-channel")
 public class PnExtChnController {
 	
-	//@Autowired
+	@Autowired
 	private PnExtChnService pnExtChnService;
-	
-	
+
 	// TODO: In caso di errore di validazione, bisogna inviare il messaggio sempre sul topic di errore ?
 	
-	@PostMapping(path = "/cartacea/saveNotifica")
-	public Object saveNotificaCartacea(
-			@RequestHeader(name = InboundMessageType.KAFKA_HEADER_PUBLISHER) String publisher,
-            @RequestHeader(name = InboundMessageType.KAFKA_HEADER_MESSAGEID) String messageId,
-            @RequestHeader(name = InboundMessageType.KAFKA_HEADER_MESSAGETYPE) String messageType,
-            @RequestHeader(name = InboundMessageType.KAFKA_HEADER_PARTITIONKEY) String partitionKey,
-			@Valid @RequestBody PnExtChnCartEventPayload notificaCartacea) {
-		log.info("PnExtChnController - saveNotificaCartacea - START");
-		PnExtChnCartEvent pnextchncartevent =
-				PnExtChnCartEvent.builder()
-				.pnExtChnCartEventHeader(PnExtChnCartEventHeader.builder()
-						.publisher(publisher)
-						.messageId(messageId)
-						.messageType(messageType)
-						.partitionKey(partitionKey)
-						.build()
-						).pnExtChnCartEventPayload(notificaCartacea).build();
+	@PostMapping(path = "/paper/saveNotification")
+	public Object savePaperNotification(
+			@RequestHeader(name = PN_EVENT_HEADER_PUBLISHER) String publisher,
+			@RequestHeader(name = PN_EVENT_HEADER_EVENT_ID) String eventId,
+			@RequestHeader(name = PN_EVENT_HEADER_EVENT_TYPE) String eventType,
+			@RequestHeader(name = PN_EVENT_HEADER_IUN) String iun,
+			@RequestHeader(name = PN_EVENT_HEADER_CREATED_AT) String createdAt,
+			@Valid @RequestBody PnExtChnPaperEventPayload paperNotification) {
+		log.info("PnExtChnController - savePaperNotification - START");
+		PnExtChnPaperEvent pnextchncartevent =
+				PnExtChnPaperEvent.builder()
+						.header(StandardEventHeader.builder()
+								.publisher(publisher)
+								.eventId(eventId)
+								.eventType(eventType)
+								.iun(iun)
+								.createdAt(Instant.parse(createdAt))
+								.build()
+						).payload(paperNotification).build();
 
-		pnExtChnService.salvaMessaggioCartaceo(pnextchncartevent);
-		log.info("PnExtChnController - saveNotificaCartacea - END");
-		return notificaCartacea;
+		pnExtChnService.savePaperMessage(pnextchncartevent);
+		log.info("PnExtChnController - savePaperNotification - END");
+		return paperNotification;
 	}
 	
-	@PostMapping(path = "/digitale/saveNotifica")
-	public Object saveNotificaDigitale(
+	@PostMapping(path = "/digital/saveNotification")
+	public Object saveDigitalNotification(
 			@RequestHeader(name = PN_EVENT_HEADER_PUBLISHER) String publisher,
             @RequestHeader(name = PN_EVENT_HEADER_EVENT_ID) String eventId,
             @RequestHeader(name = PN_EVENT_HEADER_EVENT_TYPE) String eventType,
             @RequestHeader(name = PN_EVENT_HEADER_IUN) String iun,
 			@RequestHeader(name = PN_EVENT_HEADER_CREATED_AT) String createdAt,
-			@Valid @RequestBody PnExtChnPecEventPayload notificaDigitale) {
-		log.info("PnExtChnController - saveNotificaDigitale - START");
+			@Valid @RequestBody PnExtChnPecEventPayload digitalNotification) {
+		log.info("PnExtChnController - saveDigitalNotification - START");
 		
 		PnExtChnPecEvent pnextchnpecevent =
 				PnExtChnPecEvent.builder()
@@ -69,13 +64,13 @@ public class PnExtChnController {
 						.eventId(eventId)
 						.eventType(eventType)
 						.iun(iun)
-						.createdAt(Instant.now())
+						.createdAt(Instant.parse(createdAt))
 						.build()
-					).payload(notificaDigitale).build();
+					).payload(digitalNotification).build();
 		
-		pnExtChnService.salvaMessaggioDigitale(pnextchnpecevent);
-		log.info("PnExtChnController - saveNotificaDigitale - END");
-		return notificaDigitale;
+		pnExtChnService.saveDigitalMessage(pnextchnpecevent);
+		log.info("PnExtChnController - saveDigitalNotification - END");
+		return digitalNotification;
 	}
 
 }

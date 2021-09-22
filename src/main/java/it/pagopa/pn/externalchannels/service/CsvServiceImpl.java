@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import it.pagopa.pn.externalchannels.entities.csvtemplate.Colonna;
+import it.pagopa.pn.externalchannels.entities.csvtemplate.Column;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
 import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
-import it.pagopa.pn.externalchannels.repositories.mongo.MongoCsvTemplateRepository;
 import it.pagopa.pn.externalchannels.util.Constants;
 import it.pagopa.pn.externalchannels.util.formatters.ColumnFormatter;
 import it.pagopa.pn.externalchannels.util.formatters.ColumnFormatters;
@@ -75,11 +74,11 @@ public class CsvServiceImpl implements CsvService {
         Map<String, String> map = new LinkedHashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
-            mapper.readValue(template.getColonne(), new TypeReference<List<Colonna>>() {}).forEach(c -> {
-                String prop = getProperty(message, c.getAttrMessaggio());
+            mapper.readValue(template.getColumns(), new TypeReference<List<Column>>() {}).forEach(c -> {
+                String prop = getProperty(message, c.getMessageAttribute());
                 ColumnFormatter formatter = ColumnFormatters.get(c.getType());
                 prop = formatter.format(c, prop);
-                map.put(c.getNomeColonna(), prop);
+                map.put(c.getName(), prop);
             });
         } catch (Exception e) {
             map.clear();
@@ -93,7 +92,7 @@ public class CsvServiceImpl implements CsvService {
             if (!Constants.SKIP_PROPERTY_FLAG.equals(accessString))
                 prop = (String) PropertyUtils.getProperty(m, accessString);
         } catch (Exception e) {
-       //     e.printStackTrace();
+            e.printStackTrace();
         }
         return prop == null ? "" : prop;
     }
@@ -115,7 +114,9 @@ public class CsvServiceImpl implements CsvService {
             CsvMapper mapper = new CsvMapper();
             mapper.writer(schema).writeValues(writer).writeAll(listOfMap);
             writer.flush();
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

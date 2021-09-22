@@ -8,8 +8,6 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,8 +21,8 @@ public class CsvTemplate {
 
     private String idCsv;
 
-    private String descrizione;
+    private String description;
 
-    private String colonne;
+    private String columns;
 
 }

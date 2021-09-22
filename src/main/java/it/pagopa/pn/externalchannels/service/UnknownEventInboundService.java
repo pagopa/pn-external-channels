@@ -5,17 +5,14 @@
  */
 package it.pagopa.pn.externalchannels.service;
 
+import it.pagopa.pn.api.dto.events.MessageType;
+import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-
-import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
-import it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType;
-import it.pagopa.pn.externalchannels.util.TypeCanale;
-import lombok.extern.slf4j.Slf4j;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.PN_EVENT_HEADER_EVENT_TYPE;
 
@@ -28,21 +25,18 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.PN_EVENT_HEADER_EV
 public class UnknownEventInboundService {
 
     @Autowired
-    private InboundMessageType inboundMessageType;
-    
-    @Autowired
-    private PnExtChnProcessor processor;
-
-    @Autowired
     PnExtChnService pnExtChnService;
-
     
     @StreamListener(
-            target = PnExtChnProcessor.INPUT,
-            condition = "!T(it.pagopa.pn.externalchannels.event.eventinbound.InboundMessageType).PN_EXTCHN_PEC_MESSAGE_TYPE.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE])"
+            target = PnExtChnProcessor.NOTIF_PEC_INPUT,
+            condition = "!T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_PEC.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE]) && " +
+                    "!T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_EMAIL.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE])"
     )
-    public void handleUnknownInboundEvent(@Payload String event,            
-            @Header(name = PN_EVENT_HEADER_EVENT_TYPE, required = false) String tipoMessaggio) {
+    public void handleUnknownInboundEvent(
+            @Payload String event,
+            @Header(name = PN_EVENT_HEADER_EVENT_TYPE, required = false) String tipoMessaggio
+    ) {
+        log.info("UnknownEventInboundService - handleUnknownInboundEvent - START");
 
         if (tipoMessaggio == null) {
             tipoMessaggio = "unknown";
@@ -50,13 +44,14 @@ public class UnknownEventInboundService {
         
         // TODO: Inserire chiamata al producer degli avanzamenti di stato
         
-        pnExtChnService.scartaMessaggio(event, null);
+        pnExtChnService.discardMessage(event, null);
 
-        if (!inboundMessageType.checkIfKnown(tipoMessaggio)) {
-            log.warn("Received unknown message type: " + tipoMessaggio + ": message from sqs: " + event);
-            throw new java.lang.IllegalStateException("Received unknown message type:" + tipoMessaggio + ": message from kafka: " + event);
+        if (!MessageType.checkIfKnown(tipoMessaggio)) {
+            log.warn("Received unknown message type: " + tipoMessaggio + " from sqs: " + event);
+            throw new java.lang.IllegalStateException("Received unknown message type:" + tipoMessaggio + " from sqs: " + event);
         } // if
 
+        log.info("UnknownEventInboundService - handleUnknownInboundEvent - END");
     }
 
 }

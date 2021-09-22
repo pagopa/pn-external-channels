@@ -1,15 +1,15 @@
 package it.pagopa.pn.externalchannels.service;
 
 
+import com.amazonaws.services.sqs.AmazonSQSAsync;
 import it.pagopa.pn.api.dto.events.*;
-import it.pagopa.pn.externalchannels.event.eventinbound.pnextchncartevent.PnExtChnCartEvent;
-import it.pagopa.pn.externalchannels.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 
@@ -18,26 +18,41 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient) {
+		super(sqsClient);
+	}
+
 	@Override
-	public void salvaMessaggioCartaceo(PnExtChnCartEvent notificaCartacea) {
-		super.salvaMessaggioCartaceo(notificaCartacea);
+	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
+		log.info("PnExtChnServiceFakeImpl - savePaperMessage - START");
+		super.savePaperMessage(notificaCartacea);
+		log.info("PnExtChnServiceFakeImpl - savePaperMessage - END");
 	}
 	@Override
-	public void salvaMessaggioDigitale(PnExtChnPecEvent notificaDigitale) {
+	public void saveDigitalMessage(PnExtChnPecEvent notificaDigitale) {
+		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - START");
+
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
-		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK)
-			super.salvaMessaggioDigitale(notificaDigitale);
-		else
-			processor.statusMessage().send(
-					MessageBuilder.withPayload(out.getPayload())
-							.setHeader("partitionKey", Constants.ZERO_INT_VALUE)
-							.setHeader(PN_EVENT_HEADER_IUN, out.getHeader().getIun())
-							.setHeader(PN_EVENT_HEADER_EVENT_ID, out.getHeader().getEventId())
-							.setHeader(PN_EVENT_HEADER_EVENT_TYPE, out.getHeader().getEventType())
-							.setHeader(PN_EVENT_HEADER_CREATED_AT, out.getHeader().getCreatedAt())
-							.setHeader(PN_EVENT_HEADER_PUBLISHER, out.getHeader().getPublisher())
-							.build()
-			);
+		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
+			log.info("ok");
+			super.saveDigitalMessage(notificaDigitale);
+		}
+		else {
+			Map<String, Object> headers = headersToMap(out.getHeader());
+			queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
+			log.info("failed");
+		}
+		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");
+	}
+
+	private Map<String, Object> headersToMap(StandardEventHeader header) {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put(PN_EVENT_HEADER_IUN, header.getIun());
+		map.put(PN_EVENT_HEADER_EVENT_ID, header.getEventId());
+		map.put(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType());
+		map.put(PN_EVENT_HEADER_CREATED_AT, header.getCreatedAt().toString());
+		map.put(PN_EVENT_HEADER_PUBLISHER, header.getPublisher());
+		return map;
 	}
 
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {

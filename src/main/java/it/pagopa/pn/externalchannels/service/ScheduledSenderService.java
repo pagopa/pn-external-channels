@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.pagopa.pn.api.dto.events.MessageType;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
 import it.pagopa.pn.externalchannels.event.QueuedMessageStatus;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
@@ -12,12 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
-import it.pagopa.pn.externalchannels.repositories.mongo.MongoQueuedMessageRepository;
 import it.pagopa.pn.externalchannels.util.Constants;
-import it.pagopa.pn.externalchannels.util.TypeCanale;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -32,10 +30,7 @@ public class ScheduledSenderService {
 
     @Autowired
     CsvService csvService;
-    
-    @Autowired
-    PnExtChnProcessor processor;
-    
+
     @Autowired
     PnExtChnService pnExtChnService;
 
@@ -46,7 +41,7 @@ public class ScheduledSenderService {
     public void retrieveAndSendNotifications() {
         log.info("ScheduledSenderService - retrieveAndSendNotifications - START");
         List<QueuedMessage> messages = queuedMessageRepository
-                .findByEventStatus(Constants.STATO_INVIARE);
+                .findByEventStatus(QueuedMessageStatus.TO_SEND.toString());
         Map<String, List<QueuedMessage>> templateGroups = groupByTemplate(messages);
         templateGroups.forEach((template, msges) -> {
             
@@ -57,24 +52,20 @@ public class ScheduledSenderService {
     	msges = msges.size() >= batchSize ?
     			msges.subList(Constants.ZERO_INT_VALUE, batchSize.intValue()) : msges;
     	
-    	setState(msges, QueuedMessageStatus.PROCESSATO);
+    	setState(msges, QueuedMessageStatus.PROCESSING);
 
         CsvTransformationResult result = csvService.queuedMessagesToCsv(msges);
 
-        setState(result.getDiscardedMessages(), QueuedMessageStatus.SCARTATO);
+        setState(result.getDiscardedMessages(), QueuedMessageStatus.DISCARDED);
         result.getDiscardedMessages().forEach(dm -> pnExtChnService.produceStatusMessage(dm.getCodiceAtto(),
         		dm.getIun(),
-        		null, PnExtChnProgressStatus.PERMANENT_FAIL, TypeCanale.PEC, 1, null, null, null, null));
+                MessageType.PN_EXT_CHN_PEC, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null));
 
         if (result.getCsvContent() != null) {
         	fileTransferService.transferCsv(result.getCsvContent());
         	msges.removeAll(result.getDiscardedMessages());
 
-        	msges.forEach(m -> pnExtChnService.produceStatusMessage(m.getCodiceAtto(),
-        			m.getIun(),
-        			null, PnExtChnProgressStatus.OK, TypeCanale.PEC, 1, null, null, null, null));
-
-        	setState(msges, QueuedMessageStatus.INVIATO);
+        	setState(msges, QueuedMessageStatus.SENT);
         }
             
         });

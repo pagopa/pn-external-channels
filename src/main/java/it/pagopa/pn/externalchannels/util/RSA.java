@@ -17,6 +17,10 @@ import javax.crypto.Cipher;
 
 public class RSA {
 
+    private RSA(){
+
+    }
+
     public static X509Certificate getCertificateFromPem(String pem) throws IOException, GeneralSecurityException {
         pem = "-----BEGIN CERTIFICATE-----\n" + pem + "\n-----END CERTIFICATE-----";
         CertificateFactory fact = CertificateFactory.getInstance("X.509");
@@ -26,7 +30,7 @@ public class RSA {
         return cer;
     }
 
-    public static boolean verify(PublicKey publicKey, String message, String signature) throws SignatureException, NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
+    public static boolean verify(PublicKey publicKey, String message, String signature) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         Signature sign = Signature.getInstance("SHA1withRSA");
         sign.initVerify(publicKey);
         sign.update(message.getBytes(StandardCharsets.UTF_8));
@@ -35,7 +39,7 @@ public class RSA {
 
     public static String encrypt(String rawText, PublicKey publicKey) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWITHSHA-256ANDMGF1PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return Base64.encodeBase64String(cipher.doFinal(rawText.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {

@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.controller;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
+import it.pagopa.pn.externalchannels.repositories.cassandra.DiscardedMessageRepository;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
 import it.pagopa.pn.externalchannels.repositories.mongo.MongoQueuedMessageRepository;
 import it.pagopa.pn.externalchannels.service.ScheduledSenderService;
@@ -18,6 +19,9 @@ public class TestController {
 
     @Autowired
     QueuedMessageRepository queuedMessageRepository;
+
+    @Autowired
+    DiscardedMessageRepository discardedMessageRepository;
 
     @Autowired
     CsvTemplateRepository csvTemplateRepository;
@@ -65,15 +69,16 @@ public class TestController {
     @PostMapping(path = "/mongo/postQueuedMessage")
     public QueuedMessage postMongoQueuedMessage(@RequestBody QueuedMessage queuedMessage){
         return mongoQueuedMessageRepository.save(queuedMessage);
-    }
+    }*/
 
     @GetMapping(path = "/any/clear")
     public void clear(){
-        List<QueuedMessage> all = mongoQueuedMessageRepository.findAll();
-        mongoQueuedMessageRepository.deleteAll(all);
         Iterable<QueuedMessage> all1 = queuedMessageRepository.findAll();
         queuedMessageRepository.deleteAll(all1);
-    }*/
+        queuedMessageRepository.deleteAll();
+        discardedMessageRepository.deleteAll(discardedMessageRepository.findAll());
+        discardedMessageRepository.deleteAll();
+    }
 
     @GetMapping(path = "/job/trigger")
     public void triggerJob(){
