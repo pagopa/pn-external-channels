@@ -8,7 +8,7 @@
     </parent>-->
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
