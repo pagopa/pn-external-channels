@@ -1,0 +1,47 @@
+logging:
+  config: config/logback-local.xml
+
+server:
+  port: 8082
+
+dev-options:
+  fake-pn-ext-chn-service: true
+
+cloud:
+  aws:
+    credentials:
+      profile-name: localdev
+    region:
+        static: us-east-1
+    sqs:
+        endpoint: http://localhost:4566
+
+spring:
+    cloud:
+        stream:    
+            bindings:
+                pnextchnnotifpecinbound:
+                    destination: local-ext-channels-inputs
+                pnextchnelabresult:
+                    destination: local-ext-channels-elab-res
+                pnextchnstatus:
+                    destination: local-ext-channels-outputs
+                pnextchnerror:
+                    destination: local-ext-channels-error
+    data:
+        cassandra:
+            password: cassandra
+            username: cassandra
+            keyspaceName: external_channel
+            contactPoints: localhost
+            port: 9042
+            schemaAction: CREATE_IF_NOT_EXISTS
+            local-datacenter: datacenter1
+
+
+s3:
+    buckets:
+        external-channels-out: external-channels-out
+        external-channels-in: external-channels-in
+
+

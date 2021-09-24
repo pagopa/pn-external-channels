@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 class ScheduledSenderServiceTest {
 
     @TestConfiguration
-    @TestPropertySource("classpath:application-dev.yaml")
+    @TestPropertySource("classpath:application.yaml")
     static class SpringTestConfiguration {
         @Bean
         public ModelMapper modelMapper(){

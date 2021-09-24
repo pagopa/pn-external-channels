@@ -84,20 +84,8 @@ public class PnExtChnPecEventInboundService {
     ) {
         log.info("PnExtChnPecEventInboundService - handlePnExtChnPecEvent - START");
 
-        PnExtChnPecEvent pnextchnpecevent = PnExtChnPecEvent.builder()
-            .header(StandardEventHeader.builder()
-                    .publisher(publisher)
-                    .eventId(eventId)
-                    .eventType(eventType)
-                    .iun(iun)
-                    .createdAt(Instant.parse(createdAt))
-                    .build()
-            ).payload(objectMapper.convertValue(event, PnExtChnPecEventPayload.class))
-            .build();
-        
-        
-        Set<ConstraintViolation<PnExtChnPecEvent>> errors = null;
-		errors = validator.validate(pnextchnpecevent);
+        PnExtChnPecEvent pnextchnpecevent = objectMapper.convertValue(event, PnExtChnPecEvent.class);
+        Set<ConstraintViolation<PnExtChnPecEvent>> errors = validator.validate(pnextchnpecevent);
 		
 		if(!errors.isEmpty()) {
 			log.error(Constants.MSG_ERRORI_DI_VALIDAZIONE);

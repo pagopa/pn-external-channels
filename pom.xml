@@ -167,6 +167,7 @@
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
@@ -207,6 +208,11 @@
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.pn</groupId>
+            <artifactId>pn-commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

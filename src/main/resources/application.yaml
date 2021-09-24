@@ -1,3 +1,76 @@
+app:
+  name: pn-external-channels
+
+general:
+  message:  "PN External Channels Microservice"
+
+# Middleware configuration
+pn:
+  env:
+    runtime: PROD
+  middleware:
+    init:
+      cassandra: true
+
+management:
+  endpoint:
+    health:
+      enabled: true
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: false
+    shutdown:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  config: classpath:logback-base.xml
+
+spring.autoconfigure.exclude:
+  - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+  - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+  - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
+file-transfer-service:
+  implementation: aws
+
 spring:
-  profiles:
-    active: dev
+  application:
+    name: pn-external-channels
+  main:
+    banner-mode: off
+    log-startup-info: true
+  jackson:
+    deserialization:
+      fail-on-ignored-properties: false
+    default-property-inclusion: non_absent
+  cloud:
+    stream:
+      sqs:
+        bindings:
+          pnextchnnotifpecinbound:
+            consumer:
+              snsFanout: false
+          pnextchnelabresult:
+            consumer:
+              snsFanout: false
+  data:
+    cassandra:
+      schemaAction: NONE
+
+s3:
+  retry:
+    delay: 1000
+    attempts: 3
+
+job:
+  cron-expression: "0 0 */3 ? * *" # OGNI 3 ORE
+  batch-size: 1
+  csv-template-id: 8
+

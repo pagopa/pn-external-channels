@@ -35,7 +35,7 @@ import javax.annotation.PostConstruct;
 public class Config {
 
 
-    @Bean
+    /*@Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
     public AmazonS3 s3client(CloudAwsProperties props){
         AWSCredentials credentials = new BasicAWSCredentials(
@@ -52,7 +52,7 @@ public class Config {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .enablePathStyleAccess()
                 .build();
-    }
+    }*/
 
     @Bean
     public ModelMapper modelMapper(){

@@ -37,12 +37,12 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			super.saveDigitalMessage(notificaDigitale);
 			out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 			Map<String, Object> headers = headersToMap(out.getHeader());
-			queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
+			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
 			log.info("ok");
 		}
 		else {
 			Map<String, Object> headers = headersToMap(out.getHeader());
-			queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
+			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
 			log.info("failed");
 		}
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");

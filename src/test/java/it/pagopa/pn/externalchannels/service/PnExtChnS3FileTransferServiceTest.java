@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class PnExtChnS3FileTransferServiceTest {
 
     @TestConfiguration
-    @TestPropertySource(locations = {"classpath:application-dev.yaml", "classpath:application-test.yaml"})
+    @TestPropertySource(locations = {"classpath:application.yaml", "classpath:application-test.yaml"})
     static class SpringTestConfiguration {
 
     }

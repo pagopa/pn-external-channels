@@ -11,7 +11,7 @@ for qn in  $( echo $queues | tr " " "\n" ) ; do
         --queue-name $qn
 done
 
-queues="local-ext-channels-elab-res local-ext-channels-status local-ext-channels-error"
+queues="local-ext-channels-elab-res"
 for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo creating $qn ...
     aws --profile $profile --region us-east-1 --endpoint-url http://localhost:4566 sqs create-queue \

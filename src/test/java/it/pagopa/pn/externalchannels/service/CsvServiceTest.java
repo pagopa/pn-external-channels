@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class CsvServiceTest {
 
     @TestConfiguration
-    @TestPropertySource("classpath:application-dev.yaml")
+    @TestPropertySource("classpath:application.yaml")
     static class SpringTestConfiguration {
 
     }
