@@ -12,6 +12,9 @@ pn:
     init:
       cassandra: true
 
+aws:
+  use-aws-keyspace: true
+
 management:
   endpoint:
     health:
