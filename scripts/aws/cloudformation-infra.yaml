@@ -7,6 +7,9 @@ Parameters:
   EnvNumber:
     Type: String
     Description: Second byte from the left for VPC CIDR
+  KeyspaceName:
+    Type: String
+    Description: cassandra keyspace name
 
 Resources:
   InputBucket:
