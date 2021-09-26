@@ -12,7 +12,7 @@ public class CloudAwsProperties {
     //private String accessKey;
     //@Value("${cloud.aws.credentials.secretKey}")
     //private String secretKey;
-    @Value("${cloud.aws.sqs.endpoint}")
+    @Value("${cloud.aws.sqs.endpoint:}")
     private String endpoint;
     @Value("${cloud.aws.region.static}")
     private String region;
