@@ -13,7 +13,9 @@ import it.pagopa.pn.commons.configs.aws.AwsConfigs;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.config.properties.CloudAwsProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -24,6 +26,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.aws.mcs.auth.SigV4AuthProvider;
 
 import javax.annotation.PostConstruct;
 
@@ -39,6 +43,22 @@ import javax.annotation.PostConstruct;
 @Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class})
 public class Config {
 
+    @Autowired
+    private AwsConfigs props;
+
+    @Bean
+    public SigV4AuthProvider awsKeyspaceTokenProvider() {
+
+        DefaultCredentialsProvider.Builder credentialsBuilder = DefaultCredentialsProvider.builder();
+
+        String profileName = props.getProfileName();
+        if( StringUtils.isNotBlank( profileName ) ) {
+            credentialsBuilder.profileName( profileName );
+        }
+
+        String regionCode = props.getRegionCode();
+        return new SigV4AuthProvider( credentialsBuilder.build(), regionCode );
+    }
 
     /*@Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")

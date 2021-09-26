@@ -164,6 +164,8 @@ Resources:
               Value: !Ref InputBucket
             - Name: CLOUD_AWS_REGION_STATIC
               Value: !Ref AWS::Region
+            - Name: AWS_REGIONCODE
+              Value: !Ref AWS::Region
           PortMappings:
             - ContainerPort: 8080
           # Send logs to CloudWatch Logs
