@@ -7,6 +7,9 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import it.pagopa.pn.commons.configs.PnCassandraAutoConfiguration;
+import it.pagopa.pn.commons.configs.RuntimeModeHolder;
+import it.pagopa.pn.commons.configs.aws.AwsConfigs;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.config.properties.CloudAwsProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -32,6 +36,7 @@ import javax.annotation.PostConstruct;
 @ComponentScan(basePackages = "it.pagopa.pn.externalchannels")
 @EnableBinding({PnExtChnProcessor.class})
 @Slf4j
+@Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class})
 public class Config {
 
 

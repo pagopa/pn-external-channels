@@ -7,6 +7,9 @@ server:
 dev-options:
   fake-pn-ext-chn-service: true
 
+aws:
+  use-aws-keyspace: false
+
 cloud:
   aws:
     credentials:
