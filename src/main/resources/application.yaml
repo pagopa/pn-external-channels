@@ -30,7 +30,7 @@ management:
         include: "*"
 
 logging:
-  config: classpath:logback-base.xml
+  config: classpath:logback.xml
 
 spring.autoconfigure.exclude:
   - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
