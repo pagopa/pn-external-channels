@@ -43,14 +43,14 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
 			outQueue.push( out );
 			//queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
-			log.info("ok");
+			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 		}
 		else {
 			Map<String, Object> headers = headersToMap(out.getHeader());
 			//queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push fail");
 			outQueue.push( out );
-			log.info("failed");
+			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - failed");
 		}
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");
 	}

@@ -37,7 +37,7 @@ public class ScheduledSenderService {
     @Autowired
     QueuedMessageRepository queuedMessageRepository;
 
-    @Scheduled(cron = "${job.cron-expression}")
+    //@Scheduled(cron = "${job.cron-expression}")
     public void retrieveAndSendNotifications() {
         log.info("ScheduledSenderService - retrieveAndSendNotifications - START");
         List<QueuedMessage> messages = queuedMessageRepository
