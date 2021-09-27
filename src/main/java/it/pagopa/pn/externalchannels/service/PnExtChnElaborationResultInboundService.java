@@ -56,9 +56,9 @@ public class PnExtChnElaborationResultInboundService {
         objectMapper.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    @StreamListener(
+    /*@StreamListener(
             target = PnExtChnProcessor.ELAB_RESULT_INPUT
-    )
+    )*/
     public void handleElaborationResult(
             @Payload JsonNode event
     ) {

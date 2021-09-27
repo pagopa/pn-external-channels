@@ -85,7 +85,7 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
             log.info("Attempt: " + state.getRetryCount());
             return s.get();
         }, ko -> {
-            log.error("Retryable operation failed");
+            log.error("Retryable operation failed ", ko.getLastThrowable());
             return null;
         });
     }
