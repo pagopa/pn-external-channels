@@ -20,12 +20,12 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
-	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient) {
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, PnExtChnProgressStatusEventProducer outQueue) {
 		super(sqsClient);
+		this.outQueue = outQueue;
 	}
 
-	@Autowired
-	PnExtChnProgressStatusEventProducer outQueue;
+	private final PnExtChnProgressStatusEventProducer outQueue;
 
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
