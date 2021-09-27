@@ -8,7 +8,10 @@ dev-options:
   fake-pn-ext-chn-service: true
 
 aws:
+  region: us-east-1
   use-aws-keyspace: false
+  profile-name: localdev
+  endpoint-url: http://localhost:4566
 
 cloud:
   aws:

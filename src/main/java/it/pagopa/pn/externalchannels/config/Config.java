@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 public class Config {
 
     @Bean
+    @ConditionalOnProperty( name = "aws.use-aws-keyspace", havingValue = "true")
     public SigV4AuthProvider awsKeyspaceTokenProvider( AwsConfigs props) {
 
         DefaultCredentialsProvider.Builder credentialsBuilder = DefaultCredentialsProvider.builder();
