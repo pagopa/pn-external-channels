@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.service;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.externalchannels.service.fake.PnExtChnProgressStatusEventProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,8 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		super(sqsClient);
 	}
 
+	PnExtChnProgressStatusEventProducer outQueue;
+
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
 		log.info("PnExtChnServiceFakeImpl - savePaperMessage - START");
@@ -37,12 +40,14 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			// super.saveDigitalMessage(notificaDigitale);
 			out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 			Map<String, Object> headers = headersToMap(out.getHeader());
-			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+			outQueue.push( out );
+			//queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
 			log.info("ok");
 		}
 		else {
 			Map<String, Object> headers = headersToMap(out.getHeader());
-			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+			//queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+			outQueue.push( out );
 			log.info("failed");
 		}
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");

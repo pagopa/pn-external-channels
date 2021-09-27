@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import it.pagopa.pn.commons.configs.PnCassandraAutoConfiguration;
 import it.pagopa.pn.commons.configs.RuntimeModeHolder;
 import it.pagopa.pn.commons.configs.aws.AwsConfigs;
+import it.pagopa.pn.commons.configs.aws.AwsServicesClientsConfig;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.config.properties.CloudAwsProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -40,25 +41,8 @@ import javax.annotation.PostConstruct;
 @ComponentScan(basePackages = "it.pagopa.pn.externalchannels")
 @EnableBinding({PnExtChnProcessor.class})
 @Slf4j
-@Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class})
+@Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class, AwsServicesClientsConfig.class})
 public class Config {
-
-    @Autowired
-    private AwsConfigs props;
-
-    @Bean
-    public SigV4AuthProvider awsKeyspaceTokenProvider() {
-
-        DefaultCredentialsProvider.Builder credentialsBuilder = DefaultCredentialsProvider.builder();
-
-        String profileName = props.getProfileName();
-        if( StringUtils.isNotBlank( profileName ) ) {
-            credentialsBuilder.profileName( profileName );
-        }
-
-        String regionCode = props.getRegionCode();
-        return new SigV4AuthProvider( credentialsBuilder.build(), regionCode );
-    }
 
     /*@Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")

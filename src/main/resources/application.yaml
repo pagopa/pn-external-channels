@@ -11,6 +11,7 @@ pn:
   middleware:
     init:
       cassandra: true
+      aws: true
 
 aws:
   use-aws-keyspace: true
