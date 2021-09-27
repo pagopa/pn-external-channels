@@ -35,7 +35,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
 			try {
-				super.saveDigitalMessage(notificaDigitale);
+				// super.saveDigitalMessage(notificaDigitale);
 				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
