@@ -44,6 +44,20 @@ import javax.annotation.PostConstruct;
 @Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class })
 public class Config {
 
+    @Bean
+    public SigV4AuthProvider awsKeyspaceTokenProvider( AwsConfigs props) {
+
+        DefaultCredentialsProvider.Builder credentialsBuilder = DefaultCredentialsProvider.builder();
+
+        String profileName = props.getProfileName();
+        if( StringUtils.isNotBlank( profileName ) ) {
+            credentialsBuilder.profileName( profileName );
+        }
+
+        String regionCode = props.getRegionCode();
+        return new SigV4AuthProvider( credentialsBuilder.build(), regionCode );
+    }
+
     /*@Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
     public AmazonS3 s3client(CloudAwsProperties props){
