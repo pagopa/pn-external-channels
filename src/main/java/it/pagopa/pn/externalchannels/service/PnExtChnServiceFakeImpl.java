@@ -3,9 +3,7 @@ package it.pagopa.pn.externalchannels.service;
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import it.pagopa.pn.api.dto.events.*;
-import it.pagopa.pn.externalchannels.service.fake.PnExtChnProgressStatusEventProducer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +18,9 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
-	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, PnExtChnProgressStatusEventProducer outQueue) {
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient) {
 		super(sqsClient);
-		this.outQueue = outQueue;
 	}
-
-	private final PnExtChnProgressStatusEventProducer outQueue;
 
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
@@ -35,7 +30,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 	}
 	@Override
 	public void saveDigitalMessage(PnExtChnPecEvent notificaDigitale) {
-		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - START");
+		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - START OLD");
 
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
@@ -43,16 +38,14 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 			Map<String, Object> headers = headersToMap(out.getHeader());
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
-			// outQueue.push( out );
 			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 		}
 		else {
 			Map<String, Object> headers = headersToMap(out.getHeader());
-			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push fail");
+			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push fail old");
 			try {
 				queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
-				// outQueue.push( out );
 			}
 			catch ( RuntimeException exc ) {
 				log.error("PnExtChnServiceFakeImpl - saveDigitalMessage - pushError", exc);
