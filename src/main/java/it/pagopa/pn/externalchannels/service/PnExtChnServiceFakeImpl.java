@@ -34,12 +34,17 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
-			// super.saveDigitalMessage(notificaDigitale);
-			out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
-			Map<String, Object> headers = headersToMap(out.getHeader());
-			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
-			queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
-			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
+			try {
+				super.saveDigitalMessage(notificaDigitale);
+				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
+				Map<String, Object> headers = headersToMap(out.getHeader());
+				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
+				queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
+			}
+			catch ( RuntimeException exc ) {
+				log.error("PnExtChnServiceFakeImpl - saveDigitalMessage - pushError", exc);
+			}
 		}
 		else {
 			Map<String, Object> headers = headersToMap(out.getHeader());

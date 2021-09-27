@@ -41,7 +41,7 @@ import javax.annotation.PostConstruct;
 @ComponentScan(basePackages = "it.pagopa.pn.externalchannels")
 @EnableBinding({PnExtChnProcessor.class})
 @Slf4j
-@Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class, AwsServicesClientsConfig.class})
+@Import( {PnCassandraAutoConfiguration.class, RuntimeModeHolder.class, AwsConfigs.class })
 public class Config {
 
     /*@Bean
