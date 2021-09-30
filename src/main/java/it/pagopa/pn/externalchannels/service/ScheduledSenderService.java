@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.pagopa.pn.api.dto.events.MessageType;
+import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
 import it.pagopa.pn.externalchannels.event.QueuedMessageStatus;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
@@ -59,7 +59,7 @@ public class ScheduledSenderService {
         setState(result.getDiscardedMessages(), QueuedMessageStatus.DISCARDED);
         result.getDiscardedMessages().forEach(dm -> pnExtChnService.produceStatusMessage(dm.getCodiceAtto(),
         		dm.getIun(),
-                MessageType.PN_EXT_CHN_PEC, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null));
+                EventType.SEND_PEC_REQUEST, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null));
 
         if (result.getCsvContent() != null) {
         	fileTransferService.transferCsv(result.getCsvContent());

@@ -92,7 +92,7 @@ public class CsvServiceImpl implements CsvService {
             if (!Constants.SKIP_PROPERTY_FLAG.equals(accessString))
                 prop = (String) PropertyUtils.getProperty(m, accessString);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("CsvServiceImpl - getProperty - property not found", e);
         }
         return prop == null ? "" : prop;
     }
@@ -115,7 +115,7 @@ public class CsvServiceImpl implements CsvService {
             mapper.writer(schema).writeValues(writer).writeAll(listOfMap);
             writer.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("CsvServiceImpl - csvWriter - write incomplete", e);
         }
     }
 

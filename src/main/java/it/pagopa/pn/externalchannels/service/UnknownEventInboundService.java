@@ -5,7 +5,6 @@
  */
 package it.pagopa.pn.externalchannels.service;
 
-import it.pagopa.pn.api.dto.events.MessageType;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,7 @@ public class UnknownEventInboundService {
     
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
-            condition = "!T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_PEC.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE]) && " +
-                    "!T(it.pagopa.pn.api.dto.events.MessageType).PN_EXT_CHN_EMAIL.equals(headers[T(it.pagopa.pn.api.dto.events.StandardEventHeader).PN_EVENT_HEADER_EVENT_TYPE])"
+            condition = "!T(it.pagopa.pn.externalchannels.util.Util).eventTypeIsKnown(headers)"
     )
     public void handleUnknownInboundEvent(
             @Payload String event,
@@ -46,10 +44,7 @@ public class UnknownEventInboundService {
         
         pnExtChnService.discardMessage(event, null);
 
-        if (!MessageType.checkIfKnown(tipoMessaggio)) {
-            log.warn("Received unknown message type: " + tipoMessaggio + " from sqs: " + event);
-            throw new java.lang.IllegalStateException("Received unknown message type:" + tipoMessaggio + " from sqs: " + event);
-        } // if
+        log.warn("Received unknown message type: " + tipoMessaggio + " from sqs: " + event);
 
         log.info("UnknownEventInboundService - handleUnknownInboundEvent - END");
     }

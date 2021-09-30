@@ -6,9 +6,13 @@ import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.controller.PnExtChnController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
@@ -17,11 +21,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PnExtChnController.class)
+@SpringBootTest
+@EnableAutoConfiguration(exclude = {CassandraAutoConfiguration.class})
+@ContextConfiguration(classes = {
+        PnExtChnController.class
+})
+@AutoConfigureMockMvc
 class PnExtChnControllerTest {
 
-    private static final String URL_SALVA_NOTIFICA_CART = "/external-channel/paper/saveNotification";
-    private static final String URL_SALVA_NOTIFICA_PEC = "/external-channel/digital/saveNotification";
+    private static final String URL_SAVE_PAPER_NOTIF = "/external-channel/paper/saveNotification";
+    private static final String URL_SAVE_DIGITAL_NOTIF = "/external-channel/digital/saveNotification";
 
     @Autowired
     private MockMvc mockMvc;
@@ -30,7 +39,8 @@ class PnExtChnControllerTest {
     PnExtChnService pnExtChnService;
 
     @Test
-    void cartaceoShouldReturnStatus200() throws Exception {
+    void paperShouldReturnStatus200() throws Exception {
+
 
         PnExtChnPaperEvent event = mockPaperMessage();
         StandardEventHeader header = event.getHeader();
@@ -38,7 +48,7 @@ class PnExtChnControllerTest {
 
         this.mockMvc
                 .perform(
-                        post(URL_SALVA_NOTIFICA_CART)
+                        post(URL_SAVE_PAPER_NOTIF)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(PN_EVENT_HEADER_EVENT_ID, header.getEventId())
                                 .header(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType())
@@ -52,16 +62,17 @@ class PnExtChnControllerTest {
     }
 
     @Test
-    void cartaceoShouldReturnStatus400() throws Exception {
+    void paperShouldReturnStatus400() throws Exception {
 
         PnExtChnPaperEvent event = mockPaperMessage();
         StandardEventHeader header = event.getHeader();
-        event.getPayload().setMittente(null);
+        header.setIun(""); // should discard
+        event.getPayload().setIun(null); // should discard
         String content = toJson(event.getPayload());
 
         this.mockMvc
                 .perform(
-                        post(URL_SALVA_NOTIFICA_CART)
+                        post(URL_SAVE_PAPER_NOTIF)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(PN_EVENT_HEADER_EVENT_ID, header.getEventId())
                                 .header(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType())
@@ -75,7 +86,7 @@ class PnExtChnControllerTest {
     }
 
     @Test
-    void digitaleShouldReturnStatus200() throws Exception {
+    void digitalShouldReturnStatus200() throws Exception {
 
         PnExtChnPecEvent event = mockPecMessage();
         StandardEventHeader header = event.getHeader();
@@ -83,7 +94,7 @@ class PnExtChnControllerTest {
 
         this.mockMvc
                 .perform(
-                        post(URL_SALVA_NOTIFICA_PEC)
+                        post(URL_SAVE_DIGITAL_NOTIF)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(PN_EVENT_HEADER_EVENT_ID, header.getEventId())
                                 .header(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType())
@@ -97,7 +108,7 @@ class PnExtChnControllerTest {
     }
 
     @Test
-    void digitaleShouldReturnStatus400() throws Exception {
+    void digitalShouldReturnStatus400() throws Exception {
 
         PnExtChnPecEvent event = mockPecMessage();
         StandardEventHeader header = event.getHeader();
@@ -107,7 +118,7 @@ class PnExtChnControllerTest {
 
         this.mockMvc
                 .perform(
-                        post(URL_SALVA_NOTIFICA_PEC)
+                        post(URL_SAVE_DIGITAL_NOTIF)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(PN_EVENT_HEADER_EVENT_ID, header.getEventId())
                                 .header(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType())

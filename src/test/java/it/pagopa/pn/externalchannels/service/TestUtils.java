@@ -5,7 +5,7 @@ import it.pagopa.pn.api.dto.events.*;
 
 import java.time.Instant;
 
-import static it.pagopa.pn.api.dto.events.MessageType.PN_EXT_CHN_PEC;
+import static it.pagopa.pn.api.dto.events.EventType.*;
 
 public class TestUtils {
 
@@ -25,7 +25,7 @@ public class TestUtils {
                 .header(StandardEventHeader
                         .builder()
                         .iun("123")
-                        .eventType(PN_EXT_CHN_PEC)
+                        .eventType(SEND_PEC_REQUEST.name())
                         .eventId("456")
                         .createdAt(Instant.now())
                         .publisher("pub")
@@ -50,39 +50,15 @@ public class TestUtils {
                 .header(StandardEventHeader
                         .builder()
                         .iun("123")
-                        .eventType(PN_EXT_CHN_PEC)
+                        .eventType(SEND_PAPER_REQUEST.name())
                         .eventId("456")
                         .createdAt(Instant.now())
                         .publisher("pub")
                         .build()
                 ).payload(PnExtChnPaperEventPayload
                         .builder()
-                        .destinatario(PnExtChnPaperEventPayloadReceiver
-                                .builder()
-                                .cap("01234")
-                                .provincia("PROVINCIA")
-                                .comune("COMUNE")
-                                .indirizzo("VIA PROVA 1/A")
-                                .specificaIndirizzo("SPEC")
-                                .presso("PRESSO")
-                                .destinatario("dest")
-                                .codiceFiscale("cf")
-                                .build()
-                        ).documento(PnExtChnPaperEventPayloadDocument
-                                .builder()
-                                .iun("123")
-                                .codiceAtto("123")
-                                .numeroCronologico(123)
-                                .parteIstante("abc")
-                                .procuratore("abc")
-                                .ufficialeGiudiziario("abc")
-                                .build()
-                        ).mittente(PnExtChnPaperEventPayloadSender
-                                .builder()
-                                .paMittente("ABC")
-                                .pecMittente("test@test.ts")
-                                .build()
-                        ).urlCallBack("url")
+                        .requestCorrelationId("123")
+                        .iun("456")
                         .build()
                 ).build();
     }

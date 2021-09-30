@@ -8,7 +8,7 @@ dev-options:
   fake-pn-ext-chn-service: true
 
 aws:
-  region: us-east-1
+  regionCode: us-east-1
   use-aws-keyspace: false
   profile-name: localdev
   endpoint-url: http://localhost:4566
@@ -21,6 +21,8 @@ cloud:
         static: us-east-1
     sqs:
         endpoint: http://localhost:4566
+    s3:
+        endpoint: http://localhost:4566
 
 spring:
     cloud:
@@ -32,8 +34,6 @@ spring:
                     destination: local-ext-channels-elab-res
                 pnextchnstatus:
                     destination: local-ext-channels-outputs
-                pnextchnerror:
-                    destination: local-ext-channels-error
     data:
         cassandra:
             password: cassandra

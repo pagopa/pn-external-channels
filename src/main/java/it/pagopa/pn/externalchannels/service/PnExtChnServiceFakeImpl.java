@@ -2,24 +2,22 @@ package it.pagopa.pn.externalchannels.service;
 
 
 import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
-
-import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
-	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient) {
-		super(sqsClient);
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper) {
+		super(sqsClient, objectMapper);
 	}
 
 	@Override
@@ -35,7 +33,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
 			try {
-				// super.saveDigitalMessage(notificaDigitale);
+				super.saveDigitalMessage(notificaDigitale);
 				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
@@ -58,16 +56,6 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - failed");
 		}
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");
-	}
-
-	private Map<String, Object> headersToMap(StandardEventHeader header) {
-		HashMap<String, Object> map = new HashMap<>();
-		map.put(PN_EVENT_HEADER_IUN, header.getIun());
-		map.put(PN_EVENT_HEADER_EVENT_ID, header.getEventId());
-		map.put(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType());
-		map.put(PN_EVENT_HEADER_CREATED_AT, header.getCreatedAt().toString());
-		map.put(PN_EVENT_HEADER_PUBLISHER, header.getPublisher());
-		return map;
 	}
 
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
