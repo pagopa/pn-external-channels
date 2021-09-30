@@ -7,8 +7,8 @@ package it.pagopa.pn.externalchannels.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.api.dto.events.PnExtChnEmailEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnEmailEventPayload;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEventPayload;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public class PnExtChnEmailEventInboundService {
+public class PnExtChnPaperEventInboundService {
 
     @Autowired
     ObjectMapper objectMapper;
@@ -51,9 +51,9 @@ public class PnExtChnEmailEventInboundService {
 
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
-            condition = "T(it.pagopa.pn.externalchannels.util.Util).eventTypeIs(headers, T(it.pagopa.pn.api.dto.events.EventType).SEND_COURTESY_EMAIL)"
+            condition = "T(it.pagopa.pn.externalchannels.util.Util).eventTypeIs(headers, T(it.pagopa.pn.api.dto.events.EventType).SEND_PAPER_REQUEST)"
     )
-    public void handlePnExtChnEmailEvent(
+    public void handlePnExtChnPaperEvent(
             @Header(name = PN_EVENT_HEADER_PUBLISHER) String publisher,
             @Header(name = PN_EVENT_HEADER_EVENT_ID) String eventId,
             @Header(name = PN_EVENT_HEADER_EVENT_TYPE) String eventType,
@@ -63,9 +63,9 @@ public class PnExtChnEmailEventInboundService {
     ) {
         try {
 
-            log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - START");
+            log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - START");
 
-            PnExtChnEmailEvent pnextchnpecevent = PnExtChnEmailEvent.builder()
+            PnExtChnPaperEvent pnextchnpecevent = PnExtChnPaperEvent.builder()
                     .header(StandardEventHeader.builder()
                             .publisher(publisher)
                             .eventId(eventId)
@@ -73,17 +73,17 @@ public class PnExtChnEmailEventInboundService {
                             .iun(iun)
                             .createdAt(Instant.parse(createdAt))
                             .build()
-                    ).payload(objectMapper.convertValue(event, PnExtChnEmailEventPayload.class))
+                    ).payload(objectMapper.convertValue(event, PnExtChnPaperEventPayload.class))
                     .build();
 
 
-            Set<ConstraintViolation<PnExtChnEmailEvent>> errors = null;
+            Set<ConstraintViolation<PnExtChnPaperEvent>> errors = null;
             errors = validator.validate(pnextchnpecevent);
 
-            log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - END");
+            log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
             // TODO: continue
         } catch(RuntimeException e) {
-            log.error("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent", e);
+            log.error("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent", e);
             throw e;
         }
     }

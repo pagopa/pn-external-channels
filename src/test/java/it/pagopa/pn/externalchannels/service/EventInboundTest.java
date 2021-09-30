@@ -1,6 +1,6 @@
 package it.pagopa.pn.externalchannels.service;
 
-import it.pagopa.pn.api.dto.events.MessageType;
+import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
@@ -69,8 +69,7 @@ class EventInboundTest {
         HashMap<String, Object> headers = new HashMap<>();
         GenericMessage<String> message = new GenericMessage<>("hello", headers);
         SubscribableChannel channel = processor.notifPecInput();
-        assertThrows(Exception.class, () -> channel.send(message));
-
+        channel.send(message);
         verify(unknownEventInboundService, Mockito.times(1))
                 .handleUnknownInboundEvent(any(), any());
 
@@ -100,7 +99,7 @@ class EventInboundTest {
     void shouldInterceptEmailMessage() {
 
         HashMap<String, Object> headers = new HashMap<>();
-        headers.put(PN_EVENT_HEADER_EVENT_TYPE, MessageType.PN_EXT_CHN_EMAIL);
+        headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_COURTESY_EMAIL.name());
         headers.put(PN_EVENT_HEADER_EVENT_ID, "123");
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
@@ -122,7 +121,7 @@ class EventInboundTest {
     void shouldInterceptPecMessage() {
 
         HashMap<String, Object> headers = new HashMap<>();
-        headers.put(PN_EVENT_HEADER_EVENT_TYPE, MessageType.PN_EXT_CHN_PEC);
+        headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_PEC_REQUEST.name());
         headers.put(PN_EVENT_HEADER_EVENT_ID, "123");
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
@@ -144,7 +143,7 @@ class EventInboundTest {
     void shouldInterceptAndSavePecMessage() {
 
         HashMap<String, Object> headers = new HashMap<>();
-        headers.put(PN_EVENT_HEADER_EVENT_TYPE, MessageType.PN_EXT_CHN_PEC);
+        headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_PEC_REQUEST.name());
         headers.put(PN_EVENT_HEADER_EVENT_ID, "123");
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
@@ -166,7 +165,7 @@ class EventInboundTest {
     void shouldInterceptAndDiscardPecMessage() {
 
         HashMap<String, Object> headers = new HashMap<>();
-        headers.put(PN_EVENT_HEADER_EVENT_TYPE, MessageType.PN_EXT_CHN_PEC);
+        headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_PEC_REQUEST.name());
         headers.put(PN_EVENT_HEADER_EVENT_ID, "123");
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
@@ -182,7 +181,7 @@ class EventInboundTest {
                 .handlePnExtChnPecEvent(any(), any(), any(), any(), any(), any());
 
         verify(pnExtChnService, Mockito.times(1))
-            .produceStatusMessage(any(), any(), eq(MessageType.PN_EXT_CHN_PEC),
+            .produceStatusMessage(any(), any(), eq(EventType.SEND_PEC_RESPONSE),
                     eq(PnExtChnProgressStatus.PERMANENT_FAIL), any(), anyInt(), any(), any());
 
         verify(pnExtChnService).discardMessage(any(), any());

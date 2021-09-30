@@ -4,20 +4,16 @@ package it.pagopa.pn.externalchannels.service;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.awspring.cloud.core.env.ResourceIdResolver;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
-import it.pagopa.pn.api.dto.events.PnExtChnProgressStatusEventPayload;
+import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.entities.discardedmessage.DiscardedMessage;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.PnExtChnEvnPec;
 import it.pagopa.pn.externalchannels.repositories.cassandra.DiscardedMessageRepository;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
+import it.pagopa.pn.externalchannels.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +24,10 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 import static it.pagopa.pn.externalchannels.event.QueuedMessageStatus.TO_SEND;
 
 @Service
@@ -55,11 +50,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	final QueueMessagingTemplate queueMessagingTemplate;
 
 	@Autowired
-	public PnExtChnServiceImpl(AmazonSQSAsync sqsClient) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JavaTimeModule());
-		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
+	public PnExtChnServiceImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper) {
 		MappingJackson2MessageConverter jacksonMessageConverter =
 				new MappingJackson2MessageConverter();
 		jacksonMessageConverter.setSerializedPayloadClass(String.class);
@@ -113,7 +104,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	}
 	
 	@Override
-	public void produceStatusMessage(String codiceAtto, String iun, String tipoInvio, PnExtChnProgressStatus stato, String canale,
+	public void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
 									 int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec) {
 		log.info("PnExtChnServiceImpl - produceStatusMessage - START");
 
@@ -122,7 +113,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 				.codiceAtto(codiceAtto)
 				.codiceRaccomandata(codiceRaccomandata)
 				.iun(iun)
-				.tipoInvio(tipoInvio)
+				.tipoInvio(tipoInvio != null ? tipoInvio.name() : "")
 				.tentativo(tentativo)
 				.statusCode(stato)
 				.statusDate(Instant.now())
@@ -136,9 +127,27 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 					.build();
 		}
 
-		queueMessagingTemplate.convertAndSend(statusMessageQueue, statusMessage);
+		StandardEventHeader stdHeader = builder()
+				.iun(iun)
+				.eventId("")
+				.eventType(tipoInvio != null ? tipoInvio.name() : "")
+				.createdAt(Instant.now())
+				.publisher(canale)
+				.build();
+
+		queueMessagingTemplate.convertAndSend(statusMessageQueue, statusMessage, headersToMap(stdHeader));
 
 		log.info("PnExtChnServiceImpl - produceStatusMessage - END");
+	}
+
+	Map<String, Object> headersToMap(StandardEventHeader header) {
+		Map<String, Object> map = new HashMap<>();
+		map.put(PN_EVENT_HEADER_IUN, header.getIun());
+		map.put(PN_EVENT_HEADER_EVENT_ID, header.getEventId());
+		map.put(PN_EVENT_HEADER_EVENT_TYPE, header.getEventType());
+		map.put(PN_EVENT_HEADER_CREATED_AT, Util.formatInstant(header.getCreatedAt()));
+		map.put(PN_EVENT_HEADER_PUBLISHER, header.getPublisher());
+		return map;
 	}
 
 }

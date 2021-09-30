@@ -67,6 +67,8 @@ spring:
   data:
     cassandra:
       schemaAction: NONE
+      request:
+        consistency: local_quorum
 
 s3:
   retry:

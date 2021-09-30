@@ -8,10 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CloudAwsProperties {
 
-    //@Value("${cloud.aws.credentials.accessKey}")
-    //private String accessKey;
-    //@Value("${cloud.aws.credentials.secretKey}")
-    //private String secretKey;
+    @Value("${cloud.aws.credentials.profile-name:}")
+    private String profileName;
     @Value("${cloud.aws.sqs.endpoint:}")
     private String endpoint;
     @Value("${cloud.aws.region.static}")

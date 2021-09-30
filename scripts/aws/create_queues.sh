@@ -1,5 +1,5 @@
 if ([ -z $1 ]) then
-  profile=default
+  profile=localdev
 else 
   profile=$1
 fi
