@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CloudAwsProperties {
 
-    @Value("${cloud.aws.credentials.profile-name}")
+    @Value("${cloud.aws.credentials.profile-name:}")
     private String profileName;
     @Value("${cloud.aws.sqs.endpoint:}")
     private String endpoint;
