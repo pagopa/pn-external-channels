@@ -37,7 +37,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
-				queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+				queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 			}
 			catch ( RuntimeException exc ) {
@@ -48,7 +48,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			Map<String, Object> headers = headersToMap(out.getHeader());
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push fail old");
 			try {
-				queueMessagingTemplate.convertAndSend(statusMessageQueue, out, headers);
+				queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
 			}
 			catch ( RuntimeException exc ) {
 				log.error("PnExtChnServiceFakeImpl - saveDigitalMessage - pushError", exc);
