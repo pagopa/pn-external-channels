@@ -5,21 +5,25 @@
  */
 package it.pagopa.pn.externalchannels.service;
 
+import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnPaperEventPayload;
-import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import io.awspring.cloud.core.env.ResourceIdResolver;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.time.Instant;
@@ -38,16 +42,25 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 public class PnExtChnPaperEventInboundService {
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     
     @Autowired
 	private Validator validator;
 
     @Autowired
-    PnExtChnService pnExtChnService;
+    private PnExtChnService pnExtChnService;
     
     @Autowired
-    PnExtChnProcessor processor;
+    private PnExtChnProcessor processor;
+
+    @Autowired
+    private EventSenderService evtSender;
+
+    @Value("${spring.cloud.stream.bindings." + PnExtChnProcessor.STATUS_OUTPUT + ".destination}")
+    private String statusMessageQueue;
+
+
+
 
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
@@ -80,8 +93,28 @@ public class PnExtChnPaperEventInboundService {
             Set<ConstraintViolation<PnExtChnPaperEvent>> errors = null;
             errors = validator.validate(pnextchnpecevent);
 
+
+
             log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
-            // TODO: continue
+            evtSender.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
+                    .header( builder()
+                            .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                            .eventId(eventId + "_resp")
+                            .eventType(EventType.SEND_PEC_RESPONSE.name())
+                            .iun(iun)
+                            .createdAt(Instant.now())
+                            .build()
+                    )
+                    .payload( PnExtChnProgressStatusEventPayload.builder()
+                            .iun( iun )
+                            .statusDate( Instant.now() )
+                            .statusCode( PnExtChnProgressStatus.OK )
+                            .requestCorrelationId( eventId )
+                            .build()
+                    )
+                    .build()
+            );
+
         } catch(RuntimeException e) {
             log.error("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent", e);
             throw e;
