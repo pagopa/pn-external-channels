@@ -71,13 +71,16 @@ public class Config {
     public AmazonS3 s3client(CloudAwsProperties props){
         String regionCode = props.getRegion();
 
-        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withRegion( regionCode );
+        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
 
         String endpointUrl = props.getEndpoint();
         if( StringUtils.isNotBlank( endpointUrl) ) {
             builder = builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
                         endpointUrl, regionCode
                     ));
+        }
+        else {
+            builder = builder.withRegion( regionCode );
         }
 
 
