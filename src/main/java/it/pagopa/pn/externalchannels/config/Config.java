@@ -69,16 +69,26 @@ public class Config {
     @Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
     public AmazonS3 s3client(CloudAwsProperties props){
-        ProfileCredentialsProvider profCred = new ProfileCredentialsProvider(props.getProfileName());
+        String regionCode = props.getRegion();
 
-        return AmazonS3ClientBuilder
-                .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        props.getEndpoint(),
-                        props.getRegion()
-                ))
-                .withCredentials(profCred)
-                .enablePathStyleAccess()
+        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withRegion( regionCode );
+
+        String endpointUrl = props.getEndpoint();
+        if( StringUtils.isNotBlank( endpointUrl) ) {
+            builder = builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                        endpointUrl, regionCode
+                    ));
+        }
+
+
+
+        String profileName = props.getProfileName();
+        if( StringUtils.isNotBlank( profileName )) {
+            ProfileCredentialsProvider profCred = new ProfileCredentialsProvider(profileName);
+            builder = builder.withCredentials( profCred );
+        }
+
+        return builder.enablePathStyleAccess()
                 .build();
     }
 
