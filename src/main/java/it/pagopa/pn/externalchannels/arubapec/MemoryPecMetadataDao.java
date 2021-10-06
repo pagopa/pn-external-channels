@@ -29,4 +29,9 @@ public class MemoryPecMetadataDao implements PecMetadataDao {
     public void remove(String key) {
         this.store.remove( key );
     }
+
+    @Override
+    public boolean isEmpty() {
+        return this.store.isEmpty();
+    }
 }

@@ -166,10 +166,10 @@ Resources:
               Value: !Ref AWS::Region
             - Name: AWS_REGIONCODE
               Value: !Ref AWS::Region
-            #- Name: ARUBA_USER
-            #  Value: '{{resolve:secretsmanager:pec_server_credentials:SecretString:pec_user}}'
-            #- Name: ARUBA_PASSWORD
-            #  Value: '{{resolve:secretsmanager:pec_server_credentials:SecretString:pec_pwd}}'
+            - Name: ARUBA_USER
+              Value: '{{resolve:secretsmanager:pec_server_credentials:SecretString:pec_user}}'
+            - Name: ARUBA_PASSWORD
+              Value: '{{resolve:secretsmanager:pec_server_credentials:SecretString:pec_pwd}}'
           PortMappings:
             - ContainerPort: 8080
           # Send logs to CloudWatch Logs

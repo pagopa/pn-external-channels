@@ -39,7 +39,6 @@ public class ArubaReceiverService {
         this.eventEmitter = eventtEmitter;
         this.jmailUtils = jmailUtils;
         this.dao = dao;
-        this.renewStore();
     }
 
     protected void renewStore() {
@@ -78,7 +77,9 @@ public class ArubaReceiverService {
 
     @Scheduled( fixedDelay = 10 * 1000)
     protected void scanForMessages() {
-        if(StringUtils.isNotBlank( cfg.getUser() )) {
+        if(StringUtils.isNotBlank( cfg.getUser() ) && !dao.isEmpty()) {
+            log.info("Start pec polling");
+            this.renewStore();
             store.listEntries()
                     .stream()
                     .filter( entry -> PecEntry.Type.DELIVERED_RECIPE.equals( entry.getType() ))

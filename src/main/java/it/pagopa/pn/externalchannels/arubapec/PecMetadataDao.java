@@ -9,4 +9,6 @@ public interface PecMetadataDao {
     Optional<SimpleMessage> getMessageMetadata(String originalMessageId);
 
     void remove(String key);
+
+    boolean isEmpty();
 }
