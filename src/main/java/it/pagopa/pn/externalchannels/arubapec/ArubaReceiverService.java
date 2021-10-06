@@ -66,7 +66,12 @@ public class ArubaReceiverService {
 
         Session session = Session.getInstance(props, null);
         Store store = session.getStore( "imap" );
-        store.connect( "imap.pec.it", cfg.getUser(), cfg.getPassword());
+        try {
+            store.connect( "imap.pec.it", cfg.getUser(), cfg.getPassword());
+        }
+        catch(MessagingException exc) {
+            store.close();
+        }
         return jmailUtils.wrap(store);
     }
 
