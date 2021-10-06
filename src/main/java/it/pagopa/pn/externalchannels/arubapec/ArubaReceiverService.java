@@ -8,6 +8,7 @@ import it.pagopa.pn.externalchannels.arubapec.jmailutils.PecEntry;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.service.EventSenderService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -42,17 +43,19 @@ public class ArubaReceiverService {
     }
 
     protected void renewStore() {
-        if( store != null ) {
-            try {
-                store.close();
-            } catch (MessagingException exc) {
-                log.error("Closing mail store", exc);
+        if(StringUtils.isNotBlank( cfg.getUser() )) {
+            if( store != null ) {
+                try {
+                    store.close();
+                } catch (MessagingException exc) {
+                    log.error("Closing mail store", exc);
+                }
             }
-        }
-        try {
-            store = this.newConnectedStore();
-        } catch (MessagingException exc) {
-            throw new PnInternalException("Connecting to imap", exc);
+            try {
+                store = this.newConnectedStore();
+            } catch (MessagingException exc) {
+                throw new PnInternalException("Connecting to imap", exc);
+            }
         }
     }
 
@@ -70,18 +73,20 @@ public class ArubaReceiverService {
 
     @Scheduled( fixedDelay = 10 * 1000)
     protected void scanForMessages() {
-        store.listEntries()
-            .stream()
-            .filter( entry -> PecEntry.Type.DELIVERED_RECIPE.equals( entry.getType() ))
-            .map( entry -> dao.getMessageMetadata(entry.getReferredId()) )
-            .filter( Optional::isPresent )
-            .map( Optional::get )
-            .map( metadata -> new StreamEntry( this.metadataToEvent(metadata), metadata) )
-            .forEach( entry -> {
-                log.info("Receive PEC ACK: " + entry.getMetadata());
-                sendAckEvent( entry.getEvt() );
-                dao.remove( entry.getMetadata().getKey() );
-            });
+        if(StringUtils.isNotBlank( cfg.getUser() )) {
+            store.listEntries()
+                    .stream()
+                    .filter( entry -> PecEntry.Type.DELIVERED_RECIPE.equals( entry.getType() ))
+                    .map( entry -> dao.getMessageMetadata(entry.getReferredId()) )
+                    .filter( Optional::isPresent )
+                    .map( Optional::get )
+                    .map( metadata -> new StreamEntry( this.metadataToEvent(metadata), metadata) )
+                    .forEach( entry -> {
+                        log.info("Receive PEC ACK: " + entry.getMetadata());
+                        sendAckEvent( entry.getEvt() );
+                        dao.remove( entry.getMetadata().getKey() );
+                    });
+        }
     }
 
     private void sendAckEvent(PnExtChnProgressStatusEvent event) {

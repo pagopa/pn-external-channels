@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.arubapec;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -29,18 +30,20 @@ public class ArubaSenderService {
     private Transport smtpTransport;
 
     protected synchronized void renewSmtpTransport() {
-        if( smtpTransport != null ) {
-            try {
-                smtpTransport.close();
-            } catch (MessagingException exc) {
-                this.log.error("Closing SMTP transport", exc);
+        if(StringUtils.isNotBlank( cfg.getUser())) {
+            if( smtpTransport != null ) {
+                try {
+                    smtpTransport.close();
+                } catch (MessagingException exc) {
+                    this.log.error("Closing SMTP transport", exc);
+                }
+                smtpTransport = null;
             }
-            smtpTransport = null;
-        }
-        try {
-            smtpTransport = buildNewSmtpTransport();
-        } catch (NoSuchProviderException exc) {
-            throw new PnInternalException("Preparing SMTP transport", exc);
+            try {
+                smtpTransport = buildNewSmtpTransport();
+            } catch (NoSuchProviderException exc) {
+                throw new PnInternalException("Preparing SMTP transport", exc);
+            }
         }
     }
 
@@ -61,16 +64,18 @@ public class ArubaSenderService {
 
 
     public synchronized void sendMessage( SimpleMessage dto ) {
-        try {
-            tryToSend(dto);
-        }
-        catch (MessagingException exc1) {
-            log.error("Trying to send a pec", exc1);
-            renewSmtpTransport();
+        if(StringUtils.isNotBlank( cfg.getUser())) {
             try {
                 tryToSend(dto);
-            } catch (MessagingException exc2) {
-                throw new PnInternalException("Trying to send a pec", exc2);
+            }
+            catch (MessagingException exc1) {
+                log.error("Trying to send a pec", exc1);
+                renewSmtpTransport();
+                try {
+                    tryToSend(dto);
+                } catch (MessagingException exc2) {
+                    throw new PnInternalException("Trying to send a pec", exc2);
+                }
             }
         }
     }
