@@ -1,23 +1,35 @@
 package it.pagopa.pn.externalchannels.service;
 
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.api.dto.events.*;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
+import java.util.Map;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Map;
+import com.amazonaws.services.sqs.AmazonSQSAsync;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.pagopa.pn.api.dto.events.EventPublisher;
+import it.pagopa.pn.api.dto.events.EventType;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatusEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatusEventPayload;
+import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.externalchannels.util.MessageUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
-public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
-
-	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper) {
+public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {	
+	private MessageUtil messageUtil;
+	
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper, MessageUtil messageUtil) {
 		super(sqsClient, objectMapper);
+		this.messageUtil = messageUtil;
 	}
 
 	@Override
@@ -37,7 +49,10 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
+				
+				//String msg = messageUtil.pecPayloadToMessage( notificaDigitale.getPayload(), MessageBodyType.HTML ); //FIXME rimuovi, solo per test
 				queueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
+				
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 			}
 			catch ( RuntimeException exc ) {
