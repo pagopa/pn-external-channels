@@ -6,10 +6,8 @@ import io.awspring.cloud.core.env.ResourceIdResolver;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.GenericEvent;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
-import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.stereotype.Service;
 
