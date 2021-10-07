@@ -36,24 +36,33 @@ public class MessageUtil {
 			+ "	<p><i>Questo messaggio &egrave; stato inoltrato da un indirizzo di Posta Elettronica Certificata non abilitato a ricevere messaggi.<br/>"
 			+ "	La invitiamo pertanto a non rispondere a questa comunicazione.<i></p>";
 
-	private static final String TEXT_MSG_TEMPLATE = "Buongiorno Gentile %s\n\n"	
-			+ "Ti informiano che ti è stato notificato il seguente Atto Giudiziario:\n\n"
+	private static final String TEXT_MSG_TEMPLATE = "Gentile %s\n"
+			+ "\n"
+			+ "La informiano che ti è stato notificato il seguente Atto:\n"
+			+ "\n"
 			+ "Codice univoco (IUN):\n"
-			+ "%s\n\n"
+			+ "%s\n"
+			+ "\n"
 			+ "PA Mittente:\n"
-			+ "%s\n\n"
+			+ "%s\n"
+			+ "\n"
 			+ "Data invio:\n"
-			+ "%s\n\n"
-			+ "Puoi consultare l'Atto in uno dei seguenti modi:\n\n"
-			+ "- Accedendo con SPID o CIE (Carta d'Identità Elettronica) a Piattaforma Notifiche al seguente indirizzo\n"
-			+ "https://www.piattaformanotifiche.gov.it\n\n"
-			+ "Recandoti presso un qualsiasi Ufficio Postale, dove potrai ritirare una copia dell'Atto stampato, semplicemente comunicando "
-			+ "il codice IUN di riferimento o mostrando il Codice a Barre Univoco allegato a questa comunicazione.\n\n"
+			+ "%s\n"
+			+ "\n"
+			+ "Puoi consultare l'Atto in uno dei seguenti modi:\n"
+			+ " - Accedendo con SPID o CIE (Carta d'Identità Elettronica) a Piattaforma Notifiche al seguente indirizzo\n"
+			+ "   https://www.piattaformanotifiche.gov.it\n"
+			+ " - Recandoti presso un qualsiasi Ufficio Postale, dove potrai ritirare una copia dell'Atto stampato,"
+			+ "   semplicemente comunicando il codice IUN di riferimento o mostrando il Codice a Barre Univoco allegato "
+			+ "   a questa comunicazione.\n"
+			+ "\n"
 			+ "Ti informiamo che in alternativa è anche possibile accedere temporaneamente all'Atto per un massimo di 2 accessi, "
-			+ "attraverso l'url univoco riportato qui sotto.\n\n"
+			+ "attraverso l'url univoco riportato qui sotto.\n"
+			+ "\n"
 			+ "URL UNIVOCO\n"
-			+ "https://at%s.gov.it\n\n"
-			+ "Questo messaggio è stato inoltrato da un indirizzo di Posta Elettronica Certificata non abilitato a ricevere messaggi.\n"
+			+ "https://at%s.gov.it\n"
+			+ "\n"
+			+ "Questo messaggio è stato inoltrato da un indirizzo di Posta Elettronica non abilitato a ricevere messaggi.\n"
 			+ "La invitiamo pertanto a non rispondere a questa comunicazione.";
 	
     public String pecPayloadToMessage (PnExtChnPecEventPayload payload, MessageBodyType type) {
@@ -110,7 +119,7 @@ public class MessageUtil {
 	
 	private String convertShipmentDateToString (Instant shipmentDate) {
 		String parsedDate = null;
-		
+		// FIXME: questo genera output, vanno gestite formattazione e timezone per la visualizzazione.
 		if (shipmentDate != null) {
 			OffsetDateTime odt = shipmentDate.atOffset(ZoneOffset.UTC);
 			int year = odt.get(ChronoField.YEAR_OF_ERA);

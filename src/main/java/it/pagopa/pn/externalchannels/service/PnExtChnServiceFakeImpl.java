@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
 import it.pagopa.pn.externalchannels.arubapec.SimpleMessage;
+import it.pagopa.pn.externalchannels.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,12 @@ import java.util.Map;
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 	private final ArubaSenderService pecSvc;
+	private final MessageUtil msgUtils;
 
-	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper, ArubaSenderService pecSvc) {
+	public PnExtChnServiceFakeImpl(AmazonSQSAsync sqsClient, ObjectMapper objectMapper, ArubaSenderService pecSvc, MessageUtil msgUtils) {
 		super(sqsClient, objectMapper);
 		this.pecSvc = pecSvc;
+		this.msgUtils = msgUtils;
 	}
 
 	@Override
@@ -56,14 +59,15 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 		String pecAddress = notificaDigitale.getPayload().getPecAddress().replaceFirst("\\.real$", "");
 
+		String content = msgUtils.pecPayloadToMessage( notificaDigitale.getPayload(), MessageBodyType.PLAIN_TEXT );
 		pecSvc.sendMessage( SimpleMessage.builder()
 				.iun(iun)
 				.eventId( notificaDigitale.getHeader().getEventId() )
 				.senderAddress("no-replay@pn.it")
 				.recipientAddress(pecAddress)
 				.subject("Notifica Digitale da PN " + iun)
-				.contentType("text/plain")
-				.content("Avviso Avvenuta Ricezione della notifica con iun " + iun )
+				.contentType("text/plain; charset=UTF-8")
+				.content( content )
 				.build()
 			);
 	}
