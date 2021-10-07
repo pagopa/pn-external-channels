@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -44,9 +45,16 @@ public class PnExtChnPaperEventInboundService {
 
     @Autowired
     PnExtChnService pnExtChnService;
-    
+
+    @Autowired
+    EventSenderService evtSenderSvc;
+
     @Autowired
     PnExtChnProcessor processor;
+
+    @Value("${spring.cloud.stream.bindings." + PnExtChnProcessor.STATUS_OUTPUT + ".destination}")
+    String statusMessageQueue;
+
 
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
@@ -92,7 +100,32 @@ public class PnExtChnPaperEventInboundService {
                 log.debug("Received message from sqs: " + pnextchnpaperevent.toString());
                 log.debug("object = {}", objectMapper.valueToTree(pnextchnpaperevent));
 
-                pnExtChnService.savePaperMessage(pnextchnpaperevent);
+                if( pnextchnpaperevent.getPayload().getDestinationAddress().getAddress().contains("ImmediateResponse")) {
+                    log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
+                    evtSenderSvc.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
+                                .header( builder()
+                                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                                        .eventId(eventId + "_resp")
+                                        .eventType(EventType.SEND_PEC_RESPONSE.name())
+                                        .iun(iun)
+                                        .createdAt(Instant.now())
+                                        .build()
+                                )
+                                .payload( PnExtChnProgressStatusEventPayload.builder()
+                                                .iun( iun )
+                                                .statusDate( Instant.now() )
+                                                .statusCode( PnExtChnProgressStatus.OK )
+                                                .requestCorrelationId( eventId )
+                                                .build()
+                                        )
+                                .build()
+                            );
+
+                }
+                else {
+                    pnExtChnService.savePaperMessage(pnextchnpaperevent);
+                }
+
             }
 
             log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");

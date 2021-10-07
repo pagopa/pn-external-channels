@@ -2,7 +2,11 @@ package it.pagopa.pn.externalchannels.service;
 
 
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
+import it.pagopa.pn.externalchannels.arubapec.SimpleMessage;
+import it.pagopa.pn.externalchannels.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +18,12 @@ import java.util.Map;
 @ConditionalOnProperty(name = "dev-options.fake-pn-ext-chn-service", havingValue = "true")
 public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
-	public PnExtChnServiceFakeImpl() {
-		super();
-	}
+	@Autowired
+	private ArubaSenderService pecSvc;
+
+	@Autowired
+	private MessageUtil msgUtils;
+
 
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
@@ -28,15 +35,43 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 	public void saveDigitalMessage(PnExtChnPecEvent notificaDigitale) {
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - START OLD");
 
+		if( notificaDigitale.getPayload().getPecAddress().endsWith(".real") ) {
+			realSend(notificaDigitale);
+		}
+		else {
+			fakeSend(notificaDigitale);
+		}
+	}
+
+	private void realSend(PnExtChnPecEvent notificaDigitale) {
+		String iun = notificaDigitale.getPayload().getIun();
+
+		String pecAddress = notificaDigitale.getPayload().getPecAddress().replaceFirst("\\.real$", "");
+
+		String content = msgUtils.pecPayloadToMessage( notificaDigitale.getPayload(), MessageBodyType.PLAIN_TEXT );
+		pecSvc.sendMessage( SimpleMessage.builder()
+				.iun(iun)
+				.eventId( notificaDigitale.getHeader().getEventId() )
+				.senderAddress("no-replay@pn.it")
+				.recipientAddress(pecAddress)
+				.subject("Notifica Digitale da PN " + iun)
+				.contentType("text/plain; charset=UTF-8")
+				.content( content )
+				.build()
+		);
+	}
+
+
+	private void fakeSend(PnExtChnPecEvent notificaDigitale) {
 		PnExtChnProgressStatusEvent out = computeResponse(notificaDigitale);
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
 			try {
-				super.saveDigitalMessage(notificaDigitale);
-				/*out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
+				// super.saveDigitalMessage(notificaDigitale);
+				out = buildResponse(notificaDigitale, PnExtChnProgressStatus.OK);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
 				statusQueueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
-				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");*/
+				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 			}
 			catch ( RuntimeException exc ) {
 				log.error("PnExtChnServiceFakeImpl - saveDigitalMessage - pushError", exc);
@@ -55,6 +90,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		}
 		log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - END");
 	}
+
 
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
 		PnExtChnProgressStatus outcome = decideOutcome( evt );

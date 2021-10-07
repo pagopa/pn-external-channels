@@ -81,3 +81,8 @@ job:
   messages-csv-template-id: 8
   results-csv-template-id: 4
 
+emailSender:
+  content-type: HTML
+  protocol: smtp
+  host: smtp.gmail.com
+  port: 587

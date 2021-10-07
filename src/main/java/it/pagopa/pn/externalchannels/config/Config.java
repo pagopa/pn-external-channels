@@ -84,18 +84,21 @@ public class Config {
         AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
                 .standard();
 
-        if(StringUtils.isNotEmpty(props.getProfile())){
+        if(StringUtils.isNotBlank(props.getProfile())){
             ProfileCredentialsProvider profCred = new ProfileCredentialsProvider(props.getProfile());
             builder.withCredentials(profCred);
         }
 
-        if(StringUtils.isNotEmpty(props.getEndpoint()))
+        if(StringUtils.isNotBlank(props.getEndpoint())) {
             builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                props.getEndpoint(),
-                props.getRegion()
+                    props.getEndpoint(),
+                    props.getRegion()
             ));
-        else if(StringUtils.isNotEmpty(props.getRegion()))
+        }
+        else if(StringUtils.isNotEmpty(props.getRegion())) {
             builder.withRegion(props.getRegion());
+        }
+
 
         builder.enablePathStyleAccess();
 
@@ -125,7 +128,7 @@ public class Config {
     }
 
     @Bean
-    public JavaMailSender javaMailSender(EmailProperties emailProperties) {
+    public JavaMailSenderImpl javaMailSender(EmailProperties emailProperties) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(emailProperties.getHost());
         mailSender.setPort(emailProperties.getPort());
