@@ -10,6 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import it.pagopa.pn.api.dto.events.EventPublisher;
+import it.pagopa.pn.api.dto.events.EventType;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatusEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatusEventPayload;
+import it.pagopa.pn.api.dto.events.StandardEventHeader;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -23,7 +32,6 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 	@Autowired
 	private MessageUtil msgUtils;
-
 
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent notificaCartacea) {
