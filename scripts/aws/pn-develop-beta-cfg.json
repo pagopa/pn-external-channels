@@ -2,6 +2,6 @@
   "Parameters" : {
     "EnvName" : "pn-develop",
     "EnvNumber" : "8",
-    "KeyspaceName": "develop_delivery"
+    "KeyspaceName": "devel_extch"
   }
 }
