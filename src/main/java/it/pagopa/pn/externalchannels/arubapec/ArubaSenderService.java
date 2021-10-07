@@ -23,7 +23,6 @@ public class ArubaSenderService {
     public ArubaSenderService(PecMetadataDao dao, ArubaCfg cfg) {
         this.dao = dao;
         this.cfg = cfg;
-        renewSmtpTransport();
     }
 
     private Session mailSession;
@@ -66,6 +65,7 @@ public class ArubaSenderService {
     public synchronized void sendMessage( SimpleMessage dto ) {
         if(StringUtils.isNotBlank( cfg.getUser())) {
             try {
+                renewSmtpTransport();
                 tryToSend(dto);
             }
             catch (MessagingException exc1) {
@@ -84,8 +84,6 @@ public class ArubaSenderService {
 
         String messageId = UUID.randomUUID().toString().replaceAll("-", "");
 
-        dao.saveMessageMetadata( messageId, dto );
-
         Message message = new MimeMessageWithFixedId( mailSession, messageId );
 
         message.setFrom(new InternetAddress( cfg.getUser() ));
@@ -101,6 +99,7 @@ public class ArubaSenderService {
 
         message.setContent(multipart);
         smtpTransport.send(message);
+        dao.saveMessageMetadata( messageId, dto );
         log.info("Send PEC for " + dto);
     }
 
