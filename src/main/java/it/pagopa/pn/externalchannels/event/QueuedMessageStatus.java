@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public enum QueuedMessageStatus {
+    OK,
     SENT,
     FAILED,
     ERROR,
@@ -19,7 +20,8 @@ public enum QueuedMessageStatus {
 
     static {
         converter = new EnumMap<>(QueuedMessageStatus.class);
-        converter.put(FAILED, PnExtChnProgressStatus.PERMANENT_FAIL);
+        converter.put(OK, PnExtChnProgressStatus.OK);
+        converter.put(FAILED, PnExtChnProgressStatus.RETRYABLE_FAIL);
         converter.put(ERROR, PnExtChnProgressStatus.PERMANENT_FAIL);
         converter.put(VALIDATION_ERROR, PnExtChnProgressStatus.PERMANENT_FAIL);
     }

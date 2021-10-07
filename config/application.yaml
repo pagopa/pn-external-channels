@@ -45,9 +45,28 @@ spring:
             local-datacenter: datacenter1
 
 
+#s3:
+#    profile-name: pn-develop-extchn
+#    region: eu-south-1
+#    # endpoint: http://localhost:4566
+#    buckets:
+#        external-channels-out: pn-develop-extchn-output
+#        external-channels-in: pn-develop-extchn-input
+
 s3:
-    buckets:
-        external-channels-out: external-channels-out
-        external-channels-in: external-channels-in
+  profile-name: localdev
+  region: us-east-1
+  endpoint: http://localhost:4566
+  buckets:
+    external-channels-out: external-channels-out
+    external-channels-in: external-channels-in
+
+emailSender:
+  content-type: HTML
+  protocol: smtp
+  host: smtp.gmail.com
+  port: 587
+  username: ${EMAIL_SENDER_USERNAME}
+  password: ${EMAIL_SENDER_PASSWORD}
 
 

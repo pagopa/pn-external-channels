@@ -14,6 +14,8 @@ import it.pagopa.pn.externalchannels.service.MessageBodyType;
 
 @Component
 public class MessageUtil {
+
+	public static final String MSG_SUBJECT = "Avviso di avvenuta ricezione";
 	
 	private static final String HTML_MSG_TEMPLATE = "<p>Buongiorno Gentile %s</p>"	
 			+ "	<p>Ti informiano che ti &egrave; stato notificato il seguente Atto Giudiziario:</p>"

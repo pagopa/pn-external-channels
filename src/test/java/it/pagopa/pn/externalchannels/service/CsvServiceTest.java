@@ -4,10 +4,12 @@ import it.pagopa.pn.externalchannels.entities.csvtemplate.Column;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
+import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,6 +37,12 @@ class CsvServiceTest {
 
     }
 
+    @Value("${job.messages-csv-template-id}")
+    private String messagesCsvTemplateId;
+
+    @Value("${job.results-csv-template-id}")
+    private String resultCsvTemplateId;
+
     @MockBean
     CsvTemplateRepository csvTemplateRepository;
 
@@ -43,7 +51,7 @@ class CsvServiceTest {
 
     @Test
     void shouldCreateCsv(){
-        when(csvTemplateRepository.findFirstByIdCsv("8")).thenReturn(mockCsvTemplate());
+        when(csvTemplateRepository.findFirstByIdCsv(messagesCsvTemplateId)).thenReturn(mockCsvTemplate());
         CsvTransformationResult res = csvService.queuedMessagesToCsv(Arrays.asList(mockQueuedMessage()));
         byte[] expectedBytes = "CODICE ATTO;DESTINATARIO;CAP\r\n123;456;00789\r\n".getBytes(StandardCharsets.UTF_8);
         assertArrayEquals(expectedBytes, res.getCsvContent());
@@ -51,11 +59,20 @@ class CsvServiceTest {
 
     @Test
     void shouldDiscardMessage(){
-        when(csvTemplateRepository.findFirstByIdCsv("8")).thenReturn(mockCsvTemplate());
+        when(csvTemplateRepository.findFirstByIdCsv(messagesCsvTemplateId)).thenReturn(mockCsvTemplate());
         List<QueuedMessage> messagesToDiscard = Arrays.asList(mockQueuedMessage());
         messagesToDiscard.get(0).setSenderId("abc");
         CsvTransformationResult res = csvService.queuedMessagesToCsv(messagesToDiscard);
         assertEquals(1, res.getDiscardedMessages().size());
+    }
+
+    @Test
+    void shouldReadResult(){
+        when(csvTemplateRepository.findFirstByIdCsv(resultCsvTemplateId)).thenReturn(mockCsvTemplate());
+        byte[] source = "CODICE ATTO;DESTINATARIO;CAP\r\n123;456;00789\r\n".getBytes(StandardCharsets.UTF_8);
+        List<ElaborationResult> elaborationResults = csvService.csvToElaborationResults(source);
+        assertEquals(1, elaborationResults.size());
+        assertEquals("123", elaborationResults.get(0).getIun());
     }
 
     private CsvTemplate mockCsvTemplate() {
@@ -69,9 +86,9 @@ class CsvServiceTest {
 
     private List<Column> mockCsvTemplateColumns() {
         return Arrays.asList(
-                new Column("CODICE ATTO", false, "text", "iun", 20L, ""),
-                new Column("DESTINATARIO", false, "text", "id", 44L, ""),
-                new Column("CAP", false, "paddedInt", "senderId", 5L, "")
+                new Column("CODICE ATTO", false, "text", "iun", null, 20L, ""),
+                new Column("DESTINATARIO", false, "text", "id", null, 44L, ""),
+                new Column("CAP", false, "paddedInt", "senderId", null, 5L, "")
         );
     }
 

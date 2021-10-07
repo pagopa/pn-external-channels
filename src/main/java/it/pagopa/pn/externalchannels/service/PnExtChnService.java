@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.service;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -8,6 +9,7 @@ import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.pojos.PnExtChnEvnPec;
 
 public interface PnExtChnService {
@@ -16,6 +18,8 @@ public interface PnExtChnService {
 	void saveDigitalMessage(PnExtChnPecEvent notificaDigitale);
 	<T> void discardMessage(String message, Set<ConstraintViolation<T>> violations);
 
-	void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
-							  int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec);
+    void processElaborationResults(List<ElaborationResult> elaborationResults);
+
+    void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
+                              int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec);
 }

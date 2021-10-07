@@ -8,7 +8,8 @@ package it.pagopa.pn.externalchannels.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
-import it.pagopa.pn.externalchannels.event.elaborationresult.ElaborationResult;
+import it.pagopa.pn.externalchannels.event.elaborationresult.PnExtChnElaborationResultEvent;
+import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,8 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.io.IOException;
+import java.util.List;
 
 /**
  *
@@ -33,23 +35,29 @@ public class PnExtChnElaborationResultInboundService {
     ObjectMapper objectMapper;
 
     @Autowired
-    private PnExtChnFileTransferService fileTransferService;
+    PnExtChnFileTransferService fileTransferService;
 
-    @StreamListener(
-            target = PnExtChnProcessor.ELAB_RESULT_INPUT
-    )
-    public void handleElaborationResult(
-            @Payload JsonNode event
-    ) {
+    @Autowired
+    CsvService csvService;
+
+    @Autowired
+    PnExtChnService pnExtChnService;
+
+//    @StreamListener(
+//            target = PnExtChnProcessor.ELAB_RESULT_INPUT
+//    )
+    public void handleElaborationResult(PnExtChnElaborationResultEvent evt) throws IOException {
         try {
             log.info("PnExtChnElaborationResultInboundService - handleElaborationResult - START");
 
-            ElaborationResult res = objectMapper.convertValue(event, ElaborationResult.class);
+            byte[] bytes = fileTransferService.retrieveCsv(evt.getKey());
 
-            Map<String, String> map = fileTransferService.retrieveElaborationResult(res.getKey());
+            List<ElaborationResult> elaborationResults = csvService.csvToElaborationResults(bytes);
+
+            pnExtChnService.processElaborationResults(elaborationResults);
 
             log.info("PnExtChnElaborationResultInboundService - handleElaborationResult - END");
-        } catch(RuntimeException e) {
+        } catch(Exception e) {
             log.error("PnExtChnElaborationResultInboundService - handleElaborationResult", e);
             throw e;
         }

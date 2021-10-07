@@ -2,9 +2,10 @@ package it.pagopa.pn.externalchannels.controller;
 
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
-import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
-import it.pagopa.pn.externalchannels.repositories.cassandra.DiscardedMessageRepository;
-import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
+import it.pagopa.pn.externalchannels.entities.resultdescriptor.ResultDescriptor;
+import it.pagopa.pn.externalchannels.entities.senderpa.SenderConfigByDenomination;
+import it.pagopa.pn.externalchannels.entities.senderpa.SenderPecByDenomination;
+import it.pagopa.pn.externalchannels.repositories.cassandra.*;
 import it.pagopa.pn.externalchannels.repositories.mongo.MongoQueuedMessageRepository;
 import it.pagopa.pn.externalchannels.service.ScheduledSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +27,17 @@ public class TestController {
     @Autowired
     CsvTemplateRepository csvTemplateRepository;
 
-//    @Autowired
-//    MongoQueuedMessageRepository mongoQueuedMessageRepository;
+    @Autowired
+    ResultDescriptorRepository resultDescriptorRepository;
 
     @Autowired
     ScheduledSenderService scheduledSenderService;
+
+    @Autowired
+    SenderConfigByDenominationRepository senderConfigByDenominationRepository;
+
+    @Autowired
+    SenderPecByDenominationRepository senderPecByDenominationRepository;
 
     @GetMapping(path = "/cassandra/getQueuedMessage/{id}")
     public QueuedMessage getCassandraQueuedMessage(@PathVariable(name = "id") String id){
@@ -54,22 +61,29 @@ public class TestController {
         return csvTemplateRepository.save(csvTemplate);
     }
 
-    /*@GetMapping(path = "/mongo/getQueuedMessage/{id}")
-    public QueuedMessage getMongoQueuedMessage(@PathVariable(name = "id") String id){
-        return mongoQueuedMessageRepository.findById(id).orElse(null);
+    @PostMapping(path = "/cassandra/postResultDescriptors")
+    public List<ResultDescriptor> postResultDescriptors(@RequestBody List<ResultDescriptor> resultDescriptors){
+        Iterable<ResultDescriptor> res = resultDescriptorRepository.saveAll(resultDescriptors);
+        List<ResultDescriptor> result = new ArrayList<>();
+        res.forEach(result::add);
+        return result;
     }
 
-    @GetMapping(path = "/mongo")
-    public List<QueuedMessage> getMongo(){
-        ArrayList<QueuedMessage> queuedMessages = new ArrayList<>();
-        mongoQueuedMessageRepository.findAll().forEach(queuedMessages::add);
-        return queuedMessages;
+    @PostMapping(path = "/cassandra/postPaPecs")
+    public List<SenderPecByDenomination> postPaPecs(@RequestBody List<SenderPecByDenomination> list){
+        Iterable<SenderPecByDenomination> res = senderPecByDenominationRepository.saveAll(list);
+        List<SenderPecByDenomination> result = new ArrayList<>();
+        res.forEach(result::add);
+        return result;
     }
 
-    @PostMapping(path = "/mongo/postQueuedMessage")
-    public QueuedMessage postMongoQueuedMessage(@RequestBody QueuedMessage queuedMessage){
-        return mongoQueuedMessageRepository.save(queuedMessage);
-    }*/
+    @PostMapping(path = "/cassandra/postPaConfigs")
+    public List<SenderConfigByDenomination> postPaConfigs(@RequestBody List<SenderConfigByDenomination> list){
+        Iterable<SenderConfigByDenomination> res = senderConfigByDenominationRepository.saveAll(list);
+        List<SenderConfigByDenomination> result = new ArrayList<>();
+        res.forEach(result::add);
+        return result;
+    }
 
     @GetMapping(path = "/any/clear")
     public void clear(){
