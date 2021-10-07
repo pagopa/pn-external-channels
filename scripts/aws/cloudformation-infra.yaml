@@ -264,7 +264,12 @@ Resources:
                 - '/'
                 - - !Sub '${OutputBucket.Arn}'
                   - '*'
-
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub '${InputBucket.Arn}'
+              - !Sub '${OutputBucket.Arn}'
       Roles:
         - !Ref TaskRole
   # A role needed for auto scaling
