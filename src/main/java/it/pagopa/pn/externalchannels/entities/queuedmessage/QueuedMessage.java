@@ -23,7 +23,19 @@ public class QueuedMessage {
 
     private String requestCorrelationId;
 
+    private String actCode;
+
     private String iun;
+
+    private String communicationType;
+
+    private String serviceLevel;
+
+    private String printModel;
+
+    private String template;
+
+    // sender
 
     private String senderId;
 
@@ -31,18 +43,24 @@ public class QueuedMessage {
 
     private String senderPecAddress;
 
+    // recipient
+
     private String recipientDenomination;
 
     private String recipientTaxId;
 
     private String pecAddress;
 
+    private String at;
 
-    // FIXME: tradurre in inglese
-    private String codiceAtto;
-    private String numeroCronologico;
-    private String parteIstante;
-    private String procuratore;
-    private String ufficialeGiudiziario;
+    private String address;
+
+    private String addressDetails;
+
+    private String zip;
+
+    private String municipality;
+
+    private String province;
 
 }

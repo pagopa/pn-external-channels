@@ -9,6 +9,11 @@ import java.util.List;
 public interface QueuedMessageRepository extends CrudRepository<QueuedMessage, String> {
 
     @AllowFiltering
-    List<QueuedMessage> findByEventStatus(String statoAvviso);
+    List<QueuedMessage> findByEventStatus(String status);
+
+    @AllowFiltering
+    QueuedMessage findByIun(String iun);
+
+    List<QueuedMessage> findByIunIn(List<String> iuns);
 
 }

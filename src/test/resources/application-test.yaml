@@ -78,5 +78,6 @@ s3:
 job:
   cron-expression: "0 0 */3 ? * *" # OGNI 3 ORE
   batch-size: 1
-  csv-template-id: 8
+  messages-csv-template-id: 8
+  results-csv-template-id: 4
 

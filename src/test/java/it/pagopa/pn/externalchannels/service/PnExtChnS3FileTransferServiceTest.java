@@ -1,6 +1,8 @@
 package it.pagopa.pn.externalchannels.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.mockito.Mockito.*;
@@ -53,9 +57,14 @@ class PnExtChnS3FileTransferServiceTest {
     }
 
     @Test
-    void shouldRetrieveResult(){
+    void shouldRetrieveResult() throws IOException {
         String key = "getkey";
-        s3Service.retrieveElaborationResult(key);
+
+        S3Object s3Object = new S3Object();
+        s3Object.setObjectContent(new S3ObjectInputStream(new ByteArrayInputStream("".getBytes()), null));
+        when(s3client.getObject(anyString(), eq(key))).thenReturn(s3Object);
+
+        s3Service.retrieveCsv(key);
 
         verify(s3client, times(1)).getObject(inBucket, key);
         verify(s3client, times(1)).copyObject(eq(inBucket), eq(key), eq(inBucket), any());

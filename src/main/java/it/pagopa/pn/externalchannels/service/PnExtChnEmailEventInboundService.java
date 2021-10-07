@@ -7,19 +7,24 @@ package it.pagopa.pn.externalchannels.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.api.dto.events.PnExtChnEmailEvent;
-import it.pagopa.pn.api.dto.events.PnExtChnEmailEventPayload;
-import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
+import it.pagopa.pn.externalchannels.config.properties.EmailProperties;
+import it.pagopa.pn.externalchannels.util.Constants;
+import it.pagopa.pn.externalchannels.util.MessageUtil;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.time.Instant;
@@ -49,6 +54,15 @@ public class PnExtChnEmailEventInboundService {
     @Autowired
     PnExtChnProcessor processor;
 
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    @Autowired
+    MessageUtil messageUtil;
+
+    @Autowired
+    EmailProperties emailProperties;
+
     @StreamListener(
             target = PnExtChnProcessor.NOTIF_PEC_INPUT,
             condition = "T(it.pagopa.pn.externalchannels.util.Util).eventTypeIs(headers, T(it.pagopa.pn.api.dto.events.EventType).SEND_COURTESY_EMAIL)"
@@ -60,12 +74,12 @@ public class PnExtChnEmailEventInboundService {
             @Header(name = PN_EVENT_HEADER_IUN) String iun,
             @Header(name = PN_EVENT_HEADER_CREATED_AT) String createdAt,
             @Payload JsonNode event
-    ) {
+    ) throws MessagingException {
         try {
 
             log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - START");
 
-            PnExtChnEmailEvent pnextchnpecevent = PnExtChnEmailEvent.builder()
+            PnExtChnEmailEvent pnextchnemailevent = PnExtChnEmailEvent.builder()
                     .header(StandardEventHeader.builder()
                             .publisher(publisher)
                             .eventId(eventId)
@@ -77,12 +91,33 @@ public class PnExtChnEmailEventInboundService {
                     .build();
 
 
-            Set<ConstraintViolation<PnExtChnEmailEvent>> errors = null;
-            errors = validator.validate(pnextchnpecevent);
+            Set<ConstraintViolation<PnExtChnEmailEvent>> errors = validator.validate(pnextchnemailevent);
+
+            if (!errors.isEmpty()) {
+                log.error(Constants.MSG_ERRORI_DI_VALIDAZIONE);
+                // Invio il messaggio di errore su topic dedicato
+                pnExtChnService.produceStatusMessage("",
+                        pnextchnemailevent
+                                .getPayload().getIun(),
+                        EventType.SEND_PAPER_RESPONSE, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null);
+                // Salvo il messaggio di scartato su una struttura DB dedicata
+                pnExtChnService.discardMessage(event.asText(), errors);
+            } else {
+                String messageBody = messageUtil
+                        .mailPayloadToMessage(pnextchnemailevent.getPayload(), emailProperties.getContentType());
+
+                MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+                helper.setFrom("Piattaforma Notifica <" + emailProperties.getUsername() + ">");
+                helper.setTo(pnextchnemailevent.getPayload().getEmailAddress());
+                helper.setSubject(MessageUtil.MSG_SUBJECT);
+                helper.setText(messageBody, MessageBodyType.HTML.equals(emailProperties.getContentType()));
+
+                javaMailSender.send(mimeMessage);
+            }
 
             log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - END");
-            // TODO: continue
-        } catch(RuntimeException e) {
+        } catch(Exception e) {
             log.error("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent", e);
             throw e;
         }

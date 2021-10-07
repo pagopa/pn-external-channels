@@ -1,33 +1,34 @@
 package it.pagopa.pn.externalchannels.service;
 
-import com.amazonaws.services.sqs.AmazonSQSAsync;
-import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
-import it.pagopa.pn.externalchannels.repositories.cassandra.DiscardedMessageRepository;
-import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import it.pagopa.pn.api.dto.events.EventType;
+import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
+import it.pagopa.pn.externalchannels.entities.senderpa.SenderConfigByDenomination;
+import it.pagopa.pn.externalchannels.entities.senderpa.SenderPecByDenomination;
+import it.pagopa.pn.externalchannels.repositories.cassandra.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static it.pagopa.pn.externalchannels.service.TestUtils.mockPaperMessage;
-import static it.pagopa.pn.externalchannels.service.TestUtils.mockPecMessage;
+import java.util.stream.Collectors;
+
+import static it.pagopa.pn.externalchannels.service.TestUtils.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@ContextConfiguration(classes = { PnExtChnServiceTest.SpringTestConfiguration.class, PnExtChnServiceImpl.class })
-@Disabled("Just switched to SQS, test not results not valid right now")
+@SpringBootTest(properties = {"dev-options.fake-pn-ext-chn-service=false"})
+@ContextConfiguration(classes = {
+        PnExtChnServiceTest.SpringTestConfiguration.class,
+        PnExtChnServiceImpl.class
+})
 class PnExtChnServiceTest {
 
     @TestConfiguration
@@ -40,7 +41,7 @@ class PnExtChnServiceTest {
     }
 
     @MockBean
-    AmazonSQSAsync amazonSQSAsync;
+    QueueMessagingTemplate statusQueueMessagingTemplate;
 
     @MockBean
     QueuedMessageRepository queuedMessageRepository;
@@ -48,12 +49,24 @@ class PnExtChnServiceTest {
     @MockBean
     DiscardedMessageRepository discardedMessageRepository;
 
+    @MockBean
+    ResultDescriptorRepository resultDescriptorRepository;
+
+    @MockBean
+    SenderConfigByDenominationRepository senderConfigByDenominationRepository;
+
+    @MockBean
+    SenderPecByDenominationRepository senderPecByDenominationRepository;
+
     @Autowired
     PnExtChnService pnExtChnService;
 
     @BeforeEach
     void init(){
-
+        when(senderConfigByDenominationRepository.findByDenominationAndChannelAndServiceLevel(any(),any(),any()))
+                .thenReturn(new SenderConfigByDenomination());
+        when(senderPecByDenominationRepository.findFirstByDenomination(any()))
+                .thenReturn(new SenderPecByDenomination());
     }
 
     @Test
@@ -71,5 +84,23 @@ class PnExtChnServiceTest {
         pnExtChnService.discardMessage("{+/ non conforming message", null);
     }
 
+    @Test
+    void shouldProcessElaborationResults (){
+        when(queuedMessageRepository.findByIunIn(any())).thenReturn(mockElaborationResults().stream()
+                .map(er -> {
+                    QueuedMessage qm = new QueuedMessage();
+                    qm.setIun(er.getIun());
+                    return qm;
+                }).collect(Collectors.toList())
+        );
+        when(resultDescriptorRepository.listAll()).thenReturn(mockResultDescriptors());
+        pnExtChnService.processElaborationResults(mockElaborationResults());
+    }
+
+    @Test
+    void shouldProduceStatusMessage (){
+        pnExtChnService.produceStatusMessage("123", "123", EventType.SEND_PEC_RESPONSE, PnExtChnProgressStatus.OK, "",
+                1, "", null);
+    }
 
 }

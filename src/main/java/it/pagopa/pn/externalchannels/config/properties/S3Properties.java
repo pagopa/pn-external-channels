@@ -13,6 +13,13 @@ public class S3Properties {
     @Value("${s3.buckets.external-channels-in}")
     private String inBucket;
 
+    @Value("${s3.region:}")
+    private String region;
+    @Value("${s3.profile-name:}")
+    private String profile;
+    @Value("${s3.endpoint:}")
+    private String endpoint;
+
     @Value("${s3.retry.delay:0}")
     private Long retryDelay;
     @Value("${s3.retry.attempts:1}")

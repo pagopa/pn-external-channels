@@ -57,7 +57,7 @@ public class ScheduledSenderService {
         CsvTransformationResult result = csvService.queuedMessagesToCsv(msges);
 
         setState(result.getDiscardedMessages(), QueuedMessageStatus.DISCARDED);
-        result.getDiscardedMessages().forEach(dm -> pnExtChnService.produceStatusMessage(dm.getCodiceAtto(),
+        result.getDiscardedMessages().forEach(dm -> pnExtChnService.produceStatusMessage(dm.getActCode(),
         		dm.getIun(),
                 EventType.SEND_PEC_REQUEST, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null));
 

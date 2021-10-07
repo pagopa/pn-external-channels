@@ -5,14 +5,21 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import io.awspring.cloud.core.env.ResourceIdResolver;
+import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEventPayload;
+import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
 import it.pagopa.pn.commons.configs.PnCassandraAutoConfiguration;
 import it.pagopa.pn.commons.configs.RuntimeModeHolder;
 import it.pagopa.pn.commons.configs.aws.AwsConfigs;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
-import it.pagopa.pn.externalchannels.config.properties.CloudAwsProperties;
+import it.pagopa.pn.externalchannels.config.properties.EmailProperties;
+import it.pagopa.pn.externalchannels.config.properties.S3Properties;
+import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -26,6 +33,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.aws.mcs.auth.SigV4AuthProvider;
@@ -35,6 +45,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.Properties;
 import java.util.TimeZone;
 
 import static java.time.ZoneOffset.UTC;
@@ -68,36 +79,67 @@ public class Config {
 
     @Bean
     @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
-    public AmazonS3 s3client(CloudAwsProperties props){
-        String regionCode = props.getRegion();
+    public AmazonS3 s3client(S3Properties props){
 
-        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard();
+        AmazonS3ClientBuilder builder = AmazonS3ClientBuilder
+                .standard();
 
-        String endpointUrl = props.getEndpoint();
-        if( StringUtils.isNotBlank( endpointUrl) ) {
-            builder = builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-                        endpointUrl, regionCode
-                    ));
-        }
-        else {
-            builder = builder.withRegion( regionCode );
+        if(StringUtils.isNotEmpty(props.getProfile())){
+            ProfileCredentialsProvider profCred = new ProfileCredentialsProvider(props.getProfile());
+            builder.withCredentials(profCred);
         }
 
+        if(StringUtils.isNotEmpty(props.getEndpoint()))
+            builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                props.getEndpoint(),
+                props.getRegion()
+            ));
+        else if(StringUtils.isNotEmpty(props.getRegion()))
+            builder.withRegion(props.getRegion());
 
+        builder.enablePathStyleAccess();
 
-        String profileName = props.getProfileName();
-        if( StringUtils.isNotBlank( profileName )) {
-            ProfileCredentialsProvider profCred = new ProfileCredentialsProvider(profileName);
-            builder = builder.withCredentials( profCred );
-        }
-
-        return builder.enablePathStyleAccess()
-                .build();
+        return builder.build();
     }
 
     @Bean
     public ModelMapper modelMapper(){
-        return new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
+//        modelMapper.getConfiguration()
+//                .setMatchingStrategy(MatchingStrategies.LOOSE);
+        modelMapper.createTypeMap(PnExtChnPecEventPayload.class, QueuedMessage.class)
+                .addMapping(s -> s.getDestinationAddress().getAddress(), QueuedMessage::setAddress)
+                .addMapping(s -> s.getDestinationAddress().getAddressDetails(), QueuedMessage::setAddressDetails)
+                .addMapping(s -> s.getDestinationAddress().getAt(), QueuedMessage::setAt)
+                .addMapping(s -> s.getDestinationAddress().getMunicipality(), QueuedMessage::setMunicipality)
+                .addMapping(s -> s.getDestinationAddress().getProvince(), QueuedMessage::setProvince)
+                .addMapping(s -> s.getDestinationAddress().getZip(), QueuedMessage::setZip);
+        modelMapper.createTypeMap(PnExtChnPaperEventPayload.class, QueuedMessage.class)
+                .addMapping(s -> s.getDestinationAddress().getAddress(), QueuedMessage::setAddress)
+                .addMapping(s -> s.getDestinationAddress().getAddressDetails(), QueuedMessage::setAddressDetails)
+                .addMapping(s -> s.getDestinationAddress().getAt(), QueuedMessage::setAt)
+                .addMapping(s -> s.getDestinationAddress().getMunicipality(), QueuedMessage::setMunicipality)
+                .addMapping(s -> s.getDestinationAddress().getProvince(), QueuedMessage::setProvince)
+                .addMapping(s -> s.getDestinationAddress().getZip(), QueuedMessage::setZip);
+        return modelMapper;
+    }
+
+    @Bean
+    public JavaMailSender javaMailSender(EmailProperties emailProperties) {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(emailProperties.getHost());
+        mailSender.setPort(emailProperties.getPort());
+
+        mailSender.setUsername(emailProperties.getUsername());
+        mailSender.setPassword(emailProperties.getPassword());
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", emailProperties.getProtocol());
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+        return mailSender;
     }
 
     @Bean
@@ -122,6 +164,17 @@ public class Config {
         public JsonSerializer<?> createContextual(SerializerProvider prov, BeanProperty property) {
             return this;
         }
+    }
+
+    @Bean
+    public QueueMessagingTemplate statusQueueMessagingTemplate(AmazonSQSAsync sqsClient, ObjectMapper objectMapper){
+        MappingJackson2MessageConverter jacksonMessageConverter =
+                new MappingJackson2MessageConverter();
+        jacksonMessageConverter.setSerializedPayloadClass(String.class);
+        jacksonMessageConverter.setObjectMapper(objectMapper);
+        jacksonMessageConverter.setStrictContentTypeMatch(false);
+
+        return new QueueMessagingTemplate(sqsClient, (ResourceIdResolver) null, jacksonMessageConverter);
     }
 
     @PostConstruct

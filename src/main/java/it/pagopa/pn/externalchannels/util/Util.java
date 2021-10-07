@@ -35,4 +35,18 @@ public class Util {
         return eventTypeIsAny(headers, EventType.SEND_PAPER_REQUEST, EventType.SEND_PEC_REQUEST, EventType.SEND_COURTESY_EMAIL);
     }
 
+    public static int toInt(String number, int defaultInt){
+        try {
+            return Integer.parseInt(number.trim());
+        } catch (RuntimeException e) {
+            return defaultInt;
+        }
+    }
+
+    public static String lastChars(String s, int num){
+        if(s == null || s.length() <= num)
+            return s;
+        return s.substring(s.length() - num, s.length());
+    }
+
 }

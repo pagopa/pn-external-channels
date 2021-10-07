@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 @Service
@@ -23,7 +24,8 @@ import java.util.function.Supplier;
 public class PnExtChnS3FileTransferService implements PnExtChnFileTransferService {
 
     private static final String CSV_NAME = "messages_%s.csv";
-    private static final String OK_EXTENSION = ".ok";
+    public static final String CSV_EXTENSION = ".csv";
+    public static final String OK_EXTENSION = ".ok";
 
     @Autowired
     AmazonS3 s3client;
@@ -63,7 +65,7 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
     }
 
     @Override
-    public Map<String, String> retrieveElaborationResult(String key) {
+    public byte[] retrieveCsv(String key) throws IOException {
         log.info("PnExtChnS3FileTransferService - retrieveElaborationResult - START");
 
         if(!s3client.doesBucketExistV2(s3Properties.getInBucket()))
@@ -76,8 +78,10 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
         log.info("Delete old");
         attempt(() -> s3client.deleteObject(s3Properties.getInBucket(), key));
 
+        byte[] bytes = IOUtils.toByteArray(result.getObjectContent());
+        result.getObjectContent().close();
         log.info("PnExtChnS3FileTransferService - retrieveElaborationResult - END");
-        return new HashMap<>(); // STUB RESULT
+        return bytes;
     }
 
     private <T> T attempt(Supplier<T> s){

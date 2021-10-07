@@ -15,6 +15,7 @@ public class Column {
     private Boolean required;
     private String type;
     private String messageAttribute;
+    private String defaultAttribute;
     private Long length;
     private String note;
 
