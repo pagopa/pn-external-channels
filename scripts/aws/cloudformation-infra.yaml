@@ -107,6 +107,57 @@ Resources:
         - ColumnName: idcsv
           ColumnType: text
 
+  ResultDescriptorTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: result_descriptor
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: code
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: positive
+          ColumnType: boolean
+        - ColumnName: retryable
+          ColumnType: boolean
+        - ColumnName: servicecode
+          ColumnType: text
+
+  SenderCfgByDenominationTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: sender_config_by_denomination
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: denomination
+          ColumnType: text
+        - ColumnName: channel
+          ColumnType: text
+        - ColumnName: servicelevel
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: printmodel
+          ColumnType: text
+        - ColumnName: template
+          ColumnType: text
+
+  SenderPecByDenominationTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: sender_pec_by_denomination
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: denomination
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: idpec
+          ColumnType: text
+        - ColumnName: pec
+          ColumnType: text
+
   Cluster:
     Type: AWS::ECS::Cluster
     Properties:
