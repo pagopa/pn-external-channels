@@ -18,7 +18,7 @@ public class MessageUtil {
 	public static final String MSG_SUBJECT = "Avviso di avvenuta ricezione";
 	
 	private static final String HTML_MSG_TEMPLATE = "<p>Buongiorno Gentile %s</p>"	
-			+ "	<p>Ti informiano che ti &egrave; stato notificato il seguente Atto Giudiziario:</p>"
+			+ "	<p>Ti informiano che ti &egrave; stato notificato il seguente Atto:</p>"
 			+ "	<p>Codice univoco (IUN):<br/>"
 			+ "	<b>%s</b></p>"
 			+ "	<p>PA Mittente:<br/>"
