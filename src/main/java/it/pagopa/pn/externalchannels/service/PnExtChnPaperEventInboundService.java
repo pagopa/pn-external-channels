@@ -8,6 +8,7 @@ package it.pagopa.pn.externalchannels.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.api.dto.notification.address.PhysicalAddress;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.util.Constants;
 import lombok.AllArgsConstructor;
@@ -100,26 +101,74 @@ public class PnExtChnPaperEventInboundService {
                 log.debug("Received message from sqs: " + pnextchnpaperevent.toString());
                 log.debug("object = {}", objectMapper.valueToTree(pnextchnpaperevent));
 
-                if( pnextchnpaperevent.getPayload().getDestinationAddress().getAddress().contains("ImmediateResponse")) {
+                final PhysicalAddress destinationAddress = pnextchnpaperevent.getPayload().getDestinationAddress();
+                final String address = destinationAddress.getAddress();
+                if( address.contains("ImmediateResponse(NEW_ADDR:")) {
+                    String newAdrress = address.replaceFirst(".*ImmediateResponse\\(NEW_ADDR:([^)]*).*", "$1");
                     log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
                     evtSenderSvc.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
-                                .header( builder()
-                                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
-                                        .eventId(eventId + "_resp")
-                                        .eventType(EventType.SEND_PEC_RESPONSE.name())
-                                        .iun(iun)
-                                        .createdAt(Instant.now())
-                                        .build()
-                                )
-                                .payload( PnExtChnProgressStatusEventPayload.builder()
-                                                .iun( iun )
-                                                .statusDate( Instant.now() )
-                                                .statusCode( PnExtChnProgressStatus.OK )
-                                                .requestCorrelationId( eventId )
-                                                .build()
-                                        )
-                                .build()
-                            );
+                            .header( builder()
+                                    .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                                    .eventId(eventId + "_resp")
+                                    .eventType(EventType.SEND_PAPER_RESPONSE.name())
+                                    .iun(iun)
+                                    .createdAt(Instant.now())
+                                    .build()
+                            )
+                            .payload( PnExtChnProgressStatusEventPayload.builder()
+                                    .iun( iun )
+                                    .statusDate( Instant.now() )
+                                    .statusCode( PnExtChnProgressStatus.RETRYABLE_FAIL )
+                                    .newPhysicalAddress(destinationAddress.toBuilder().address(newAdrress).build())
+                                    .requestCorrelationId( eventId )
+                                    .build()
+                            )
+                            .build()
+                    );
+
+                }
+                else if( address.contains("ImmediateResponse_FAIL")) {
+                    log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
+                    evtSenderSvc.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
+                            .header( builder()
+                                    .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                                    .eventId(eventId + "_resp")
+                                    .eventType(EventType.SEND_PAPER_RESPONSE.name())
+                                    .iun(iun)
+                                    .createdAt(Instant.now())
+                                    .build()
+                            )
+                            .payload( PnExtChnProgressStatusEventPayload.builder()
+                                    .iun( iun )
+                                    .statusDate( Instant.now() )
+                                    .statusCode( PnExtChnProgressStatus.PERMANENT_FAIL )
+                                    .requestCorrelationId( eventId )
+                                    .build()
+                            )
+                            .build()
+                    );
+
+                }
+                else if( address.contains("ImmediateResponse_OK")) {
+                    log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
+                    evtSenderSvc.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
+                            .header( builder()
+                                    .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                                    .eventId(eventId + "_resp")
+                                    .eventType(EventType.SEND_PAPER_RESPONSE.name())
+                                    .iun(iun)
+                                    .createdAt(Instant.now())
+                                    .build()
+                            )
+                            .payload( PnExtChnProgressStatusEventPayload.builder()
+                                    .iun( iun )
+                                    .statusDate( Instant.now() )
+                                    .statusCode( PnExtChnProgressStatus.OK )
+                                    .requestCorrelationId( eventId )
+                                    .build()
+                            )
+                            .build()
+                    );
 
                 }
                 else {
