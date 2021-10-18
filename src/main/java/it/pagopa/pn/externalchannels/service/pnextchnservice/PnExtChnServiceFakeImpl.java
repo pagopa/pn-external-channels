@@ -113,12 +113,16 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		PnExtChnProgressStatus outcome = decideOutcome( evt );
 		PnExtChnProgressStatusEvent statusEvent = buildResponse(evt.getHeader(), evt.getPayload().getRequestCorrelationId(),
 				"PAPER", outcome);
-		if (PnExtChnProgressStatus.NEW_ADDRESS == outcome) {
+		if (PnExtChnProgressStatus.RETRYABLE_FAIL == outcome) {
 			Matcher matcher = Pattern.compile(IMMEDIATE_RESPONSE_NEW_ADDR_REGEX)
 					.matcher(evt.getPayload().getDestinationAddress().getAddress());
 			if (matcher.find()) {
 				String newAddr = matcher.group(1);
-				statusEvent.getPayload().setNewAddress(newAddr != null ? newAddr.trim() : "");
+				statusEvent.getPayload().setNewPhysicalAddress(
+						PhysicalAddress.builder()
+						.address(newAddr != null ? newAddr.trim() : "")
+						.build()
+				);
 			}
 		}
 		return outcome != null ? statusEvent : null;
@@ -185,7 +189,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			String addr = destAddr.getAddress() != null ? destAddr.getAddress() : "";
 
 			if( addr.matches(IMMEDIATE_RESPONSE_NEW_ADDR_REGEX) ) {
-				status = PnExtChnProgressStatus.NEW_ADDRESS;
+				status = PnExtChnProgressStatus.RETRYABLE_FAIL;
 			}
 			else if( addr.startsWith("ImmediateResponse(FAIL)") ) {
 				status = PnExtChnProgressStatus.PERMANENT_FAIL;
