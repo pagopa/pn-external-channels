@@ -1,29 +1,37 @@
 package it.pagopa.pn.externalchannels.service;
 
-import it.pagopa.pn.api.dto.events.EventType;
-import it.pagopa.pn.api.dto.events.PnExtChnPaperEventPayload;
-import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
-import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.api.dto.notification.address.PhysicalAddress;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.config.properties.EmailProperties;
+import it.pagopa.pn.externalchannels.event.elaborationresult.PnExtChnElaborationResultEvent;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnServiceSelectorProxy;
 import it.pagopa.pn.externalchannels.util.MessageUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
@@ -31,8 +39,7 @@ import java.util.HashMap;
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 import static it.pagopa.pn.externalchannels.service.TestUtils.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @EnableAutoConfiguration(exclude = {CassandraAutoConfiguration.class})
@@ -47,8 +54,30 @@ import static org.mockito.Mockito.when;
 @EnableBinding({PnExtChnProcessor.class})
 class EventInboundTest {
 
+    @TestConfiguration
+    @TestPropertySource(locations = {"classpath:application.yaml", "classpath:application-test.yaml"})
+    static class SpringTestConfiguration {
+
+        @Bean
+        JavaMailSender javaMailSender(){
+            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            return mailSender;
+        }
+
+        @Bean
+        @Primary
+        PnExtChnService pnExtChnService(){
+            return mock(PnExtChnService.class);
+        }
+
+    }
+
     @Autowired
     PnExtChnProcessor processor;
+
+    @SpyBean
+    @Autowired
+    JavaMailSender javaMailSender;
 
     @SpyBean
     @Autowired
@@ -70,11 +99,11 @@ class EventInboundTest {
     @Autowired
     UnknownEventInboundService unknownEventInboundService;
 
-    @MockBean
+    @Autowired // mocked in configuration
     PnExtChnService pnExtChnService;
 
     @MockBean
-    JavaMailSender javaMailSender;
+    PnExtChnServiceSelectorProxy pnExtChnServiceSelectorProxy;
 
     @MockBean
     EmailProperties emailProperties;
@@ -85,9 +114,18 @@ class EventInboundTest {
     @MockBean
     PnExtChnFileTransferService fileTransferService;
 
+    @MockBean
+    EventSenderService eventSenderService;
+
     @BeforeEach
     void init (){
         when(emailProperties.getContentType()).thenReturn(MessageBodyType.HTML);
+        doNothing().when(javaMailSender).send((MimeMessage) any());
+    }
+
+    @AfterEach
+    void clear (){
+        clearInvocations(pnExtChnService);
     }
 
     @Test
@@ -106,14 +144,16 @@ class EventInboundTest {
     }
 
     @Test
-    @Disabled("Result poller enabled instead")
     void shouldInterceptElaborationResultEvent() throws IOException {
 
-        HashMap<String, Object> headers = new HashMap<>();
+        /*HashMap<String, Object> headers = new HashMap<>();
         String payload = "{}";
         GenericMessage<String> message = new GenericMessage<>(payload, headers);
         SubscribableChannel channel = processor.elabResultInput();
-        channel.send(message);
+        channel.send(message);*/
+
+        // Force test because StreamListener is currently disabled
+        pnExtChnElaborationResultInboundService.handleElaborationResult(new PnExtChnElaborationResultEvent());
 
         verify(unknownEventInboundService, Mockito.times(0))
                 .handleUnknownInboundEvent(any(), any());
@@ -124,8 +164,10 @@ class EventInboundTest {
     }
 
     @Test
-    @Disabled("email mock in place")
-    void shouldInterceptEmailMessage() throws MessagingException {
+    void shouldInterceptAndSaveEmailMessage() throws MessagingException {
+
+        when(emailProperties.getUsername()).thenReturn("abc@abc.it");
+        when(emailProperties.getPassword()).thenReturn("123");
 
         HashMap<String, Object> headers = new HashMap<>();
         headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_COURTESY_EMAIL.name());
@@ -147,6 +189,31 @@ class EventInboundTest {
     }
 
     @Test
+    void shouldInterceptAndDiscardEmailMessage() throws MessagingException {
+
+        HashMap<String, Object> headers = new HashMap<>();
+        headers.put(PN_EVENT_HEADER_EVENT_TYPE, EventType.SEND_COURTESY_EMAIL.name());
+        headers.put(PN_EVENT_HEADER_EVENT_ID, "123");
+        headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
+        headers.put(PN_EVENT_HEADER_IUN, "iun");
+        headers.put(PN_EVENT_HEADER_CREATED_AT, Instant.now().toString());
+        PnExtChnEmailEventPayload evt = mockEmailMessage().getPayload();
+        evt = evt.toBuilder().iun(null).build(); // should discard
+        String payload = toJson(evt);
+        GenericMessage<String> message = new GenericMessage<>(payload, headers);
+        SubscribableChannel channel = processor.notifPecInput();
+        channel.send(message);
+
+        verify(unknownEventInboundService, Mockito.times(0))
+                .handleUnknownInboundEvent(any(), any());
+
+        verify(pnExtChnEmailEventInboundService, Mockito.times(1))
+                .handlePnExtChnEmailEvent(any(), any(), any(), any(), any(), any());
+
+        verify(pnExtChnService).discardMessage(any(), any());
+    }
+
+    @Test
     void shouldInterceptPecMessage() {
 
         HashMap<String, Object> headers = new HashMap<>();
@@ -155,7 +222,9 @@ class EventInboundTest {
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
         headers.put(PN_EVENT_HEADER_CREATED_AT, Instant.now().toString());
-        String payload = toJson(mockPecMessage().getPayload());
+        PnExtChnPecEventPayload evt = mockPecMessage().getPayload();
+        evt.setIun(null); // should discard
+        String payload = toJson(evt);
         GenericMessage<String> message = new GenericMessage<>(payload, headers);
         SubscribableChannel channel = processor.notifPecInput();
         channel.send(message);
@@ -185,7 +254,7 @@ class EventInboundTest {
         verify(pnExtChnPecEventInboundService, Mockito.times(1))
                 .handlePnExtChnPecEvent(any(), any(), any(), any(), any(), any());
 
-        verify(pnExtChnService)
+        verify(pnExtChnServiceSelectorProxy)
                 .saveDigitalMessage(any());
 
     }
@@ -209,11 +278,11 @@ class EventInboundTest {
         verify(pnExtChnPecEventInboundService, Mockito.times(1))
                 .handlePnExtChnPecEvent(any(), any(), any(), any(), any(), any());
 
-        verify(pnExtChnService, Mockito.times(1))
+        verify(pnExtChnServiceSelectorProxy, Mockito.times(1))
             .produceStatusMessage(any(), any(), eq(EventType.SEND_PEC_RESPONSE),
                     eq(PnExtChnProgressStatus.PERMANENT_FAIL), any(), anyInt(), any(), any());
 
-        verify(pnExtChnService).discardMessage(any(), any());
+        verify(pnExtChnServiceSelectorProxy).discardMessage(any(), any());
     }
 
     @Test
@@ -255,7 +324,7 @@ class EventInboundTest {
         verify(pnExtChnPaperEventInboundService, Mockito.times(1))
                 .handlePnExtChnPaperEvent(any(), any(), any(), any(), any(), any());
 
-        verify(pnExtChnService)
+        verify(pnExtChnServiceSelectorProxy)
                 .savePaperMessage(any());
 
     }
@@ -279,11 +348,11 @@ class EventInboundTest {
         verify(pnExtChnPaperEventInboundService, Mockito.times(1))
                 .handlePnExtChnPaperEvent(any(), any(), any(), any(), any(), any());
 
-        verify(pnExtChnService, Mockito.times(1))
+        verify(pnExtChnServiceSelectorProxy, Mockito.times(1))
                 .produceStatusMessage(any(), any(), eq(EventType.SEND_PAPER_RESPONSE),
                         eq(PnExtChnProgressStatus.PERMANENT_FAIL), any(), anyInt(), any(), any());
 
-        verify(pnExtChnService).discardMessage(any(), any());
+        verify(pnExtChnServiceSelectorProxy).discardMessage(any(), any());
     }
 
 }

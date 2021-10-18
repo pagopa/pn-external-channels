@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnServiceSelectorProxy;
 import it.pagopa.pn.externalchannels.util.Constants;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +33,13 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @Service
 @Slf4j
 @NoArgsConstructor
-@AllArgsConstructor
 public class PnExtChnPecEventInboundService {
 
     @Autowired
 	private Validator validator;
 
     @Autowired
-    PnExtChnService pnExtChnService;
+    PnExtChnServiceSelectorProxy pnExtChnService;
     
     @Autowired
     PnExtChnProcessor processor;

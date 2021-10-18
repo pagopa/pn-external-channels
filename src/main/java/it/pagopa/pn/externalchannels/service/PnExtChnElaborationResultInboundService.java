@@ -5,17 +5,13 @@
  */
 package it.pagopa.pn.externalchannels.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.event.elaborationresult.PnExtChnElaborationResultEvent;
 import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
-import lombok.AllArgsConstructor;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,7 +24,6 @@ import java.util.List;
 @Service
 @Slf4j
 @NoArgsConstructor
-@AllArgsConstructor
 public class PnExtChnElaborationResultInboundService {
 
     @Autowired

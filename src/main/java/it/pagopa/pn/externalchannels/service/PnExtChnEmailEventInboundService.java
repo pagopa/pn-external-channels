@@ -10,11 +10,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
 import it.pagopa.pn.externalchannels.config.properties.EmailProperties;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import it.pagopa.pn.externalchannels.util.Constants;
 import it.pagopa.pn.externalchannels.util.MessageUtil;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -39,7 +40,6 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @Service
 @Slf4j
 @NoArgsConstructor
-@AllArgsConstructor
 public class PnExtChnEmailEventInboundService {
 
     @Autowired
@@ -102,7 +102,7 @@ public class PnExtChnEmailEventInboundService {
                         EventType.SEND_PAPER_RESPONSE, PnExtChnProgressStatus.PERMANENT_FAIL, null, 1, null, null);
                 // Salvo il messaggio di scartato su una struttura DB dedicata
                 pnExtChnService.discardMessage(event.asText(), errors);
-            } else {
+            } else if (emailConfigProvided()){
                 String messageBody = messageUtil
                         .mailPayloadToMessage(pnextchnemailevent.getPayload(), emailProperties.getContentType());
 
@@ -114,12 +114,18 @@ public class PnExtChnEmailEventInboundService {
                 helper.setText(messageBody, MessageBodyType.HTML.equals(emailProperties.getContentType()));
 
                 javaMailSender.send(mimeMessage);
-            }
+            } else
+                log.warn("Email username and password not provided - can't attempt email sending");
 
             log.info("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent - END");
         } catch(Exception e) {
             log.error("PnExtChnEmailEventInboundService - handlePnExtChnEmailEvent", e);
             throw e;
         }
+    }
+
+    private boolean emailConfigProvided(){
+        return StringUtils.isNotBlank(emailProperties.getUsername()) &&
+                StringUtils.isNotBlank(emailProperties.getPassword());
     }
 }

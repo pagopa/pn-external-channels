@@ -1,15 +1,15 @@
 package it.pagopa.pn.externalchannels.service;
 
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
-import it.pagopa.pn.api.dto.events.EventType;
-import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
-import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
+import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
+import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
+import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderConfigByDenomination;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderPecByDenomination;
-import it.pagopa.pn.externalchannels.pojos.PnExtChnEvnPec;
 import it.pagopa.pn.externalchannels.repositories.cassandra.*;
 import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
-import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnServiceImpl;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnServiceFakeImpl;
+import it.pagopa.pn.externalchannels.util.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -21,20 +21,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static it.pagopa.pn.externalchannels.service.TestUtils.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ContextConfiguration(classes = {
-        PnExtChnServiceTest.SpringTestConfiguration.class,
-        PnExtChnServiceImpl.class
+        PnExtChnServiceFakeTest.SpringTestConfiguration.class,
+        PnExtChnServiceFakeImpl.class,
+        MessageUtil.class
 })
-class PnExtChnServiceTest {
+class PnExtChnServiceFakeTest {
 
     @TestConfiguration
     @TestPropertySource("classpath:application-test.yaml")
@@ -63,6 +60,9 @@ class PnExtChnServiceTest {
     @MockBean
     SenderPecByDenominationRepository senderPecByDenominationRepository;
 
+    @MockBean
+    ArubaSenderService arubaSenderService;
+
     @Autowired
     PnExtChnService pnExtChnService;
 
@@ -80,38 +80,56 @@ class PnExtChnServiceTest {
     }
 
     @Test
-    void shouldSaveDigitalMessage(){
-        pnExtChnService.saveDigitalMessage(mockPecMessage());
+    void shouldSaveImmediateResponseOkPaperMessage(){
+        PnExtChnPaperEvent evt = mockPaperMessage();
+        evt.getPayload().getDestinationAddress().setAddress("ImmediateResponse(OK)");
+        pnExtChnService.savePaperMessage(evt);    }
+
+    @Test
+    void shouldSaveImmediateResponseFailPaperMessage(){
+        PnExtChnPaperEvent evt = mockPaperMessage();
+        evt.getPayload().getDestinationAddress().setAddress("ImmediateResponse(FAIL)");
+        pnExtChnService.savePaperMessage(evt);    }
+
+    @Test
+    void shouldSaveImmediateResponseNewAddressPaperMessage(){
+        PnExtChnPaperEvent evt = mockPaperMessage();
+        evt.getPayload().getDestinationAddress().setAddress("ImmediateResponse(NEW_ADDR:via test 123)");
+        pnExtChnService.savePaperMessage(evt);
     }
 
     @Test
-    void shouldDiscardMessage(){
-        pnExtChnService.discardMessage("{+/ non conforming message", null);
+    void shouldRealSendDigitalMessage(){
+        PnExtChnPecEvent event = mockPecMessage();
+        event.getPayload().setPecAddress("abc@aaa.it.real");
+        pnExtChnService.saveDigitalMessage(event);
     }
 
     @Test
-    void shouldProcessElaborationResults (){
-
-
-        List<QueuedMessage> qms = mockElaborationResults().stream()
-                .map(er -> {
-                    QueuedMessage qm = new QueuedMessage();
-                    qm.setIun(er.getIun());
-                    return qm;
-                }).collect(Collectors.toList());
-
-        when(queuedMessageRepository.findByIunIn(any())).thenReturn(qms);
-
-        qms.forEach(qm -> when(queuedMessageRepository.findByIun(qm.getIun())).thenReturn(qm));
-
-        when(resultDescriptorRepository.listAll()).thenReturn(mockResultDescriptors());
-        pnExtChnService.processElaborationResults(mockElaborationResults());
+    void shouldFakeSendDigitalMessage(){
+        PnExtChnPecEvent event = mockPecMessage();
+        pnExtChnService.saveDigitalMessage(event);
     }
 
     @Test
-    void shouldProduceStatusMessage (){
-        pnExtChnService.produceStatusMessage("123", "123", EventType.SEND_PEC_RESPONSE, PnExtChnProgressStatus.OK, "",
-                1, "", new PnExtChnEvnPec());
+    void shouldFakeSendWorksDigitalMessage(){
+        PnExtChnPecEvent event = mockPecMessage();
+        event.getPayload().setPecAddress("abc@works");
+        pnExtChnService.saveDigitalMessage(event);
+    }
+
+    @Test
+    void shouldFakeSendFailBothDigitalMessage(){
+        PnExtChnPecEvent event = mockPecMessage();
+        event.getPayload().setPecAddress("abc@fail-both");
+        pnExtChnService.saveDigitalMessage(event);
+    }
+
+    @Test
+    void shouldFakeSendNotExistDigitalMessage(){
+        PnExtChnPecEvent event = mockPecMessage();
+        event.getPayload().setPecAddress("abc@do-not-exists");
+        pnExtChnService.saveDigitalMessage(event);
     }
 
 }

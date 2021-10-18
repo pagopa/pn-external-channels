@@ -4,6 +4,7 @@ import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
