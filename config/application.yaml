@@ -4,9 +4,6 @@ logging:
 server:
   port: 8082
 
-dev-options:
-  fake-pn-ext-chn-service: true
-
 aws:
   regionCode: us-east-1
   use-aws-keyspace: false

@@ -8,9 +8,9 @@ import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
 import it.pagopa.pn.externalchannels.event.QueuedMessageStatus;
 import it.pagopa.pn.externalchannels.repositories.cassandra.QueuedMessageRepository;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;

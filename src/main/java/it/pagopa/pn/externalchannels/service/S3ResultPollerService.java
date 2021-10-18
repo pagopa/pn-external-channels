@@ -35,11 +35,11 @@ public class S3ResultPollerService {
 
 	private List<String> knownFiles = new ArrayList<>();
 
-	@PostConstruct
-	public void init() {
+//	@PostConstruct
+//	public void init() {
 //		List<String> keys = getKeys();
 //		knownFiles.addAll(keys);
-	}
+//	}
 
 	@Scheduled(fixedDelay = 2000)
 	public void pollResultsBucket() throws IOException {

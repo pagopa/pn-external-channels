@@ -11,7 +11,7 @@ else
 fi
 
 if ([ -z $3 ]) then
-  mockBehaviour=fail-first
+  mockBehaviour=none
 else 
   mockBehaviour=$3
 fi

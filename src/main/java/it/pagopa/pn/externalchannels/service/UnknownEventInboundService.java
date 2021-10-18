@@ -6,6 +6,7 @@
 package it.pagopa.pn.externalchannels.service;
 
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;

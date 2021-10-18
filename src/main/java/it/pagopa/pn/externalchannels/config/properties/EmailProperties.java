@@ -21,10 +21,10 @@ public class EmailProperties {
     @Value("${emailSender.port}")
     private Integer port;
 
-    @Value("${emailSender.username}")
+    @Value("${emailSender.username:}")
     private String username;
 
-    @Value("${emailSender.password}")
+    @Value("${emailSender.password:}")
     private String password;
 
 }

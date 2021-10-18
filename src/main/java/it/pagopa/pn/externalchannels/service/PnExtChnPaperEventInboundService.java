@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.externalchannels.binding.PnExtChnProcessor;
+import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnServiceSelectorProxy;
 import it.pagopa.pn.externalchannels.util.Constants;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 @Service
 @Slf4j
 @NoArgsConstructor
-@AllArgsConstructor
 public class PnExtChnPaperEventInboundService {
 
     @Autowired
@@ -44,7 +43,7 @@ public class PnExtChnPaperEventInboundService {
 	private Validator validator;
 
     @Autowired
-    PnExtChnService pnExtChnService;
+    PnExtChnServiceSelectorProxy pnExtChnService;
 
     @Autowired
     EventSenderService evtSenderSvc;
@@ -100,32 +99,7 @@ public class PnExtChnPaperEventInboundService {
                 log.debug("Received message from sqs: " + pnextchnpaperevent.toString());
                 log.debug("object = {}", objectMapper.valueToTree(pnextchnpaperevent));
 
-                if( pnextchnpaperevent.getPayload().getDestinationAddress().getAddress().contains("ImmediateResponse")) {
-                    log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
-                    evtSenderSvc.sendTo( statusMessageQueue, PnExtChnProgressStatusEvent.builder()
-                                .header( builder()
-                                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
-                                        .eventId(eventId + "_resp")
-                                        .eventType(EventType.SEND_PEC_RESPONSE.name())
-                                        .iun(iun)
-                                        .createdAt(Instant.now())
-                                        .build()
-                                )
-                                .payload( PnExtChnProgressStatusEventPayload.builder()
-                                                .iun( iun )
-                                                .statusDate( Instant.now() )
-                                                .statusCode( PnExtChnProgressStatus.OK )
-                                                .requestCorrelationId( eventId )
-                                                .build()
-                                        )
-                                .build()
-                            );
-
-                }
-                else {
-                    pnExtChnService.savePaperMessage(pnextchnpaperevent);
-                }
-
+                pnExtChnService.savePaperMessage(pnextchnpaperevent);
             }
 
             log.info("PnExtChnPaperEventInboundService - handlePnExtChnPaperEvent - END");
