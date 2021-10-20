@@ -7,13 +7,13 @@ server:
 aws:
   regionCode: us-east-1
   use-aws-keyspace: false
-  profile-name: localdev
+  profile-name: ${PN_AWS_PROFILE_NAME:default}
   endpoint-url: http://localhost:4566
 
 cloud:
   aws:
     credentials:
-      profile-name: localdev
+      profile-name: ${PN_AWS_PROFILE_NAME:default}
     region:
         static: us-east-1
     sqs:
@@ -51,7 +51,7 @@ spring:
 #        external-channels-in: pn-develop-extchn-input
 
 s3:
-  profile-name: localdev
+  profile-name: ${PN_AWS_PROFILE_NAME:default}
   region: us-east-1
   endpoint: http://localhost:4566
   buckets:
@@ -63,7 +63,11 @@ emailSender:
   protocol: smtp
   host: smtp.gmail.com
   port: 587
-  username: ${EMAIL_SENDER_USERNAME}
-  password: ${EMAIL_SENDER_PASSWORD}
+  username: ${EMAIL_SENDER_USERNAME:}
+  password: ${EMAIL_SENDER_PASSWORD:}
+
+aruba:
+  user: ${PEC_SENDER_USERNAME:}
+  password: ${PEC_SENDER_PASSWORD:}
 
 
