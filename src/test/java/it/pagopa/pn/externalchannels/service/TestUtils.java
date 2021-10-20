@@ -71,7 +71,6 @@ public class TestUtils {
                 ).payload(PnExtChnPecEventPayload
                         .builder()
                         .iun("1")
-                        .destinationAddress(new PhysicalAddress())
                         .pecAddress("2")
                         .recipientDenomination("3")
                         .recipientTaxId("4")
