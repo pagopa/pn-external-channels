@@ -108,15 +108,6 @@ public class Config {
     @Bean
     public ModelMapper modelMapper(){
         ModelMapper modelMapper = new ModelMapper();
-//        modelMapper.getConfiguration()
-//                .setMatchingStrategy(MatchingStrategies.LOOSE);
-        modelMapper.createTypeMap(PnExtChnPecEventPayload.class, QueuedMessage.class)
-                .addMapping(s -> s.getDestinationAddress().getAddress(), QueuedMessage::setAddress)
-                .addMapping(s -> s.getDestinationAddress().getAddressDetails(), QueuedMessage::setAddressDetails)
-                .addMapping(s -> s.getDestinationAddress().getAt(), QueuedMessage::setAt)
-                .addMapping(s -> s.getDestinationAddress().getMunicipality(), QueuedMessage::setMunicipality)
-                .addMapping(s -> s.getDestinationAddress().getProvince(), QueuedMessage::setProvince)
-                .addMapping(s -> s.getDestinationAddress().getZip(), QueuedMessage::setZip);
         modelMapper.createTypeMap(PnExtChnPaperEventPayload.class, QueuedMessage.class)
                 .addMapping(s -> s.getDestinationAddress().getAddress(), QueuedMessage::setAddress)
                 .addMapping(s -> s.getDestinationAddress().getAddressDetails(), QueuedMessage::setAddressDetails)
