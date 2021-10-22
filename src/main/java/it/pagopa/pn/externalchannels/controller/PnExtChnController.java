@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.controller;
 
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.externalchannels.service.PnExtChnFileTransferService;
 import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class PnExtChnController {
 	
 	@Autowired
 	private PnExtChnService pnExtChnService;
+
+	@Autowired
+	private PnExtChnFileTransferService fileTransferService;
 
 	// TODO: In caso di errore di validazione, bisogna inviare il messaggio sempre sul topic di errore ?
 	
@@ -71,6 +75,16 @@ public class PnExtChnController {
 		pnExtChnService.saveDigitalMessage(pnextchnpecevent);
 		log.info("PnExtChnController - saveDigitalNotification - END");
 		return digitalNotification;
+	}
+
+	@GetMapping(path = "/attachments/getDownloadLink")
+	public String getDownloadLink(@RequestParam String attachmentKey) {
+		log.info("PnExtChnController - getDownloadLink - START");
+
+		String downloadLink = fileTransferService.getDownloadLink(attachmentKey);
+
+		log.info("PnExtChnController - getDownloadLink - END");
+		return downloadLink;
 	}
 
 }

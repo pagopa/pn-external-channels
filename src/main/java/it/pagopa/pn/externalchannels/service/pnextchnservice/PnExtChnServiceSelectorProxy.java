@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.service.pnextchnservice;
 
 
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.pojos.PnExtChnEvnPec;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +52,8 @@ public class PnExtChnServiceSelectorProxy implements PnExtChnService {
 	}
 
 	@Override
-	public void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale, int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec) {
+	public void produceStatusMessage(QueuedMessage qm, EventType tipoInvio, PnExtChnProgressStatus stato, String canale, int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec) {
 		// fallback to real implementation
-		pnExtChnService.produceStatusMessage(codiceAtto, iun, tipoInvio, stato, canale, tentativo, codiceRaccomandata, pec);
+		pnExtChnService.produceStatusMessage(qm, tipoInvio, stato, canale, tentativo, codiceRaccomandata, pec);
 	}
 }

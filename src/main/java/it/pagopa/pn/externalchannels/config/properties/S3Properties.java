@@ -13,6 +13,11 @@ public class S3Properties {
     @Value("${s3.buckets.external-channels-in}")
     private String inBucket;
 
+    @Value("${s3.buckets.physicalDestination:}")
+    private String physicalDestination;
+    @Value("${s3.buckets.digitalDestination:}")
+    private String digitalDestination;
+
     @Value("${s3.region:}")
     private String region;
     @Value("${s3.profile-name:}")

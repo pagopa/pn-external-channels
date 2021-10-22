@@ -8,6 +8,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -62,5 +64,9 @@ public class QueuedMessage {
     private String municipality;
 
     private String province;
+
+    // elaboration result
+
+    private List<String> attachmentKeys;
 
 }

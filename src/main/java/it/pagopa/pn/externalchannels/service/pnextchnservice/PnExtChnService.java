@@ -9,6 +9,7 @@ import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnProgressStatus;
+import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.pojos.PnExtChnEvnPec;
 
@@ -20,6 +21,15 @@ public interface PnExtChnService {
 
     void processElaborationResults(List<ElaborationResult> elaborationResults);
 
-    void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
+    void produceStatusMessage(QueuedMessage qm, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
                               int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec);
+
+	default void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
+									 int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec) {
+		QueuedMessage qm = new QueuedMessage();
+		qm.setActCode(codiceAtto);
+		qm.setIun(iun);
+		produceStatusMessage(qm, tipoInvio, stato, canale, tentativo, codiceRaccomandata, pec);
+	}
+
 }

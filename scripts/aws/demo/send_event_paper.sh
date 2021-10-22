@@ -16,7 +16,9 @@ else
   mockBehaviour=$3
 fi
 
+iun=$(date +%s)
+
 echo "Sending "$eventType", attempt number "$attemptNum" with "$mockBehaviour" behaviour"
-aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url https://localhost:4566/000000000000/local-ext-channels-inputs --message-body "{\"requestCorrelationId\":\"123\",\"iun\":\"456\",\"destinationAddress\":{\"at\":\"scala a\",\"address\":\"corso v emanuele 100\",\"addressDetails\":\"dettaglio\",\"zip\":\"80144\",\"municipality\":\"NAPOLI\",\"province\":\"NA\",\"foreignState\":\"\"},\"communicationType\":\"RECIEVED_DELIVERY_NOTICE\",\"serviceLevel\":\"REGISTERED_LETTER_890\",\"senderDenomination\":\"PAGOPA\",\"recipientDenomination\":\"Mario Rossi\"}" --message-attributes "{\"eventType\":{\"DataType\":\"String\",\"StringValue\":\""$eventType"\"},\"publisher\":{\"DataType\":\"String\",\"StringValue\":\"pub\"},\"eventId\":{\"DataType\":\"String\",\"StringValue\":\"a23-"$attemptNum"\"},\"iun\":{\"DataType\":\"String\",\"StringValue\":\"456\"},\"createdAt\":{\"DataType\":\"String\",\"StringValue\":\"2021-09-20T15:57:25.097159300Z\"}}"
+aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url https://localhost:4566/000000000000/local-ext-channels-inputs --message-body "{\"requestCorrelationId\":\"123\",\"iun\":\""$iun"\",\"destinationAddress\":{\"at\":\"scala a\",\"address\":\"corso v emanuele 100\",\"addressDetails\":\"dettaglio\",\"zip\":\"80144\",\"municipality\":\"NAPOLI\",\"province\":\"NA\",\"foreignState\":\"\"},\"communicationType\":\"RECIEVED_DELIVERY_NOTICE\",\"serviceLevel\":\"REGISTERED_LETTER_890\",\"senderDenomination\":\"PAGOPA\",\"recipientDenomination\":\"Mario Rossi\"}" --message-attributes "{\"eventType\":{\"DataType\":\"String\",\"StringValue\":\""$eventType"\"},\"publisher\":{\"DataType\":\"String\",\"StringValue\":\"pub\"},\"eventId\":{\"DataType\":\"String\",\"StringValue\":\"a23-"$attemptNum"\"},\"iun\":{\"DataType\":\"String\",\"StringValue\":\""$iun"\"},\"createdAt\":{\"DataType\":\"String\",\"StringValue\":\"2021-09-20T15:57:25.097159300Z\"}}"
 
 read -n 1 -s -r -p "Press any key to continue"

@@ -176,6 +176,13 @@ public class CsvServiceImpl implements CsvService {
                     .with(schema)
                     .readValues(csv);
             List<Map<String, String>> rows = mappingIterator.readAll();
+
+            rows = rows.stream().map(m -> {
+                Map<String, String> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+                map.putAll(m);
+                return map;
+            }).collect(Collectors.toList());
+
             return rows;
         } catch (Exception e) {
             log.warn("CsvServiceImpl - csvReader - read incomplete", e);
