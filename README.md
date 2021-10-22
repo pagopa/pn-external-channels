@@ -28,3 +28,12 @@ Infine, avviare l'applicativo e chiamare i seguenti endpoint di sviluppo per le 
  - POST http://localhost:8082/test-external-channel/cassandra/postPaPecs [{"denomination":"PAGOPA","idPec":"PEC1","pec":"pagopa@pagopa.it"}]
 
  - POST http://localhost:8082/test-external-channel/cassandra/postPaConfigs [{"denomination":"PAGOPA","channel":"DIGITAL","serviceLevel":"PEC","template":"A","printModel":"A"},{"denomination":"PAGOPA","channel":"PAPER","serviceLevel":"SIMPLE_REGISTERED_LETTER","template":"B","printModel":"A"},{"denomination":"PAGOPA","channel":"PAPER","serviceLevel":"REGISTERED_LETTER_890","template":"B","printModel":"B"}]
+ 
+##Istruzioni per la compilazione
+```
+    ./mvnw clean install
+```
+##Istruzioni per il run
+```
+    ./mvnw spring-boot:run
+```
