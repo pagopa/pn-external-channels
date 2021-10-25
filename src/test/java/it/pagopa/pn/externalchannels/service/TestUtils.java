@@ -23,7 +23,7 @@ public class TestUtils {
         om.registerModule(javaTimeModule);
     }
 
-    public static String toJson(Object o){
+    public static String toJson(Object o) {
         try {
             return om.writeValueAsString(o);
         } catch (Exception e) {
@@ -56,8 +56,11 @@ public class TestUtils {
                 ).build();
     }
 
-
     public static PnExtChnPecEvent mockPecMessage() {
+        return mockPecMessage("1", "2");
+    }
+
+    public static PnExtChnPecEvent mockPecMessage(String iun, String address) {
         return PnExtChnPecEvent
                 .builder()
                 .header(StandardEventHeader
@@ -70,8 +73,8 @@ public class TestUtils {
                         .build()
                 ).payload(PnExtChnPecEventPayload
                         .builder()
-                        .iun("1")
-                        .pecAddress("2")
+                        .iun(iun)
+                        .pecAddress(address)
                         .recipientDenomination("3")
                         .recipientTaxId("4")
                         .requestCorrelationId("5")
@@ -84,6 +87,10 @@ public class TestUtils {
     }
 
     public static PnExtChnPaperEvent mockPaperMessage() {
+        return mockPaperMessage("123", "via abc 1");
+    }
+
+    public static PnExtChnPaperEvent mockPaperMessage(String iun, String address) {
         return PnExtChnPaperEvent
                 .builder()
                 .header(StandardEventHeader
@@ -97,9 +104,9 @@ public class TestUtils {
                 ).payload(PnExtChnPaperEventPayload
                         .builder()
                         .requestCorrelationId("123")
-                        .iun("456")
+                        .iun(iun)
                         .destinationAddress(PhysicalAddress.builder()
-                                .address("via abc 1")
+                                .address(address)
                                 .addressDetails("")
                                 .at("")
                                 .zip("80100")

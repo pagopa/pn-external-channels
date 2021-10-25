@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 import static it.pagopa.pn.externalchannels.service.TestUtils.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,12 +33,29 @@ class PnExtChnControllerTest {
 
     private static final String URL_SAVE_PAPER_NOTIF = "/external-channel/paper/saveNotification";
     private static final String URL_SAVE_DIGITAL_NOTIF = "/external-channel/digital/saveNotification";
+    private static final String URL_GET_DOWNLOAD_LINK = "/external-channel/attachments/getDownloadLink";
+
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     PnExtChnService pnExtChnService;
+
+    @MockBean
+    PnExtChnFileTransferService fileTransferService;
+
+    @Test
+    void shouldGetDownloadLink() throws Exception {
+
+        this.mockMvc
+                .perform(
+                        get(URL_GET_DOWNLOAD_LINK)
+                                .queryParam("attachmentKey", "key")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 
     @Test
     void paperShouldReturnStatus200() throws Exception {
@@ -65,10 +83,8 @@ class PnExtChnControllerTest {
     @Test
     void paperShouldReturnStatus400() throws Exception {
 
-        PnExtChnPaperEvent event = mockPaperMessage();
-        StandardEventHeader header = event.getHeader();
-        header.setIun(""); // should discard
-        event.getPayload().setIun(null); // should discard
+        PnExtChnPaperEvent event = mockPaperMessage(null, "1");
+        StandardEventHeader header = event.getHeader(); // should discard
         String content = toJson(event.getPayload());
 
         this.mockMvc
@@ -111,10 +127,8 @@ class PnExtChnControllerTest {
     @Test
     void digitalShouldReturnStatus400() throws Exception {
 
-        PnExtChnPecEvent event = mockPecMessage();
-        StandardEventHeader header = event.getHeader();
-        header.setIun(""); // should discard
-        event.getPayload().setIun(null); // should discard
+        PnExtChnPecEvent event = mockPecMessage(null, "1");
+        StandardEventHeader header = event.getHeader(); // should discard
         String content = toJson(event.getPayload());
 
         this.mockMvc
