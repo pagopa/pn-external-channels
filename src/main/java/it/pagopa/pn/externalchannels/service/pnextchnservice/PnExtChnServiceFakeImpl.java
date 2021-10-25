@@ -117,7 +117,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 					.matcher(evt.getPayload().getDestinationAddress().getAddress());
 			if (matcher.find()) {
 				String newAddr = matcher.group(1);
-				addr = PhysicalAddress.builder()
+				addr = evt.getPayload().getDestinationAddress().toBuilder()
 						.address(newAddr != null ? newAddr.trim() : "")
 						.build();
 			}
