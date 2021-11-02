@@ -18,10 +18,11 @@ Infine, avviare l'applicativo ed eseguire il seguente script per le configurazio
 
  - 2_setup_application.sh
 
-##Istruzioni per la compilazione
+
+Istruzioni per la compilazione
 ```
     ./mvnw clean install
 ```
-##Istruzioni per il run
+Istruzioni per il run
 ```
     ./mvnw spring-boot:run

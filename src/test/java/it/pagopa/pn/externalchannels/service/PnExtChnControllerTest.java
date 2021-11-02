@@ -37,7 +37,6 @@ class PnExtChnControllerTest {
     private static final String URL_GET_ATTACHMENT_KEYS = "/external-channel/attachments/getAttachmentKeys";
 
 
-
     @Autowired
     private MockMvc mockMvc;
 
