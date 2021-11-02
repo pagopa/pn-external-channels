@@ -33,7 +33,8 @@ class PnExtChnControllerTest {
 
     private static final String URL_SAVE_PAPER_NOTIF = "/external-channel/paper/saveNotification";
     private static final String URL_SAVE_DIGITAL_NOTIF = "/external-channel/digital/saveNotification";
-    private static final String URL_GET_DOWNLOAD_LINK = "/external-channel/attachments/getDownloadLink";
+    private static final String URL_GET_DOWNLOAD_LINKS = "/external-channel/attachments/getDownloadLinks";
+    private static final String URL_GET_ATTACHMENT_KEYS = "/external-channel/attachments/getAttachmentKeys";
 
 
     @Autowired
@@ -46,11 +47,23 @@ class PnExtChnControllerTest {
     PnExtChnFileTransferService fileTransferService;
 
     @Test
-    void shouldGetDownloadLink() throws Exception {
+    void shouldGetAttachmentKeys() throws Exception {
 
         this.mockMvc
                 .perform(
-                        get(URL_GET_DOWNLOAD_LINK)
+                        get(URL_GET_ATTACHMENT_KEYS)
+                                .queryParam("eventId", "eventId")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGetDownloadLinks() throws Exception {
+
+        this.mockMvc
+                .perform(
+                        get(URL_GET_DOWNLOAD_LINKS)
                                 .queryParam("attachmentKey", "key")
                 )
                 .andDo(print())

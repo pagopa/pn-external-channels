@@ -67,7 +67,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent paperNotification) {
 		log.info("PnExtChnServiceImpl - savePaperMessage - START");
-		QueuedMessage queuedMessage = mapBodyToQueuedMessage(paperNotification.getPayload());
+		QueuedMessage queuedMessage = mapBodyToQueuedMessage(paperNotification);
 		setPaPec(queuedMessage);
 		setPaConfig(queuedMessage, QueuedMessageChannel.PAPER);
 		queuedMessageRepository.save(queuedMessage);
@@ -77,7 +77,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	@Override
 	public void saveDigitalMessage(PnExtChnPecEvent digitalNotification) {
 		log.info("PnExtChnServiceImpl - saveDigitalMessage - START");
-		QueuedMessage queuedMessage = mapBodyToQueuedMessage(digitalNotification.getPayload());
+		QueuedMessage queuedMessage = mapBodyToQueuedMessage(digitalNotification);
 		if (StringUtils.isBlank(queuedMessage.getSenderPecAddress()))
 			setPaPec(queuedMessage);
 		setPaConfig(queuedMessage, QueuedMessageChannel.DIGITAL);
@@ -105,11 +105,12 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 		log.info("PnExtChnServiceImpl - discardMessage - END");
 	}
 
-	private QueuedMessage mapBodyToQueuedMessage(Object body) {
-		QueuedMessage m = modelMapper.map(body, QueuedMessage.class);
+	private <T> QueuedMessage mapBodyToQueuedMessage(GenericEvent<StandardEventHeader, T> evt) {
+		QueuedMessage m = modelMapper.map(evt.getPayload(), QueuedMessage.class);
 		m.setId(Uuids.timeBased().toString());
 		String actCode = Util
 				.lastChars(String.format("%020d", new BigInteger(m.getId().replace("-", ""), 16)), 20);
+		m.setEventId(evt.getHeader().getEventId());
 		m.setActCode(actCode);
 		m.setEventStatus(TO_SEND.toString());
 		return m;
@@ -133,6 +134,19 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 		qm.setTemplate(configInfo.getTemplate());
 		qm.setPrintModel(configInfo.getPrintModel());
+	}
+
+	@Override
+	public List<String> getAttachmentKeys(String eventId) {
+		log.info("PnExtChnServiceImpl - getAttachmentKeys - START");
+
+		QueuedMessage qm = queuedMessageRepository.findByEventId(eventId);
+
+		log.info("PnExtChnServiceImpl - getAttachmentKeys - END");
+
+		if (qm == null)
+			return null;
+		return qm.getAttachmentKeys();
 	}
 
 	@Override

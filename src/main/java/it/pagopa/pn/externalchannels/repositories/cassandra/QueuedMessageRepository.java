@@ -14,6 +14,9 @@ public interface QueuedMessageRepository extends CrudRepository<QueuedMessage, S
     @AllowFiltering
     QueuedMessage findByIun(String iun);
 
+    @AllowFiltering
+    QueuedMessage findByEventId(String eventId);
+
     List<QueuedMessage> findByIunIn(List<String> iuns);
 
 }

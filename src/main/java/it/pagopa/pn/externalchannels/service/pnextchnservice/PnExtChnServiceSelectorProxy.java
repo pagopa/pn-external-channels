@@ -46,6 +46,12 @@ public class PnExtChnServiceSelectorProxy implements PnExtChnService {
 	}
 
 	@Override
+	public List<String> getAttachmentKeys(String eventId) {
+		// fallback to real implementation
+		return pnExtChnService.getAttachmentKeys(eventId);
+	}
+
+	@Override
 	public void processElaborationResults(List<ElaborationResult> elaborationResults) {
 		// fallback to real implementation
 		pnExtChnService.processElaborationResults(elaborationResults);

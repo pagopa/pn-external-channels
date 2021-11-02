@@ -21,6 +21,8 @@ public class QueuedMessage {
     @MongoId
     private String id;
 
+    private String eventId;
+
     private String eventStatus;
 
     private String requestCorrelationId;

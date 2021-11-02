@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.service;
 
+import freemarker.template.Configuration;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
@@ -62,6 +63,9 @@ class PnExtChnServiceFakeTest {
 
     @MockBean
     ArubaSenderService arubaSenderService;
+
+    @MockBean
+    Configuration freeMarker;
 
     @Autowired
     PnExtChnService pnExtChnService;

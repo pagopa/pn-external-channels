@@ -60,7 +60,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 		String pecAddress = notificaDigitale.getPayload().getPecAddress().replaceFirst("\\.real$", "");
 
-		String content = msgUtils.pecPayloadToMessage( notificaDigitale.getPayload(), MessageBodyType.PLAIN_TEXT );
+		String content = msgUtils.prepareMessage( notificaDigitale, MessageBodyType.PLAIN_TEXT );
 		pecSvc.sendMessage( SimpleMessage.builder()
 				.iun(iun)
 				.eventId( notificaDigitale.getHeader().getEventId() )

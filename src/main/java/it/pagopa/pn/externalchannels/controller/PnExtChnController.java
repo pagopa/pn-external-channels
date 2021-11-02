@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 
@@ -77,14 +79,26 @@ public class PnExtChnController {
 		return digitalNotification;
 	}
 
-	@GetMapping(path = "/attachments/getDownloadLink")
-	public String getDownloadLink(@RequestParam String attachmentKey) {
-		log.info("PnExtChnController - getDownloadLink - START");
+	@GetMapping(path = "/attachments/getAttachmentKeys")
+	public List<String> getAttachmentKeys(@RequestParam String eventId) {
+		log.info("PnExtChnController - getAttachmentKeys - START");
 
-		String downloadLink = fileTransferService.getDownloadLink(attachmentKey);
+		List<String> attachmentKeys = pnExtChnService.getAttachmentKeys(eventId);
 
-		log.info("PnExtChnController - getDownloadLink - END");
-		return downloadLink;
+		log.info("PnExtChnController - getAttachmentKeys - END");
+		return attachmentKeys;
+	}
+
+	@GetMapping(path = "/attachments/getDownloadLinks")
+	public List<String> getDownloadLinks(@RequestParam(name = "attachmentKey") List<String> attachmentKeys) {
+		log.info("PnExtChnController - getDownloadLinks - START");
+
+		List<String> downloadLinks = attachmentKeys.stream()
+				.map(fileTransferService::getDownloadLink)
+				.collect(Collectors.toList());
+
+		log.info("PnExtChnController - getDownloadLinks - END");
+		return downloadLinks;
 	}
 
 }

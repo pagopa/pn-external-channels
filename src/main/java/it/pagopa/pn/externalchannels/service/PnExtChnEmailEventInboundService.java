@@ -104,7 +104,7 @@ public class PnExtChnEmailEventInboundService {
                 pnExtChnService.discardMessage(event.asText(), errors);
             } else if (emailConfigProvided()){
                 String messageBody = messageUtil
-                        .mailPayloadToMessage(pnextchnemailevent.getPayload(), emailProperties.getContentType());
+                        .prepareMessage(pnextchnemailevent, emailProperties.getContentType());
 
                 MimeMessage mimeMessage = javaMailSender.createMimeMessage();
                 MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");

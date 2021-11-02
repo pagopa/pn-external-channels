@@ -19,6 +19,8 @@ public interface PnExtChnService {
 	void saveDigitalMessage(PnExtChnPecEvent digitalNotification);
 	<T> void discardMessage(String message, Set<ConstraintViolation<T>> violations);
 
+	List<String> getAttachmentKeys(String eventId);
+
     void processElaborationResults(List<ElaborationResult> elaborationResults);
 
     void produceStatusMessage(QueuedMessage qm, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
