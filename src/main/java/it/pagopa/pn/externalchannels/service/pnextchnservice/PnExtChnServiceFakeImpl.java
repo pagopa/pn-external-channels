@@ -60,7 +60,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 
 		String pecAddress = notificaDigitale.getPayload().getPecAddress().replaceFirst("\\.real$", "");
 
-		String content = msgUtils.pecPayloadToMessage( notificaDigitale.getPayload(), MessageBodyType.PLAIN_TEXT );
+		String content = msgUtils.prepareMessage( notificaDigitale, MessageBodyType.PLAIN_TEXT );
 		pecSvc.sendMessage( SimpleMessage.builder()
 				.iun(iun)
 				.eventId( notificaDigitale.getHeader().getEventId() )
@@ -79,7 +79,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		if(out == null || out.getPayload().getStatusCode() == PnExtChnProgressStatus.OK) {
 			try {
 				out = buildResponse(notificaDigitale.getHeader(), notificaDigitale.getPayload().getRequestCorrelationId(),
-						"PEC", PnExtChnProgressStatus.OK);
+						"PEC", PnExtChnProgressStatus.OK, null);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
 				statusQueueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
@@ -106,30 +106,29 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
 		PnExtChnProgressStatus outcome = decideOutcome( evt );
 		return outcome != null ? buildResponse( evt.getHeader(), evt.getPayload().getRequestCorrelationId(),
-				"PEC", outcome ) : null;
+				"PEC", outcome, null) : null;
 	}
 
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPaperEvent evt) {
 		PnExtChnProgressStatus outcome = decideOutcome( evt );
-		PnExtChnProgressStatusEvent statusEvent = buildResponse(evt.getHeader(), evt.getPayload().getRequestCorrelationId(),
-				"PAPER", outcome);
+		PhysicalAddress addr = null;
 		if (PnExtChnProgressStatus.RETRYABLE_FAIL == outcome) {
 			Matcher matcher = Pattern.compile(IMMEDIATE_RESPONSE_NEW_ADDR_REGEX)
 					.matcher(evt.getPayload().getDestinationAddress().getAddress());
 			if (matcher.find()) {
 				String newAddr = matcher.group(1);
-				statusEvent.getPayload().setNewPhysicalAddress(
-						PhysicalAddress.builder()
+				addr = evt.getPayload().getDestinationAddress().toBuilder()
 						.address(newAddr != null ? newAddr.trim() : "")
-						.build()
-				);
+						.build();
 			}
 		}
+		PnExtChnProgressStatusEvent statusEvent = buildResponse(evt.getHeader(), evt.getPayload().getRequestCorrelationId(),
+				"PAPER", outcome, addr);
 		return outcome != null ? statusEvent : null;
 	}
 
 	private PnExtChnProgressStatusEvent buildResponse(StandardEventHeader header, String correlationId,
-													  String channel, PnExtChnProgressStatus status) {
+													  String channel, PnExtChnProgressStatus status, PhysicalAddress addr) {
 		return PnExtChnProgressStatusEvent.builder()
 				.header( StandardEventHeader.builder()
 						.eventId( header.getEventId() + "_response" )
@@ -147,6 +146,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 						.iun( header.getIun() )
 						.statusCode( status )
 						.statusDate( Instant.now() )
+						.newPhysicalAddress(addr)
 						.build()
 				)
 				.build();
@@ -173,7 +173,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			else if( domainPart.startsWith("do-not-exists") ) {
 				status = PnExtChnProgressStatus.PERMANENT_FAIL;
 			}
-			else if (domainPart.startsWith("works")){
+			else if (domainPart.startsWith("works") || domainPart.startsWith("fail-first")){
 				status = PnExtChnProgressStatus.OK;
 			}
 		}

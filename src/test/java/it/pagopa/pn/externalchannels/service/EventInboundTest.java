@@ -222,8 +222,7 @@ class EventInboundTest {
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
         headers.put(PN_EVENT_HEADER_CREATED_AT, Instant.now().toString());
-        PnExtChnPecEventPayload evt = mockPecMessage().getPayload();
-        evt.setIun(null); // should discard
+        PnExtChnPecEventPayload evt = mockPecMessage(null, "1").getPayload();// should discard
         String payload = toJson(evt);
         GenericMessage<String> message = new GenericMessage<>(payload, headers);
         SubscribableChannel channel = processor.notifPecInput();
@@ -268,8 +267,7 @@ class EventInboundTest {
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
         headers.put(PN_EVENT_HEADER_CREATED_AT, Instant.now().toString());
-        PnExtChnPecEventPayload pecEvent = mockPecMessage().getPayload();
-        pecEvent.setIun(null); // should discard
+        PnExtChnPecEventPayload pecEvent = mockPecMessage(null, "1").getPayload(); // should discard
         String payload = toJson(pecEvent);
         GenericMessage<String> message = new GenericMessage<>(payload, headers);
         SubscribableChannel channel = processor.notifPecInput();
@@ -338,8 +336,7 @@ class EventInboundTest {
         headers.put(PN_EVENT_HEADER_PUBLISHER, "pub");
         headers.put(PN_EVENT_HEADER_IUN, "iun");
         headers.put(PN_EVENT_HEADER_CREATED_AT, Instant.now().toString());
-        PnExtChnPaperEventPayload pecEvent = mockPaperMessage().getPayload();
-        pecEvent.setIun(null); // should discard
+        PnExtChnPaperEventPayload pecEvent = mockPaperMessage(null, "2").getPayload(); // should discard
         String payload = toJson(pecEvent);
         GenericMessage<String> message = new GenericMessage<>(payload, headers);
         SubscribableChannel channel = processor.notifPecInput();

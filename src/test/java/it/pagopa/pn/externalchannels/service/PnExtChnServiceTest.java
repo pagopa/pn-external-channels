@@ -90,6 +90,11 @@ class PnExtChnServiceTest {
     }
 
     @Test
+    void shouldGetAttachmentKeys(){
+        pnExtChnService.getAttachmentKeys("eventId");
+    }
+
+    @Test
     void shouldProcessElaborationResults (){
 
 

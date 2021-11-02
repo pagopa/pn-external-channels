@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.controller;
 
 import it.pagopa.pn.api.dto.events.*;
+import it.pagopa.pn.externalchannels.service.PnExtChnFileTransferService;
 import it.pagopa.pn.externalchannels.service.pnextchnservice.PnExtChnService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 
@@ -19,6 +22,9 @@ public class PnExtChnController {
 	
 	@Autowired
 	private PnExtChnService pnExtChnService;
+
+	@Autowired
+	private PnExtChnFileTransferService fileTransferService;
 
 	// TODO: In caso di errore di validazione, bisogna inviare il messaggio sempre sul topic di errore ?
 	
@@ -71,6 +77,28 @@ public class PnExtChnController {
 		pnExtChnService.saveDigitalMessage(pnextchnpecevent);
 		log.info("PnExtChnController - saveDigitalNotification - END");
 		return digitalNotification;
+	}
+
+	@GetMapping(path = "/attachments/getAttachmentKeys")
+	public List<String> getAttachmentKeys(@RequestParam String eventId) {
+		log.info("PnExtChnController - getAttachmentKeys - START");
+
+		List<String> attachmentKeys = pnExtChnService.getAttachmentKeys(eventId);
+
+		log.info("PnExtChnController - getAttachmentKeys - END");
+		return attachmentKeys;
+	}
+
+	@GetMapping(path = "/attachments/getDownloadLinks")
+	public List<String> getDownloadLinks(@RequestParam(name = "attachmentKey") List<String> attachmentKeys) {
+		log.info("PnExtChnController - getDownloadLinks - START");
+
+		List<String> downloadLinks = attachmentKeys.stream()
+				.map(fileTransferService::getDownloadLink)
+				.collect(Collectors.toList());
+
+		log.info("PnExtChnController - getDownloadLinks - END");
+		return downloadLinks;
 	}
 
 }

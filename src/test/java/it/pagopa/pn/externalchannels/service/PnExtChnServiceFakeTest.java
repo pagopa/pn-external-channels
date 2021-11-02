@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.service;
 
+import freemarker.template.Configuration;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
@@ -63,6 +64,9 @@ class PnExtChnServiceFakeTest {
     @MockBean
     ArubaSenderService arubaSenderService;
 
+    @MockBean
+    Configuration freeMarker;
+
     @Autowired
     PnExtChnService pnExtChnService;
 
@@ -100,8 +104,7 @@ class PnExtChnServiceFakeTest {
 
     @Test
     void shouldRealSendDigitalMessage(){
-        PnExtChnPecEvent event = mockPecMessage();
-        event.getPayload().setPecAddress("abc@aaa.it.real");
+        PnExtChnPecEvent event = mockPecMessage("1", "abc@aaa.it.real");
         pnExtChnService.saveDigitalMessage(event);
     }
 
@@ -113,22 +116,19 @@ class PnExtChnServiceFakeTest {
 
     @Test
     void shouldFakeSendWorksDigitalMessage(){
-        PnExtChnPecEvent event = mockPecMessage();
-        event.getPayload().setPecAddress("abc@works");
+        PnExtChnPecEvent event = mockPecMessage("1", "abc@works");
         pnExtChnService.saveDigitalMessage(event);
     }
 
     @Test
     void shouldFakeSendFailBothDigitalMessage(){
-        PnExtChnPecEvent event = mockPecMessage();
-        event.getPayload().setPecAddress("abc@fail-both");
+        PnExtChnPecEvent event = mockPecMessage("1", "abc@fail-both");
         pnExtChnService.saveDigitalMessage(event);
     }
 
     @Test
     void shouldFakeSendNotExistDigitalMessage(){
-        PnExtChnPecEvent event = mockPecMessage();
-        event.getPayload().setPecAddress("abc@do-not-exists");
+        PnExtChnPecEvent event = mockPecMessage("1", "abc@do-not-exists");
         pnExtChnService.saveDigitalMessage(event);
     }
 

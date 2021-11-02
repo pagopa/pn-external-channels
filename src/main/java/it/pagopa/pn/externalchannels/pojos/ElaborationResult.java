@@ -15,6 +15,8 @@ public class ElaborationResult {
 
     private String digitalCommunicationCode;
 
+    private String registeredMailCode;
+
     private String userProgressiveNumber;
 
     private String protocolNumber;
@@ -43,6 +45,8 @@ public class ElaborationResult {
 
     private String messageId;
 
+    private String resultMacro;
+
     private String resultType;
 
     private String resultDate;
@@ -52,5 +56,15 @@ public class ElaborationResult {
     private String resultDenomination;
 
     private String iun;
+
+    private String attachmentA;
+
+    private String attachmentB;
+
+    private String attachmentC;
+
+    private String attachmentD;
+
+    private String attachmentE;
 
 }

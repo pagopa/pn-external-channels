@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.pagopa.pn.api.dto.events.StandardEventHeader.*;
 import static it.pagopa.pn.externalchannels.event.QueuedMessageStatus.TO_SEND;
@@ -66,7 +67,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent paperNotification) {
 		log.info("PnExtChnServiceImpl - savePaperMessage - START");
-		QueuedMessage queuedMessage = mapBodyToQueuedMessage(paperNotification.getPayload());
+		QueuedMessage queuedMessage = mapBodyToQueuedMessage(paperNotification);
 		setPaPec(queuedMessage);
 		setPaConfig(queuedMessage, QueuedMessageChannel.PAPER);
 		queuedMessageRepository.save(queuedMessage);
@@ -76,7 +77,9 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 	@Override
 	public void saveDigitalMessage(PnExtChnPecEvent digitalNotification) {
 		log.info("PnExtChnServiceImpl - saveDigitalMessage - START");
-		QueuedMessage queuedMessage = mapBodyToQueuedMessage(digitalNotification.getPayload());
+		QueuedMessage queuedMessage = mapBodyToQueuedMessage(digitalNotification);
+		if (StringUtils.isBlank(queuedMessage.getSenderPecAddress()))
+			setPaPec(queuedMessage);
 		setPaConfig(queuedMessage, QueuedMessageChannel.DIGITAL);
 		queuedMessageRepository.save(queuedMessage);
 		log.info("PnExtChnServiceImpl - saveDigitalMessage - END");
@@ -102,11 +105,12 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 		log.info("PnExtChnServiceImpl - discardMessage - END");
 	}
 
-	private QueuedMessage mapBodyToQueuedMessage(Object body) {
-		QueuedMessage m = modelMapper.map(body, QueuedMessage.class);
+	private <T> QueuedMessage mapBodyToQueuedMessage(GenericEvent<StandardEventHeader, T> evt) {
+		QueuedMessage m = modelMapper.map(evt.getPayload(), QueuedMessage.class);
 		m.setId(Uuids.timeBased().toString());
 		String actCode = Util
 				.lastChars(String.format("%020d", new BigInteger(m.getId().replace("-", ""), 16)), 20);
+		m.setEventId(evt.getHeader().getEventId());
 		m.setActCode(actCode);
 		m.setEventStatus(TO_SEND.toString());
 		return m;
@@ -130,6 +134,19 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 		qm.setTemplate(configInfo.getTemplate());
 		qm.setPrintModel(configInfo.getPrintModel());
+	}
+
+	@Override
+	public List<String> getAttachmentKeys(String eventId) {
+		log.info("PnExtChnServiceImpl - getAttachmentKeys - START");
+
+		QueuedMessage qm = queuedMessageRepository.findByEventId(eventId);
+
+		log.info("PnExtChnServiceImpl - getAttachmentKeys - END");
+
+		if (qm == null)
+			return null;
+		return qm.getAttachmentKeys();
 	}
 
 	@Override
@@ -180,27 +197,42 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 			else
 				status = QueuedMessageStatus.ERROR;
 		}
+		List<String> attachments = putAttachmentsInList(er);
+		qm.setAttachmentKeys(attachments);
 		PnExtChnProgressStatus externalStatus = QueuedMessageStatus.toPnExtChnProgressStatus(status);
 		qm.setEventStatus(status.name());
 		queuedMessageRepository.save(qm);
-		produceStatusMessage(qm.getActCode(), qm.getIun(), EventType.SEND_PEC_RESPONSE, externalStatus,
+		produceStatusMessage(qm, EventType.SEND_PEC_RESPONSE, externalStatus,
 				null, Util.toInt(er.getNotificationAttemptNumber(), 1), null, null);
 	}
-	
+
+	private List<String> putAttachmentsInList(ElaborationResult er){
+		List<String> attachments = Stream.of(
+						er.getAttachmentA(),
+						er.getAttachmentB(),
+						er.getAttachmentC(),
+						er.getAttachmentD(),
+						er.getAttachmentE()
+				).filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+		return attachments.isEmpty() ? null : attachments;
+	}
+
 	@Override
-	public void produceStatusMessage(String codiceAtto, String iun, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
+	public void produceStatusMessage(QueuedMessage qm, EventType tipoInvio, PnExtChnProgressStatus stato, String canale,
 									 int tentativo, String codiceRaccomandata, PnExtChnEvnPec pec) {
 		log.info("PnExtChnServiceImpl - produceStatusMessage - START");
 
 		PnExtChnProgressStatusEventPayload statusMessage = PnExtChnProgressStatusEventPayload.builder()
 				.canale(canale)
-				.codiceAtto(codiceAtto)
+				.codiceAtto(qm.getActCode())
 				.codiceRaccomandata(codiceRaccomandata)
-				.iun(iun)
+				.iun(qm.getIun())
 				.tipoInvio(tipoInvio != null ? tipoInvio.name() : "")
 				.tentativo(tentativo)
 				.statusCode(stato)
 				.statusDate(Instant.now())
+				.attachmentKeys(qm.getAttachmentKeys())
 				.build();
 
 		if(pec != null) {
@@ -212,7 +244,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 		}
 
 		StandardEventHeader stdHeader = builder()
-				.iun(iun)
+				.iun(qm.getIun())
 				.eventId("")
 				.eventType(tipoInvio != null ? tipoInvio.name() : "")
 				.createdAt(Instant.now())

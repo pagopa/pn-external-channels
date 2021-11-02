@@ -8,4 +8,6 @@ public interface PnExtChnFileTransferService {
 
     byte[] retrieveCsv(String key) throws IOException;
 
+    String getDownloadLink(String attachmentKey);
+
 }
