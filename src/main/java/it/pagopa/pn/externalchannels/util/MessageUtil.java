@@ -37,7 +37,7 @@ public class MessageUtil {
 			+ "	<br/>"
 			+ "	<p>Ti informiamo che in alternativa &egrave; anche possibile accedere temporaneamente all'Atto per un massimo di <b>2 accessi</b>,"
 			+ "	attraverso l'url univoco riportato qui sotto.</p>"
-			+ "	<p>URL UNIVOCO<br/><a href=\"https://at${iun}.gov.it\">https://at${iun}.gov.it</a></p>"
+			+ "	<p>URL UNIVOCO<br/><a href=\"${accessUrl}\">${accessUrl}</a></p>"
 			+ "	<br/>"
 			+ "	<p><i>Questo messaggio &egrave; stato inoltrato da un indirizzo di Posta Elettronica Certificata non abilitato a ricevere messaggi.<br/>"
 			+ "	La invitiamo pertanto a non rispondere a questa comunicazione.<i></p>";
@@ -66,7 +66,7 @@ public class MessageUtil {
 			+ "attraverso l'url univoco riportato qui sotto.\n"
 			+ "\n"
 			+ "URL UNIVOCO\n"
-			+ "https://at${iun}.gov.it\n"
+			+ "${accessUrl}\n"
 			+ "\n"
 			+ "Questo messaggio è stato inoltrato da un indirizzo di Posta Elettronica non abilitato a ricevere messaggi.\n"
 			+ "La invitiamo pertanto a non rispondere a questa comunicazione.";
