@@ -62,7 +62,7 @@ class PnExtChnS3FileTransferServiceTest {
 
     @Test
     void shouldTransferCsv(){
-        s3Service.transferCsv("TEST_CONTENT".getBytes(StandardCharsets.UTF_8));
+        s3Service.transferCsv("TEST_CONTENT".getBytes(StandardCharsets.UTF_8), "abc.csv");
 
         verify(s3client, times(1)).putObject(eq(outBucket), any(), any(), any());
     }

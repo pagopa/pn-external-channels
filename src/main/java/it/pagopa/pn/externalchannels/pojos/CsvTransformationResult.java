@@ -20,4 +20,6 @@ public class CsvTransformationResult {
 
     private byte[] csvContent;
 
+    private String fileName;
+
 }

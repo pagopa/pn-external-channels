@@ -6,25 +6,29 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import it.pagopa.pn.externalchannels.config.properties.JobProperties;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.Column;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
+import it.pagopa.pn.externalchannels.event.QueuedMessageChannel;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
 import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
 import it.pagopa.pn.externalchannels.util.Constants;
+import it.pagopa.pn.externalchannels.util.Util;
 import it.pagopa.pn.externalchannels.util.formatters.ColumnFormatter;
 import it.pagopa.pn.externalchannels.util.formatters.ColumnFormatters;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,14 +36,27 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CsvServiceImpl implements CsvService {
 
-    @Value("${job.messages-csv-template-id}")
-    private String messagesCsvTemplateId;
+    private static final String QUEUED_MESSAGES_FILENAME = "%04d_%04d_%d_%tY%4$tm%4$td_PZ%d.csv";
 
-    @Value("${job.results-csv-template-id}")
-    private String resultCsvTemplateId;
+    private static final String AUTOINC_PLACEHOLDER = "*AUTOINC*";
+
+    @Autowired
+    JobProperties jobProperties;
 
     @Autowired
     CsvTemplateRepository csvTemplateRepository;
+
+    public String formatFileName(Integer rows, QueuedMessageChannel channel){
+        Date now = new Date();
+        Integer prog = LocalTime.now(ZoneId.of("Europe/Rome")).toSecondOfDay();
+        Integer customer = jobProperties.getCustomer();
+        Integer macroservice;
+        if (QueuedMessageChannel.DIGITAL == channel)
+            macroservice = jobProperties.getDigitalMacroservice();
+        else
+            macroservice = jobProperties.getPhysicalMacroservice();
+        return String.format(QUEUED_MESSAGES_FILENAME, customer, macroservice, prog, now, rows);
+    }
 
     @Override
     public CsvTransformationResult queuedMessagesToCsv(List<QueuedMessage> messages) {
@@ -47,7 +64,7 @@ public class CsvServiceImpl implements CsvService {
 
         CsvTransformationResult result = new CsvTransformationResult();
 
-        CsvTemplate template = csvTemplateRepository.findFirstByIdCsv(messagesCsvTemplateId);
+        CsvTemplate template = csvTemplateRepository.findFirstByIdCsv(jobProperties.getMessagesCsvTemplateId());
         List<Column> templateColumns = getTemplateColumns(template);
 
         StringWriter writer = new StringWriter();
@@ -64,12 +81,21 @@ public class CsvServiceImpl implements CsvService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
+        for (int i = 0; i < csvRows.size(); i++) {
+            int autoInc = i + 1;
+            csvRows.get(i).replaceAll((k, v) -> AUTOINC_PLACEHOLDER.equals(v) ? String.valueOf(autoInc) : v);
+        }
+
         csvWriter(csvRows, writer);
 
         String csvString = writer.toString();
 
         if(csvString != null && !"".equals(csvString))
             result.setCsvContent(csvString.getBytes(StandardCharsets.UTF_8));
+
+        QueuedMessageChannel channel = findChannel(messages);
+
+        result.setFileName(formatFileName(csvRows.size(), channel));
 
         log.info("CsvServiceImpl - queuedMessagesToCsv - END");
         return result;
@@ -132,7 +158,7 @@ public class CsvServiceImpl implements CsvService {
 
         String csv = new String(csvBytes, StandardCharsets.UTF_8);
 
-        CsvTemplate template = csvTemplateRepository.findFirstByIdCsv(resultCsvTemplateId);
+        CsvTemplate template = csvTemplateRepository.findFirstByIdCsv(jobProperties.getResultCsvTemplateId());
         List<Column> templateColumns = getTemplateColumns(template);
 
         List<Map<String, String>> csvRows = csvReader(csv);
@@ -197,6 +223,13 @@ public class CsvServiceImpl implements CsvService {
             log.error("CsvServiceImpl - getTemplateColumns - could not read template columns", e);
             return Collections.emptyList();
         }
+    }
+
+    private QueuedMessageChannel findChannel(List<QueuedMessage> messages){
+        return messages.stream()
+                .map(Util::getChannel)
+                .findAny()
+                .orElse(null);
     }
 
 }

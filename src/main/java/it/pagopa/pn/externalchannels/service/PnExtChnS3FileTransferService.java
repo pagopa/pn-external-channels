@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
 public class PnExtChnS3FileTransferService implements PnExtChnFileTransferService {
 
-    private static final String CSV_NAME = "messages_%s.csv";
     public static final String CSV_EXTENSION = ".csv";
     public static final String OK_EXTENSION = ".ok";
 
@@ -53,17 +52,16 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
     }
 
     @Override
-    public void transferCsv(byte[] csv) {
+    public void transferCsv(byte[] csv, String name) {
         log.info("PnExtChnS3FileTransferService - transferCsv - START");
 
         ByteArrayInputStream is = new ByteArrayInputStream(csv);
-        String key = String.format(CSV_NAME, System.currentTimeMillis());
 
         if(!s3client.doesBucketExistV2(s3Properties.getOutBucket()))
             s3client.createBucket(s3Properties.getOutBucket());
 
-        log.info("Write key " + key);
-        attempt(() -> s3client.putObject(s3Properties.getOutBucket(), key, is, null));
+        log.info("Write key " + name);
+        attempt(() -> s3client.putObject(s3Properties.getOutBucket(), name, is, null));
 
         log.info("PnExtChnS3FileTransferService - transferCsv - END");
     }
