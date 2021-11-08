@@ -80,4 +80,8 @@ job:
   batch-size: 1
   messages-csv-template-id: 8
   results-csv-template-id: 4
+  customer: 8585
+  macroservice:
+    digital: 5066
+    physical: 5065
 

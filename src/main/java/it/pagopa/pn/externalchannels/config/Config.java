@@ -12,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import io.awspring.cloud.core.env.ResourceIdResolver;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEventPayload;
+import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
 import it.pagopa.pn.commons.configs.PnCassandraAutoConfiguration;
 import it.pagopa.pn.commons.configs.RuntimeModeHolder;
@@ -115,6 +116,11 @@ public class Config {
                 .addMapping(s -> s.getDestinationAddress().getMunicipality(), QueuedMessage::setMunicipality)
                 .addMapping(s -> s.getDestinationAddress().getProvince(), QueuedMessage::setProvince)
                 .addMapping(s -> s.getDestinationAddress().getZip(), QueuedMessage::setZip);
+
+        modelMapper.createTypeMap(PnExtChnPecEventPayload.class, QueuedMessage.class)
+                .addMapping(s -> null, QueuedMessage::setAddress)
+                .addMapping(s -> null, QueuedMessage::setAddressDetails);
+
         return modelMapper;
     }
 

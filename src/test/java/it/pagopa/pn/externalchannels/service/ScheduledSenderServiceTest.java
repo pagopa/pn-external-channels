@@ -76,7 +76,7 @@ class ScheduledSenderServiceTest {
 
         scheduledSenderService.retrieveAndSendNotifications();
 
-        verify(fileTransferService, never()).transferCsv(any());
+        verify(fileTransferService, never()).transferCsv(any(), any());
         verify(pnExtChnService).produceStatusMessage(any(), any(), any(), statusCaptor.capture(),
                 any(), anyInt(), any(), any());
 
@@ -94,7 +94,7 @@ class ScheduledSenderServiceTest {
 
         scheduledSenderService.retrieveAndSendNotifications();
 
-        verify(fileTransferService, times(1)).transferCsv(any());
+        verify(fileTransferService, times(1)).transferCsv(any(), any());
     }
 
     private QueuedMessage mockQueuedMessage() {
@@ -103,11 +103,11 @@ class ScheduledSenderServiceTest {
     }
 
     private CsvTransformationResult mockErrorCsvResult(){
-        return new CsvTransformationResult(Arrays.asList(mockQueuedMessage()), null);
+        return new CsvTransformationResult(Arrays.asList(mockQueuedMessage()), null, "abc.csv");
     }
 
     private CsvTransformationResult mockCsvResult(){
-        return new CsvTransformationResult(Collections.emptyList(), "MOCK_CONTENT".getBytes(StandardCharsets.UTF_8));
+        return new CsvTransformationResult(Collections.emptyList(), "MOCK_CONTENT".getBytes(StandardCharsets.UTF_8), "abc.csv");
     }
 
 }

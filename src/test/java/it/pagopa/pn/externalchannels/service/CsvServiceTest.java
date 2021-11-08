@@ -1,11 +1,14 @@
 package it.pagopa.pn.externalchannels.service;
 
+import it.pagopa.pn.api.dto.events.ServiceLevelType;
+import it.pagopa.pn.externalchannels.config.properties.JobProperties;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.Column;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.CsvTemplate;
 import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
 import it.pagopa.pn.externalchannels.pojos.CsvTransformationResult;
 import it.pagopa.pn.externalchannels.pojos.ElaborationResult;
 import it.pagopa.pn.externalchannels.repositories.cassandra.CsvTemplateRepository;
+import it.pagopa.pn.externalchannels.util.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -22,18 +26,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import static it.pagopa.pn.externalchannels.service.TestUtils.toJson;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ContextConfiguration(classes = { CsvServiceTest.SpringTestConfiguration.class, CsvServiceImpl.class })
+@ContextConfiguration(classes = { CsvServiceTest.SpringTestConfiguration.class, CsvServiceImpl.class})
 class CsvServiceTest {
 
     @TestConfiguration
     @TestPropertySource("classpath:application.yaml")
     static class SpringTestConfiguration {
+
+        @Bean
+        JobProperties jobProperties(){
+            return new JobProperties();
+        }
 
     }
 
@@ -50,11 +58,29 @@ class CsvServiceTest {
     CsvService csvService;
 
     @Test
-    void shouldCreateCsv(){
+    void shouldCreateDigitalCsv(){
         when(csvTemplateRepository.findFirstByIdCsv(messagesCsvTemplateId)).thenReturn(mockCsvTemplate());
-        CsvTransformationResult res = csvService.queuedMessagesToCsv(Arrays.asList(mockQueuedMessage()));
+        List<QueuedMessage> qms = Arrays.asList(mockQueuedMessage());
+        qms.get(0).setServiceLevel(Constants.PEC);
+        CsvTransformationResult res = csvService.queuedMessagesToCsv(qms);
         byte[] expectedBytes = "CODICE ATTO;DESTINATARIO;CAP\r\n123;456;00789\r\n".getBytes(StandardCharsets.UTF_8);
         assertArrayEquals(expectedBytes, res.getCsvContent());
+        String expectedFilename = "8585_5066_[0-9]{1,5}_[0-9]{8}_PZ1\\.csv";
+        System.out.println("FILENAME: " + res.getFileName());
+        assertTrue(res.getFileName().matches(expectedFilename));
+    }
+
+    @Test
+    void shouldCreatePhysicalCsv(){
+        when(csvTemplateRepository.findFirstByIdCsv(messagesCsvTemplateId)).thenReturn(mockCsvTemplate());
+        List<QueuedMessage> qms = Arrays.asList(mockQueuedMessage());
+        qms.get(0).setServiceLevel(ServiceLevelType.REGISTERED_LETTER_890.name());
+        CsvTransformationResult res = csvService.queuedMessagesToCsv(qms);
+        byte[] expectedBytes = "CODICE ATTO;DESTINATARIO;CAP\r\n123;456;00789\r\n".getBytes(StandardCharsets.UTF_8);
+        assertArrayEquals(expectedBytes, res.getCsvContent());
+        String expectedFilename = "8585_5065_[0-9]{1,5}_[0-9]{8}_PZ1\\.csv";
+        System.out.println("FILENAME: " + res.getFileName());
+        assertTrue(res.getFileName().matches(expectedFilename));
     }
 
     @Test
