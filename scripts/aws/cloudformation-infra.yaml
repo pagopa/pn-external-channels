@@ -431,8 +431,8 @@ Resources:
       #HealthCheckPath: /
       #HealthCheckPort: 8080
       #HealthCheckProtocol: HTTP
-      #Matcher:
-        #HttpCode: 404
+      Matcher:
+        HttpCode: 404
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60 # default is 300
