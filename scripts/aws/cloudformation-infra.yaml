@@ -346,7 +346,8 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+          CidrIp: 0.0.0.0/0
+          #SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -355,8 +356,8 @@ Resources:
         "Fn::Sub": '${EnvName}-vpc-id'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: 0.0.0.0/0
   ExtChannelService:
     Type: AWS::ECS::Service
@@ -383,6 +384,13 @@ Resources:
             - !ImportValue { "Fn::Sub": '${EnvName}-subnet2' }
           SecurityGroups:
             - !Ref ContainerSecurityGroup
+      LoadBalancers:
+        - ContainerName: !Sub '${EnvName}-extchannel'
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ExtChaTargetGroup
+        - ContainerName: !Sub '${EnvName}-extchannel'
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ExtChaNetTargetGroup
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -411,6 +419,61 @@ Resources:
         ScaleOutCooldown: 10
         # Keep things at or lower than 50% CPU utilization, for example
         TargetValue: 60
+
+  ExtChaTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      Protocol: HTTP
+      Port: 8080
+      #HealthCheckEnabled: true
+      #HealthCheckIntervalSeconds: 10
+      #HealthCheckPath: /
+      #HealthCheckPort: 8080
+      #HealthCheckProtocol: HTTP
+      #Matcher:
+        #HttpCode: 404
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60 # default is 300
+      VpcId: !ImportValue
+        "Fn::Sub": '${EnvName}-vpc-id'
+
+  ExtChaLoadBalancerListner:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue
+        "Fn::Sub": '${EnvName}-extcha-alb-id'
+      Protocol: HTTP
+      Port: 8080
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ExtChaTargetGroup
+          Order: 1
+
+  ExtChaNetTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      Protocol: TCP
+      Port: 8080
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60 # default is 300
+      VpcId: !ImportValue
+        "Fn::Sub": '${EnvName}-vpc-id'
+
+  ExtChaNetLoadBalancerListner:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue
+        "Fn::Sub": '${EnvName}-extcha-nlb-id'
+      Protocol: TCP
+      Port: 8080
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ExtChaNetTargetGroup
+          Order: 1
 
 Outputs:
   CluserArn:
