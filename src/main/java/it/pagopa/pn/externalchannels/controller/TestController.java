@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/test-external-channel")
+@RequestMapping("/external-channel/test")
+//@RequestMapping("/test-external-channel")
 public class TestController {
 
     @Autowired
