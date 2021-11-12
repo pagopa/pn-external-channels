@@ -46,19 +46,31 @@ Resources:
         - ColumnName: id
           ColumnType: text
       RegularColumns:
-        - ColumnName: codiceatto
+        - ColumnName: actcode
           ColumnType: text
         - ColumnName: eventstatus
           ColumnType: text
+        - ColumnName: eventid
+          ColumnType: text
         - ColumnName: iun
           ColumnType: text
-        - ColumnName: numerocronologico
+        - ColumnName: address
           ColumnType: text
-        - ColumnName: parteistante
+        - ColumnName: addressdetails
+          ColumnType: text
+        - ColumnName: at
+          ColumnType: text
+        - ColumnName: attachmentkeys
+          ColumnType: list<text>
+        - ColumnName: communicationtype
+          ColumnType: text
+        - ColumnName: municipality
           ColumnType: text
         - ColumnName: pecaddress
           ColumnType: text
-        - ColumnName: procuratore
+        - ColumnName: printmodel
+          ColumnType: text
+        - ColumnName: province
           ColumnType: text
         - ColumnName: recipientdenomination
           ColumnType: text
@@ -72,7 +84,11 @@ Resources:
           ColumnType: text
         - ColumnName: senderpecaddress
           ColumnType: text
-        - ColumnName: ufficialegiudiziario
+        - ColumnName: servicelevel
+          ColumnType: text
+        - ColumnName: template
+          ColumnType: text
+        - ColumnName: zip
           ColumnType: text
 
   DiscartedMessageTable:
