@@ -334,8 +334,8 @@ Resources:
             Action:
               - s3:ListBucket
             Resource:
-              - !Sub '${InputBucket.Arn}'
-              - !Sub '${OutputBucket.Arn}'
+              - !Sub '${InputBucketArn}'
+              - !Sub '${OutputBucketArn}'
       Roles:
         - !Ref TaskRole
   # A role needed for auto scaling
