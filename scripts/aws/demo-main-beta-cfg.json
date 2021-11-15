@@ -3,7 +3,7 @@
     "EnvName" : "demo-main",
     "EnvNumber" : "6",
     "KeyspaceName": "demo_extch",
-    "SendCronExpression": "* 0/5 0 ? * *",
+    "SendCronExpression": "0 0/5 * ? * *",
     "InputBucketName": "demo-pagopa-main-extchn-input",
     "OutputBucketName": "demo-pagopa-main-extchn-output",
     "InputBucketArn": "arn:aws:s3:::demo-pagopa-main-extchn-input",
