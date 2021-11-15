@@ -10,26 +10,17 @@ Parameters:
   KeyspaceName:
     Type: String
     Description: cassandra keyspace name
+  SendCronExpression:
+    Type: String
+    Description: Espressione quartz per schedulare gli invii
+  InputBucketName:
+    Type: String
+    Description: Nome del bucket di input dai sistemi di poste
+  OutputBucketName:
+    Type: String
+    Description: Nome del bucket di output verso i sistemi di poste
 
 Resources:
-  InputBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-  OutputBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
 
   Keyspace:
     Type: AWS::Cassandra::Keyspace
@@ -219,6 +210,8 @@ Resources:
               Value: !Sub 'cassandra.${AWS::Region}.${AWS::URLSuffix}:9142'
             - Name: DEVOPTIONS_FAKEPNEXTCHNSERVICE
               Value: "true"
+            - Name: JOB_CRONEXPRESSION
+              Value: !Ref SendCronExpression
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNNOTIFPECINBOUND_DESTINATION
               Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-input-queue-name' }
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNELABRESULT_DESTINATION
@@ -226,9 +219,9 @@ Resources:
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION
               Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-output-queue-name' }
             - Name: S3_BUCKETS_EXTERNALCHANNELSOUT
-              Value: !Ref OutputBucket
+              Value: !Ref OutputBucketName
             - Name: S3_BUCKETS_EXTERNALCHANNELSIN
-              Value: !Ref InputBucket
+              Value: !Ref InputBucketName
             - Name: CLOUD_AWS_REGION_STATIC
               Value: !Ref AWS::Region
             - Name: AWS_REGIONCODE

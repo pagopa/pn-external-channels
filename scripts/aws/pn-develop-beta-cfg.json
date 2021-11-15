@@ -2,6 +2,9 @@
   "Parameters" : {
     "EnvName" : "pn-develop",
     "EnvNumber" : "8",
-    "KeyspaceName": "devel_extch"
+    "KeyspaceName": "devel_extch",
+    "SendCronExpression": "0 0/5 0 ? * *",
+    "InputBucketName": "pn-pagopa-develop-extchn-input",
+    "OutputBucketName": "pn-pagopa-develop-extchn-output"
   }
 }
