@@ -3,7 +3,7 @@
     "EnvName" : "pn-develop",
     "EnvNumber" : "8",
     "KeyspaceName": "devel_extch",
-    "SendCronExpression": "0 0/5 0 ? * *",
+    "SendCronExpression": "* 0/5 0 ? * *",
     "InputBucketName": "pn-pagopa-develop-extchn-input",
     "OutputBucketName": "pn-pagopa-develop-extchn-output",
     "InputBucketArn": "arn:aws:s3:::pn-pagopa-develop-extchn-input",
