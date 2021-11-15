@@ -16,9 +16,15 @@ Parameters:
   InputBucketName:
     Type: String
     Description: Nome del bucket di input dai sistemi di poste
+  InputBucketArn:
+    Type: String
+    Description: Arn del bucket di input dai sistemi di poste
   OutputBucketName:
     Type: String
     Description: Nome del bucket di output verso i sistemi di poste
+  OutputBucketArn:
+    Type: String
+    Description: Arn del bucket di output verso i sistemi di poste
 
 Resources:
 
@@ -318,11 +324,11 @@ Resources:
             Resource:
               - !Join
                 - '/'
-                - - !Sub '${InputBucket.Arn}'
+                - - !Sub '${InputBucketArn}'
                   - '*'
               - !Join
                 - '/'
-                - - !Sub '${OutputBucket.Arn}'
+                - - !Sub '${OutputBucketArn}'
                   - '*'
           - Effect: Allow
             Action:
