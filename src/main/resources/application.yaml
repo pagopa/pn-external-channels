@@ -74,6 +74,9 @@ s3:
   retry:
     delay: 1000
     attempts: 3
+  buckets:
+    physicalDestination: "EsitiCartacei/"
+    digitalDestination: "EsitiDigitali/"
 
 job:
   cron-expression: "0 * * * * *" # OGNI MINUTO
