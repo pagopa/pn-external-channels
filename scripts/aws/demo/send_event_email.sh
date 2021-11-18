@@ -16,7 +16,9 @@ else
   mockBehaviour=$3
 fi
 
+iun=$(date +%s)
+
 echo "Sending "$eventType", attempt number "$attemptNum" with "$mockBehaviour" behaviour"
-aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url https://localhost:4566/000000000000/local-ext-channels-inputs --message-body "{\"iun\":\"123\",\"senderId\":\"456\",\"senderDenomination\":\"PAGOPA\",\"senderEmailAddress\":\"piattaformanotifica.poc@gmail.com\",\"recipientDenomination\":\"MARIO ROSSI\",\"recipientTaxId\":\"MRRSS123\",\"emailAddress\":\"piattaformanotifica.poc@gmail.com\",\"shipmentDate\":\"2021-09-20T15:57:25.097159300Z\"}" --message-attributes "{\"eventType\":{\"DataType\":\"String\",\"StringValue\":\""$eventType"\"},\"publisher\":{\"DataType\":\"String\",\"StringValue\":\"pub\"},\"eventId\":{\"DataType\":\"String\",\"StringValue\":\"a23-"$attemptNum"\"},\"iun\":{\"DataType\":\"String\",\"StringValue\":\"456\"},\"createdAt\":{\"DataType\":\"String\",\"StringValue\":\"2021-09-20T15:57:25.097159300Z\"}}"
+aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url https://localhost:4566/000000000000/local-ext-channels-inputs --message-body "{\"accessUrl\":\"0\",\"iun\":\""$iun"\",\"senderId\":\"456\",\"senderDenomination\":\"PAGOPA\",\"senderEmailAddress\":\"piattaformanotifica.poc@gmail.com\",\"recipientDenomination\":\"MARIO ROSSI\",\"recipientTaxId\":\"MRRSS123\",\"emailAddress\":\"piattaformanotifica.poc@gmail.com\",\"shipmentDate\":\"2021-09-20T15:57:25.097159300Z\"}" --message-attributes "{\"eventType\":{\"DataType\":\"String\",\"StringValue\":\""$eventType"\"},\"publisher\":{\"DataType\":\"String\",\"StringValue\":\"pub\"},\"eventId\":{\"DataType\":\"String\",\"StringValue\":\""$iun"-"$attemptNum"\"},\"iun\":{\"DataType\":\"String\",\"StringValue\":\""$iun"\"},\"createdAt\":{\"DataType\":\"String\",\"StringValue\":\"2021-09-20T15:57:25.097159300Z\"}}"
 
 read -n 1 -s -r -p "Press any key to continue"

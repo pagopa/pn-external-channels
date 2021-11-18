@@ -15,40 +15,42 @@ cloud:
     credentials:
       profile-name: ${PN_AWS_PROFILE_NAME:default}
     region:
-        static: us-east-1
+      static: us-east-1
     sqs:
-        endpoint: http://localhost:4566
+      endpoint: http://localhost:4566
     s3:
-        endpoint: http://localhost:4566
+      endpoint: http://localhost:4566
 
 spring:
-    cloud:
-        stream:    
-            bindings:
-                pnextchnnotifpecinbound:
-                    destination: local-ext-channels-inputs
-                pnextchnelabresult:
-                    destination: local-ext-channels-elab-res
-                pnextchnstatus:
-                    destination: local-ext-channels-outputs
-    data:
-        cassandra:
-            password: cassandra
-            username: cassandra
-            keyspaceName: external_channel
-            contactPoints: localhost
-            port: 9042
-            schemaAction: CREATE_IF_NOT_EXISTS
-            local-datacenter: datacenter1
+  cloud:
+    stream:
+      bindings:
+        pnextchnnotifpecinbound:
+          destination: local-ext-channels-inputs
+        pnextchnelabresult:
+          destination: local-ext-channels-elab-res
+        pnextchnstatus:
+          destination: local-ext-channels-outputs
+  data:
+    cassandra:
+      password: cassandra
+      username: cassandra
+      keyspaceName: external_channel
+      contactPoints: localhost
+      port: 9042
+      schemaAction: CREATE_IF_NOT_EXISTS
+      local-datacenter: datacenter1
 
 
 #s3:
-#    profile-name: pn-develop-extchn
-#    region: eu-south-1
-#    # endpoint: http://localhost:4566
-#    buckets:
-#        external-channels-out: pn-develop-extchn-output
-#        external-channels-in: pn-develop-extchn-input
+#  profile-name: pn-develop-extchn
+#  region: eu-south-1
+#  # endpoint: http://localhost:4566
+#  buckets:
+#    external-channels-out: pn-develop-extchn-input
+#    external-channels-in: pn-develop-extchn-output
+#    physicalDestination: "EsitiCartacei/"
+#    digitalDestionation: "EsitiDigitali/"
 
 s3:
   profile-name: ${PN_AWS_PROFILE_NAME:default}
@@ -57,6 +59,8 @@ s3:
   buckets:
     external-channels-out: external-channels-out
     external-channels-in: external-channels-in
+    physicalDestination: "EsitiCartacei/"
+    digitalDestination: "EsitiDigitali/"
 
 emailSender:
   content-type: HTML
@@ -69,5 +73,4 @@ emailSender:
 aruba:
   user: ${PEC_SENDER_USERNAME:}
   password: ${PEC_SENDER_PASSWORD:}
-
 

@@ -18,8 +18,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -50,8 +53,16 @@ class PnExtChnS3FileTransferServiceTest {
     }
 
     @Test
+    void shouldGetDownloadLink() throws MalformedURLException {
+        when(s3client.generatePresignedUrl(any(), any(), any(), any()))
+                .thenReturn(new URL("https://test.com"));
+        String link = s3Service.getDownloadLink("key");
+        assertNotNull(link);
+    }
+
+    @Test
     void shouldTransferCsv(){
-        s3Service.transferCsv("TEST_CONTENT".getBytes(StandardCharsets.UTF_8));
+        s3Service.transferCsv("TEST_CONTENT".getBytes(StandardCharsets.UTF_8), "abc.csv");
 
         verify(s3client, times(1)).putObject(eq(outBucket), any(), any(), any());
     }

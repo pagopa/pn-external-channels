@@ -10,26 +10,23 @@ Parameters:
   KeyspaceName:
     Type: String
     Description: cassandra keyspace name
+  SendCronExpression:
+    Type: String
+    Description: Espressione quartz per schedulare gli invii
+  InputBucketName:
+    Type: String
+    Description: Nome del bucket di input dai sistemi di poste
+  InputBucketArn:
+    Type: String
+    Description: Arn del bucket di input dai sistemi di poste
+  OutputBucketName:
+    Type: String
+    Description: Nome del bucket di output verso i sistemi di poste
+  OutputBucketArn:
+    Type: String
+    Description: Arn del bucket di output verso i sistemi di poste
 
 Resources:
-  InputBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-  OutputBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
 
   Keyspace:
     Type: AWS::Cassandra::Keyspace
@@ -46,19 +43,31 @@ Resources:
         - ColumnName: id
           ColumnType: text
       RegularColumns:
-        - ColumnName: codiceatto
+        - ColumnName: actcode
           ColumnType: text
         - ColumnName: eventstatus
           ColumnType: text
+        - ColumnName: eventid
+          ColumnType: text
         - ColumnName: iun
           ColumnType: text
-        - ColumnName: numerocronologico
+        - ColumnName: address
           ColumnType: text
-        - ColumnName: parteistante
+        - ColumnName: addressdetails
+          ColumnType: text
+        - ColumnName: at
+          ColumnType: text
+        - ColumnName: attachmentkeys
+          ColumnType: list<text>
+        - ColumnName: communicationtype
+          ColumnType: text
+        - ColumnName: municipality
           ColumnType: text
         - ColumnName: pecaddress
           ColumnType: text
-        - ColumnName: procuratore
+        - ColumnName: printmodel
+          ColumnType: text
+        - ColumnName: province
           ColumnType: text
         - ColumnName: recipientdenomination
           ColumnType: text
@@ -72,7 +81,11 @@ Resources:
           ColumnType: text
         - ColumnName: senderpecaddress
           ColumnType: text
-        - ColumnName: ufficialegiudiziario
+        - ColumnName: servicelevel
+          ColumnType: text
+        - ColumnName: template
+          ColumnType: text
+        - ColumnName: zip
           ColumnType: text
 
   DiscartedMessageTable:
@@ -203,6 +216,8 @@ Resources:
               Value: !Sub 'cassandra.${AWS::Region}.${AWS::URLSuffix}:9142'
             - Name: DEVOPTIONS_FAKEPNEXTCHNSERVICE
               Value: "true"
+            - Name: JOB_CRONEXPRESSION
+              Value: !Ref SendCronExpression
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNNOTIFPECINBOUND_DESTINATION
               Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-input-queue-name' }
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNELABRESULT_DESTINATION
@@ -210,9 +225,9 @@ Resources:
             - Name: SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION
               Value: !ImportValue { "Fn::Sub": '${EnvName}-extchannel-output-queue-name' }
             - Name: S3_BUCKETS_EXTERNALCHANNELSOUT
-              Value: !Ref OutputBucket
+              Value: !Ref OutputBucketName
             - Name: S3_BUCKETS_EXTERNALCHANNELSIN
-              Value: !Ref InputBucket
+              Value: !Ref InputBucketName
             - Name: CLOUD_AWS_REGION_STATIC
               Value: !Ref AWS::Region
             - Name: AWS_REGIONCODE
@@ -309,18 +324,18 @@ Resources:
             Resource:
               - !Join
                 - '/'
-                - - !Sub '${InputBucket.Arn}'
+                - - !Sub '${InputBucketArn}'
                   - '*'
               - !Join
                 - '/'
-                - - !Sub '${OutputBucket.Arn}'
+                - - !Sub '${OutputBucketArn}'
                   - '*'
           - Effect: Allow
             Action:
               - s3:ListBucket
             Resource:
-              - !Sub '${InputBucket.Arn}'
-              - !Sub '${OutputBucket.Arn}'
+              - !Sub '${InputBucketArn}'
+              - !Sub '${OutputBucketArn}'
       Roles:
         - !Ref TaskRole
   # A role needed for auto scaling
@@ -346,7 +361,8 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+          CidrIp: 0.0.0.0/0
+          #SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
   LoadBalancerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -355,8 +371,8 @@ Resources:
         "Fn::Sub": '${EnvName}-vpc-id'
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: 0.0.0.0/0
   ExtChannelService:
     Type: AWS::ECS::Service
@@ -383,6 +399,13 @@ Resources:
             - !ImportValue { "Fn::Sub": '${EnvName}-subnet2' }
           SecurityGroups:
             - !Ref ContainerSecurityGroup
+      LoadBalancers:
+        - ContainerName: !Sub '${EnvName}-extchannel'
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ExtChaTargetGroup
+        - ContainerName: !Sub '${EnvName}-extchannel'
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ExtChaNetTargetGroup
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -411,6 +434,61 @@ Resources:
         ScaleOutCooldown: 10
         # Keep things at or lower than 50% CPU utilization, for example
         TargetValue: 60
+
+  ExtChaTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      Protocol: HTTP
+      Port: 8080
+      #HealthCheckEnabled: true
+      #HealthCheckIntervalSeconds: 10
+      #HealthCheckPath: /
+      #HealthCheckPort: 8080
+      #HealthCheckProtocol: HTTP
+      Matcher:
+        HttpCode: 404
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60 # default is 300
+      VpcId: !ImportValue
+        "Fn::Sub": '${EnvName}-vpc-id'
+
+  ExtChaLoadBalancerListner:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue
+        "Fn::Sub": '${EnvName}-extcha-alb-id'
+      Protocol: HTTP
+      Port: 8080
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ExtChaTargetGroup
+          Order: 1
+
+  ExtChaNetTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      Protocol: TCP
+      Port: 8080
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60 # default is 300
+      VpcId: !ImportValue
+        "Fn::Sub": '${EnvName}-vpc-id'
+
+  ExtChaNetLoadBalancerListner:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !ImportValue
+        "Fn::Sub": '${EnvName}-extcha-nlb-id'
+      Protocol: TCP
+      Port: 8080
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ExtChaNetTargetGroup
+          Order: 1
 
 Outputs:
   CluserArn:

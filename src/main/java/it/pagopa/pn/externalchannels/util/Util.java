@@ -2,6 +2,8 @@ package it.pagopa.pn.externalchannels.util;
 
 
 import it.pagopa.pn.api.dto.events.EventType;
+import it.pagopa.pn.externalchannels.entities.queuedmessage.QueuedMessage;
+import it.pagopa.pn.externalchannels.event.QueuedMessageChannel;
 import org.springframework.messaging.MessageHeaders;
 
 import java.time.Instant;
@@ -13,6 +15,11 @@ import static it.pagopa.pn.api.dto.events.StandardEventHeader.PN_EVENT_HEADER_EV
 public class Util {
 
     private Util(){}
+
+    public static QueuedMessageChannel getChannel(QueuedMessage qm) {
+        return Constants.PEC.equals(qm.getServiceLevel()) ?
+                QueuedMessageChannel.DIGITAL : QueuedMessageChannel.PAPER;
+    }
 
     public static String formatInstant(Instant i){
         if (i != null)

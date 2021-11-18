@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
@@ -15,7 +16,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.net.URL;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.function.Supplier;
 
 @Service
@@ -23,7 +27,6 @@ import java.util.function.Supplier;
 @ConditionalOnProperty(name = "file-transfer-service.implementation", havingValue = "aws")
 public class PnExtChnS3FileTransferService implements PnExtChnFileTransferService {
 
-    private static final String CSV_NAME = "messages_%s.csv";
     public static final String CSV_EXTENSION = ".csv";
     public static final String OK_EXTENSION = ".ok";
 
@@ -49,17 +52,31 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
     }
 
     @Override
-    public void transferCsv(byte[] csv) {
+    public void transferAttachment(byte[] attachment, String name) {
+        log.info("PnExtChnS3FileTransferService - transferAttachment - START");
+
+        ByteArrayInputStream is = new ByteArrayInputStream(attachment);
+
+        if(!s3client.doesBucketExistV2(s3Properties.getInBucket()))
+            s3client.createBucket(s3Properties.getInBucket());
+
+        log.info("Write key " + name);
+        attempt(() -> s3client.putObject(s3Properties.getInBucket(), name, is, null));
+
+        log.info("PnExtChnS3FileTransferService - transferAttachment - END");
+    }
+
+    @Override
+    public void transferCsv(byte[] csv, String name) {
         log.info("PnExtChnS3FileTransferService - transferCsv - START");
 
         ByteArrayInputStream is = new ByteArrayInputStream(csv);
-        String key = String.format(CSV_NAME, System.currentTimeMillis());
 
         if(!s3client.doesBucketExistV2(s3Properties.getOutBucket()))
             s3client.createBucket(s3Properties.getOutBucket());
 
-        log.info("Write key " + key);
-        attempt(() -> s3client.putObject(s3Properties.getOutBucket(), key, is, null));
+        log.info("Write key " + name);
+        attempt(() -> s3client.putObject(s3Properties.getOutBucket(), name, is, null));
 
         log.info("PnExtChnS3FileTransferService - transferCsv - END");
     }
@@ -82,6 +99,14 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
         result.getObjectContent().close();
         log.info("PnExtChnS3FileTransferService - retrieveElaborationResult - END");
         return bytes;
+    }
+
+    @Override
+    public String getDownloadLink(String attachmentKey) {
+        Instant expiry = Instant.now().plus(3, ChronoUnit.HOURS);
+        URL url = s3client.generatePresignedUrl(s3Properties.getInBucket(), attachmentKey,
+                Date.from(expiry), HttpMethod.GET);
+        return url.toString();
     }
 
     private <T> T attempt(Supplier<T> s){

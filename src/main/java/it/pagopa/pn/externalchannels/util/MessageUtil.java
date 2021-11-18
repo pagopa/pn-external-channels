@@ -1,30 +1,34 @@
 package it.pagopa.pn.externalchannels.util;
 
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import it.pagopa.pn.api.dto.events.GenericEvent;
+import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.externalchannels.service.MessageBodyType;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.stereotype.Component;
 
-import it.pagopa.pn.api.dto.events.PnExtChnEmailEventPayload;
-import it.pagopa.pn.api.dto.events.PnExtChnPecEventPayload;
-import it.pagopa.pn.externalchannels.service.MessageBodyType;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 @Component
+@Slf4j
 public class MessageUtil {
 
 	public static final String MSG_SUBJECT = "Avviso di avvenuta ricezione";
 	
-	private static final String HTML_MSG_TEMPLATE = "<p>Buongiorno Gentile %s</p>"	
+	private static final String HTML_MSG_TEMPLATE = "<p>Buongiorno Gentile ${recipientDenomination}</p>"
 			+ "	<p>Ti informiano che ti &egrave; stato notificato il seguente Atto:</p>"
 			+ "	<p>Codice univoco (IUN):<br/>"
-			+ "	<b>%s</b></p>"
+			+ "	<b>${iun}</b></p>"
 			+ "	<p>PA Mittente:<br/>"
-			+ "	<b>%s</b></p>"
+			+ "	<b>${senderDenomination}</b></p>"
 			+ " <p>Data invio:<br/>"
-			+ " <b>%s</b></p>"
+			+ " <b>${shipmentDate?datetime.iso?string[\"dd-MM-yyyy\"]}</b></p>"
 			+ "	<p>Puoi consultare l'Atto in uno dei seguenti modi:</p>"
 			+ "	<p>- Accedendo con SPID o CIE (Carta d'Identit&agrave; Elettronica) a Piattaforma Notifiche al seguente indirizzo<br/>"
 			+ "	<a href=\"https://www.piattaformanotifiche.gov.it\">https://www.piattaformanotifiche.gov.it</a></p>"
@@ -33,23 +37,23 @@ public class MessageUtil {
 			+ "	<br/>"
 			+ "	<p>Ti informiamo che in alternativa &egrave; anche possibile accedere temporaneamente all'Atto per un massimo di <b>2 accessi</b>,"
 			+ "	attraverso l'url univoco riportato qui sotto.</p>"
-			+ "	<p>URL UNIVOCO<br/><a href=\"https://at%s.gov.it\">https://at%s.gov.it</a></p>"
+			+ "	<p>URL UNIVOCO<br/><a href=\"${accessUrl}\">${accessUrl}</a></p>"
 			+ "	<br/>"
 			+ "	<p><i>Questo messaggio &egrave; stato inoltrato da un indirizzo di Posta Elettronica Certificata non abilitato a ricevere messaggi.<br/>"
 			+ "	La invitiamo pertanto a non rispondere a questa comunicazione.<i></p>";
 
-	private static final String TEXT_MSG_TEMPLATE = "Gentile %s\n"
+	private static final String TEXT_MSG_TEMPLATE = "Gentile ${recipientDenomination}\n"
 			+ "\n"
 			+ "La informiano che ti è stato notificato il seguente Atto:\n"
 			+ "\n"
 			+ "Codice univoco (IUN):\n"
-			+ "%s\n"
+			+ "${iun}\n"
 			+ "\n"
 			+ "PA Mittente:\n"
-			+ "%s\n"
+			+ "${senderDenomination}\n"
 			+ "\n"
 			+ "Data invio:\n"
-			+ "%s\n"
+			+ "${shipmentDate?datetime.iso?string[\"dd-MM-yyyy\"]}\n"
 			+ "\n"
 			+ "Puoi consultare l'Atto in uno dei seguenti modi:\n"
 			+ " - Accedendo con SPID o CIE (Carta d'Identità Elettronica) a Piattaforma Notifiche al seguente indirizzo\n"
@@ -62,74 +66,37 @@ public class MessageUtil {
 			+ "attraverso l'url univoco riportato qui sotto.\n"
 			+ "\n"
 			+ "URL UNIVOCO\n"
-			+ "https://at%s.gov.it\n"
+			+ "${accessUrl}\n"
 			+ "\n"
 			+ "Questo messaggio è stato inoltrato da un indirizzo di Posta Elettronica non abilitato a ricevere messaggi.\n"
 			+ "La invitiamo pertanto a non rispondere a questa comunicazione.";
-	
-    public String pecPayloadToMessage (PnExtChnPecEventPayload payload, MessageBodyType type) {
-		if ( type.equals(MessageBodyType.HTML ) ) {
-			return pecPayloadToHtmlBody( payload );
-		} else {
-			return pecPayloadToPlainTextBody( payload );
+
+	Configuration freeMarker;
+
+	public MessageUtil(Configuration freeMarker) {
+		this.freeMarker = freeMarker;
+		StringTemplateLoader stringLoader = new StringTemplateLoader();
+		stringLoader.putTemplate(MessageBodyType.PLAIN_TEXT.name(), TEXT_MSG_TEMPLATE);
+		stringLoader.putTemplate(MessageBodyType.HTML.name(), HTML_MSG_TEMPLATE);
+		this.freeMarker.setTemplateLoader(stringLoader);
+	}
+
+	public <T> String prepareMessage(GenericEvent<StandardEventHeader, T> evt, MessageBodyType type) {
+		StringWriter stringWriter = new StringWriter();
+		try {
+			Template template = freeMarker.getTemplate(type.name());
+			template.process(toModel(evt.getPayload()), stringWriter);
+		} catch (Exception e) {
+			log.error("Could not process message template", e);
+			e.printStackTrace();
 		}
+		return stringWriter.getBuffer().toString();
 	}
-    
-    public String mailPayloadToMessage (PnExtChnEmailEventPayload payload, MessageBodyType type) {
-		if ( type.equals(MessageBodyType.HTML ) ) {
-			return emailPayloadToHtmlBody( payload );
-		} else {
-			return emailPayloadToPlainTextBody( payload );
-		}
+
+	private Map<String, Object> toModel(Object o)
+			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Map<String, Object> model = PropertyUtils.describe(o);
+		return model;
 	}
-		
-	private String pecPayloadToHtmlBody( PnExtChnPecEventPayload payload ) {
-    	return String.format( HTML_MSG_TEMPLATE, payload.getRecipientDenomination(),
-    								   payload.getIun(),
-    								   payload.getSenderDenomination(),
-    								   convertShipmentDateToString(payload.getShipmentDate()),
-    								   payload.getIun(),
-    								   payload.getIun() );
-	}
-	
-	private String pecPayloadToPlainTextBody( PnExtChnPecEventPayload payload ) {
-    	return String.format( TEXT_MSG_TEMPLATE, payload.getRecipientDenomination(),
-    								   payload.getIun(),
-    								   payload.getSenderDenomination(),
-    								   convertShipmentDateToString(payload.getShipmentDate()),
-    								   payload.getIun(),
-    								   payload.getIun() );
-	}
-	
-	private String emailPayloadToHtmlBody( PnExtChnEmailEventPayload payload ) {
-    	return String.format( HTML_MSG_TEMPLATE, payload.getRecipientDenomination(),
-    								   payload.getIun(),
-    								   payload.getSenderDenomination(),
-    								   convertShipmentDateToString(payload.getShipmentDate()),
-    								   payload.getIun(),
-    								   payload.getIun() );
-	}
-	
-	private String emailPayloadToPlainTextBody( PnExtChnEmailEventPayload payload ) {
-    	return String.format( TEXT_MSG_TEMPLATE, payload.getRecipientDenomination(),
-    								   payload.getIun(),
-    								   payload.getSenderDenomination(),
-    								   convertShipmentDateToString(payload.getShipmentDate()),
-    								   payload.getIun(),
-    								   payload.getIun() );
-	}
-	
-	private String convertShipmentDateToString (Instant shipmentDate) {
-		String parsedDate = null;
-		// FIXME: questo genera output, vanno gestite formattazione e timezone per la visualizzazione.
-		if (shipmentDate != null) {
-			OffsetDateTime odt = shipmentDate.atOffset(ZoneOffset.UTC);
-			int year = odt.get(ChronoField.YEAR_OF_ERA);
-			int month = odt.get(ChronoField.MONTH_OF_YEAR);
-			int day = odt.get(ChronoField.DAY_OF_MONTH);
-			parsedDate = String.format("%02d-%02d-%04d", day, month, year);
-		}
-		
-		return parsedDate;
-	}
+
 }
