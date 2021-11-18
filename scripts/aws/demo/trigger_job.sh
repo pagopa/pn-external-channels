@@ -11,7 +11,7 @@ else
 fi
 
 curl -X GET -H "x-api-key: "$xapikey"" \
-    ""$endpoint"test-external-channel/job/trigger"
+    ""$endpoint"external-channel/test/job/trigger"
 
 echo "Job Triggered"
 

@@ -12,7 +12,7 @@ fi
 
 
 curl -X GET -H "x-api-key: "$xapikey"" \
-    ""$endpoint"test-external-channel/any/clear"
+    ""$endpoint"external-channel/test/any/clear"
 
 echo "Cassandra is now empty"
 

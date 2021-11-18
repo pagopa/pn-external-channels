@@ -76,7 +76,7 @@ s3:
     attempts: 3
 
 job:
-  cron-expression: "0 0 */3 ? * *" # OGNI 3 ORE
+  cron-expression: "0 * * * * *" # OGNI MINUTO
   batch-size: 10
   messages-csv-template-id: 8
   results-csv-template-id: 4

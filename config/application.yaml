@@ -60,7 +60,7 @@ s3:
     external-channels-out: external-channels-out
     external-channels-in: external-channels-in
     physicalDestination: "EsitiCartacei/"
-    digitalDestionation: "EsitiDigitali/"
+    digitalDestination: "EsitiDigitali/"
 
 emailSender:
   content-type: HTML

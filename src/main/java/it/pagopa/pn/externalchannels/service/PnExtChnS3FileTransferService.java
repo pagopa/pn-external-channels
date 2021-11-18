@@ -52,6 +52,21 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
     }
 
     @Override
+    public void transferAttachment(byte[] attachment, String name) {
+        log.info("PnExtChnS3FileTransferService - transferAttachment - START");
+
+        ByteArrayInputStream is = new ByteArrayInputStream(attachment);
+
+        if(!s3client.doesBucketExistV2(s3Properties.getInBucket()))
+            s3client.createBucket(s3Properties.getInBucket());
+
+        log.info("Write key " + name);
+        attempt(() -> s3client.putObject(s3Properties.getInBucket(), name, is, null));
+
+        log.info("PnExtChnS3FileTransferService - transferAttachment - END");
+    }
+
+    @Override
     public void transferCsv(byte[] csv, String name) {
         log.info("PnExtChnS3FileTransferService - transferCsv - START");
 

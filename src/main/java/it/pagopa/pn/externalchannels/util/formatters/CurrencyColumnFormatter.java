@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.util.formatters;
 import it.pagopa.pn.externalchannels.entities.csvtemplate.Column;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 public class CurrencyColumnFormatter extends ColumnFormatter{
 
@@ -10,7 +11,9 @@ public class CurrencyColumnFormatter extends ColumnFormatter{
 
     public CurrencyColumnFormatter() {
         df = new DecimalFormat("0.00");
-        df.getDecimalFormatSymbols().setDecimalSeparator(',');
+        DecimalFormatSymbols decimalFormatSymbols = df.getDecimalFormatSymbols();
+        decimalFormatSymbols.setDecimalSeparator(',');
+        df.setDecimalFormatSymbols(decimalFormatSymbols);
         df.setDecimalSeparatorAlwaysShown(true);
     }
 

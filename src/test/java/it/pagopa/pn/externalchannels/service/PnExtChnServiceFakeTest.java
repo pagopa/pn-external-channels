@@ -5,6 +5,7 @@ import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
 import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
+import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderConfigByDenomination;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderPecByDenomination;
 import it.pagopa.pn.externalchannels.repositories.cassandra.*;
@@ -30,7 +31,8 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {
         PnExtChnServiceFakeTest.SpringTestConfiguration.class,
         PnExtChnServiceFakeImpl.class,
-        MessageUtil.class
+        MessageUtil.class,
+        S3Properties.class
 })
 class PnExtChnServiceFakeTest {
 
@@ -40,6 +42,11 @@ class PnExtChnServiceFakeTest {
         @Bean
         public ModelMapper modelMapper(){
             return new ModelMapper();
+        }
+
+        @Bean
+        public Configuration configuration(){
+            return new Configuration();
         }
     }
 
@@ -65,7 +72,7 @@ class PnExtChnServiceFakeTest {
     ArubaSenderService arubaSenderService;
 
     @MockBean
-    Configuration freeMarker;
+    PnExtChnFileTransferService fileTransferService;
 
     @Autowired
     PnExtChnService pnExtChnService;
@@ -76,11 +83,6 @@ class PnExtChnServiceFakeTest {
                 .thenReturn(new SenderConfigByDenomination());
         when(senderPecByDenominationRepository.findFirstByDenomination(any()))
                 .thenReturn(new SenderPecByDenomination());
-    }
-
-    @Test
-    void shouldSavePaperMessage(){
-        pnExtChnService.savePaperMessage(mockPaperMessage());
     }
 
     @Test

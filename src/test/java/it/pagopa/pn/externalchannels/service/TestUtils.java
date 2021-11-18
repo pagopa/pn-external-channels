@@ -52,6 +52,7 @@ public class TestUtils {
                         .senderId("7")
                         .senderEmailAddress("8")
                         .shipmentDate(Instant.now())
+                        .accessUrl("9")
                         .build()
                 ).build();
     }
@@ -82,6 +83,7 @@ public class TestUtils {
                         .senderId("7")
                         .senderPecAddress("8")
                         .shipmentDate(Instant.now())
+                        .accessUrl("9")
                         .build()
                 ).build();
     }
@@ -118,6 +120,7 @@ public class TestUtils {
                         .senderDenomination("4")
                         .serviceLevel(ServiceLevelType.REGISTERED_LETTER_890)
                         .communicationType(CommunicationType.FAILED_DELIVERY_NOTICE)
+                        .accessUrl("5")
                         .build()
                 ).build();
     }

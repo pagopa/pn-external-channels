@@ -5,13 +5,17 @@ import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.api.dto.notification.address.PhysicalAddress;
 import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
 import it.pagopa.pn.externalchannels.arubapec.SimpleMessage;
+import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import it.pagopa.pn.externalchannels.service.MessageBodyType;
+import it.pagopa.pn.externalchannels.service.PnExtChnFileTransferService;
 import it.pagopa.pn.externalchannels.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,12 +32,21 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 	@Autowired
 	private MessageUtil msgUtils;
 
+	@Autowired
+	private PnExtChnFileTransferService fileTransferService;
+
+	@Autowired
+	private S3Properties s3Properties;
+
+	private byte[] attachmentExample;
+
 	@Override
 	public void savePaperMessage(PnExtChnPaperEvent paperNotification) {
 		log.info("PnExtChnServiceFakeImpl - savePaperMessage - START");
 		try {
 			PnExtChnProgressStatusEvent out = computeResponse(paperNotification);
 			Map<String, Object> headers = headersToMap(out.getHeader());
+			out = setAttachments(out, s3Properties.getPhysicalDestination());
 			statusQueueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
 		}
 		catch ( RuntimeException exc ) {
@@ -82,6 +95,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 						"PEC", PnExtChnProgressStatus.OK, null);
 				Map<String, Object> headers = headersToMap(out.getHeader());
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push ok");
+				out = setAttachments(out, s3Properties.getDigitalDestination());
 				statusQueueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
 				log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - ok");
 			}
@@ -93,6 +107,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 			Map<String, Object> headers = headersToMap(out.getHeader());
 			log.info("PnExtChnServiceFakeImpl - saveDigitalMessage - before push fail old");
 			try {
+				out = setAttachments(out, s3Properties.getDigitalDestination());
 				statusQueueMessagingTemplate.convertAndSend(statusMessageQueue, out.getPayload(), headers);
 			}
 			catch ( RuntimeException exc ) {
@@ -102,6 +117,27 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 		}
 	}
 
+	private PnExtChnProgressStatusEvent setAttachments(PnExtChnProgressStatusEvent evt, String folder) {
+		if(evt != null && evt.getPayload() != null &&
+				PnExtChnProgressStatus.OK.equals(evt.getPayload().getStatusCode())) {
+			try {
+				long ts = new Date().getTime();
+				if (attachmentExample == null)
+					attachmentExample = this.getClass().getClassLoader()
+							.getResourceAsStream("attachment_example.pdf")	.readAllBytes();
+				String fileName = folder + "attachment_" + ts + ".pdf";
+				fileTransferService.transferAttachment(attachmentExample, fileName);
+				evt = evt.toBuilder()
+						.payload(evt.getPayload().toBuilder()
+								.attachmentKeys(Arrays.asList(fileName))
+								.build()
+						).build();
+			} catch (Exception e) {
+				log.warn("Could not load attachment example", e);
+			}
+		}
+		return evt;
+	}
 
 	private PnExtChnProgressStatusEvent computeResponse(PnExtChnPecEvent evt) {
 		PnExtChnProgressStatus outcome = decideOutcome( evt );
