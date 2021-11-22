@@ -227,6 +227,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 				.canale(canale)
 				.codiceAtto(qm.getActCode())
 				.codiceRaccomandata(codiceRaccomandata)
+				.requestCorrelationId( qm.getRequestCorrelationId() )
 				.iun(qm.getIun())
 				.tipoInvio(tipoInvio != null ? tipoInvio.name() : "")
 				.tentativo(tentativo)
@@ -245,7 +246,7 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 		StandardEventHeader stdHeader = builder()
 				.iun(qm.getIun())
-				.eventId("")
+				.eventId( UUID.randomUUID().toString() )
 				.eventType(tipoInvio != null ? tipoInvio.name() : "")
 				.createdAt(Instant.now())
 				.publisher(canale)
