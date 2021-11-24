@@ -1,5 +1,5 @@
 if ([ -z $1 ]) then
-  destdir=physical
+  destdir=EsitiCartacei
 else 
   destdir=$1
 fi

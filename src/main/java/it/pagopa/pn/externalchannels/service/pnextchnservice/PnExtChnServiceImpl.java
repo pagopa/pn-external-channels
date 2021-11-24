@@ -154,15 +154,15 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 		log.info("PnExtChnServiceImpl - processElaborationResults - START");
 
 		List<ElaborationResult> elaborationResults = elaborationResultList.stream()
-				.filter(r -> r != null && StringUtils.isNotBlank(r.getIun()))
+				.filter(r -> r != null && StringUtils.isNotBlank(r.getEventId()))
 				.collect(Collectors.toList());
 
-		List<String> iuns = elaborationResults.stream()
-				.map(ElaborationResult::getIun)
+		List<String> eventIds = elaborationResults.stream()
+				.map(ElaborationResult::getEventId)
 				.collect(Collectors.toList());
 
-		List<QueuedMessage> queuedMessages = iuns.stream()
-				.map(queuedMessageRepository::findByIun)
+		List<QueuedMessage> queuedMessages = eventIds.stream()
+				.map(queuedMessageRepository::findByEventId)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
 
@@ -170,12 +170,12 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 		queuedMessages.forEach(qm -> {
 			ElaborationResult elabRes = elaborationResults.stream()
-					.filter(er -> er.getIun().equals(qm.getIun()))
+					.filter(er -> er.getEventId().equals(qm.getEventId()))
 					.findFirst()
 					.orElseGet(ElaborationResult::new);
 
 			Runnable logWarning = () ->
-					log.warn("Message with IUN " + qm.getIun() + " has unknown result code: " + elabRes.getResult());
+					log.warn("Message with EVENT ID " + qm.getEventId() + " has unknown result code: " + elabRes.getResult());
 
 			resultDescriptors.stream()
 					.filter(rd -> rd.getCode().equals(elabRes.getResult()))

@@ -43,17 +43,20 @@ public class S3ResultPollerService {
 
 	@Scheduled(fixedDelay = 2000)
 	public void pollResultsBucket() throws IOException {
+		log.info("S3ResultPollerService - pollResultsBucket - START");
 		List<String> keys = getKeys();
 		String key = keys.stream()
 				.filter(k -> !knownFiles.contains(k))
 				.findFirst()
 				.orElse(null);
 		if(key != null) {
+			log.info("Key found ! " + key);
 			PnExtChnElaborationResultEvent evt = new PnExtChnElaborationResultEvent();
 			evt.setKey(key);
 			knownFiles.add(key);
 			service.handleElaborationResult(evt);
 		}
+		log.info("S3ResultPollerService - pollResultsBucket - END");
 	}
 
 	private List<String> getKeys() {
