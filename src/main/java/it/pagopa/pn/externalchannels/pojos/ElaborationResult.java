@@ -57,6 +57,8 @@ public class ElaborationResult {
 
     private String iun;
 
+    private String eventId;
+
     private String attachmentA;
 
     private String attachmentB;

@@ -1,5 +1,5 @@
 if ([ -z $1 ]) then
-  destdir=digital
+  destdir=EsitiDigitali
 else 
   destdir=$1
 fi
