@@ -41,11 +41,20 @@ spring:
       schemaAction: CREATE_IF_NOT_EXISTS
       local-datacenter: datacenter1
 
+# S3 PAGOPA
+#s3:
+#  profile-name: pn-develop-extchn-pagopa
+#  region: eu-central-1
+#  buckets:
+#    external-channels-out: pn-pagopa-develop-extchn-input
+#    external-channels-in: pn-pagopa-develop-extchn-output
+#    physicalDestination: "EsitiCartacei/"
+#    digitalDestionation: "EsitiDigitali/"
 
+# S3 POSTE
 #s3:
 #  profile-name: pn-develop-extchn
 #  region: eu-south-1
-#  # endpoint: http://localhost:4566
 #  buckets:
 #    external-channels-out: pn-develop-extchn-input
 #    external-channels-in: pn-develop-extchn-output

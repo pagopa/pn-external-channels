@@ -102,12 +102,13 @@ class PnExtChnServiceTest {
                 .map(er -> {
                     QueuedMessage qm = new QueuedMessage();
                     qm.setIun(er.getIun());
+                    qm.setEventId(er.getEventId());
                     return qm;
                 }).collect(Collectors.toList());
 
         when(queuedMessageRepository.findByIunIn(any())).thenReturn(qms);
 
-        qms.forEach(qm -> when(queuedMessageRepository.findByIun(qm.getIun())).thenReturn(qm));
+        qms.forEach(qm -> when(queuedMessageRepository.findByEventId(qm.getEventId())).thenReturn(qm));
 
         when(resultDescriptorRepository.listAll()).thenReturn(mockResultDescriptors());
         pnExtChnService.processElaborationResults(mockElaborationResults());
