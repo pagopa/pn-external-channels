@@ -127,8 +127,8 @@ public class TestUtils {
 
     public static List<ElaborationResult> mockElaborationResults() {
         return Arrays.asList(
-                ElaborationResult.builder().iun("123").result("1").build(),
-                ElaborationResult.builder().iun("456").result("2").build()
+                ElaborationResult.builder().iun("123").result("1").eventId("123").build(),
+                ElaborationResult.builder().iun("456").result("2").eventId("456").build()
         );
     }
 

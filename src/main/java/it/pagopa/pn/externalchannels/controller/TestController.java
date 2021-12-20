@@ -58,7 +58,7 @@ public class TestController {
     }
 
     @PostMapping(path = "/cassandra/postCsvTemplate")
-    public CsvTemplate postCassandraQueuedMessage(@RequestBody CsvTemplate csvTemplate){
+    public CsvTemplate postCassandraCsvTemplate(@RequestBody CsvTemplate csvTemplate){
         return csvTemplateRepository.save(csvTemplate);
     }
 
