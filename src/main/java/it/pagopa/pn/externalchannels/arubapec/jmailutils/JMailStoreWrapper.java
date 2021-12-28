@@ -75,6 +75,7 @@ public class JMailStoreWrapper {
                 try {
                     PecEntry pecEntry = new PecEntry(jMailMsg);
                     pecEntries.add(pecEntry);
+                    log.debug("{} pecEntry from {} type {} ", pecEntries.size(), pecEntry.getFrom(), pecEntry.getType());
                 } catch (MessagingException | IOException exc) {
                     throw new PnInternalException("Elencando messaggi nel folder " + folder.getFullName(), exc);
                 }

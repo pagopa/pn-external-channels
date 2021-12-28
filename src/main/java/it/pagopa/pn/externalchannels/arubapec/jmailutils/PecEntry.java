@@ -26,7 +26,8 @@ public class PecEntry {
     public enum Type {
         MESSAGE,
         ACCEPTED_RECIPE,
-        DELIVERED_RECIPE
+        DELIVERED_RECIPE,
+        IGNORED
     }
 
     private final Type type;
@@ -56,15 +57,26 @@ public class PecEntry {
         if( recipeType == null ) {
             pecEntryType = Type.MESSAGE;
         }
-        else if( RECIPE_TYPE_HEADER__ACCEPTED_VALUE.equals( recipeType )) {
-            pecEntryType = Type.ACCEPTED_RECIPE;
-        }
-        else if( RECIPE_TYPE_HEADER__DELIVERED_VALUE.equals( recipeType )) {
-            pecEntryType = Type.DELIVERED_RECIPE;
-        }
         else {
-            throw new IllegalArgumentException(String.format("Recipe type [%s] not supported", recipeType));
-        }
+            switch (recipeType) {
+                case RECIPE_TYPE_HEADER__ACCEPTED_VALUE:
+                    pecEntryType = Type.ACCEPTED_RECIPE;
+                    break;
+                case RECIPE_TYPE_HEADER__DELIVERED_VALUE:
+                    pecEntryType = Type.DELIVERED_RECIPE;
+                    break;
+                case "non-accettazione":
+                case "presa-in-carico":
+                case "posta-certificata":
+                case "errore-consegna":
+                case "preavviso-errore-consegna":
+                case "rilevazione-virus":
+                    pecEntryType = Type.IGNORED;
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Recipe type [%s] not supported", recipeType));
+                }
+            }
 
         return pecEntryType;
     }
