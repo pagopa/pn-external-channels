@@ -52,7 +52,7 @@ public class ArubaSenderService {
         props.put("mail.smtp.auth", true);
         props.put("mail.smtp.ssl.enable", "true");
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        props.put("mail.smtp.host", "smtp.pec.it");
+        props.put("mail.smtp.host", cfg.getSmtpsHost() );
         this.mailSession = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {

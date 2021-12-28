@@ -66,7 +66,7 @@ public class ArubaReceiverService {
         Session session = Session.getInstance(props, null);
         Store store = session.getStore( "imap" );
         try {
-            store.connect( "imap.pec.it", cfg.getUser(), cfg.getPassword());
+            store.connect( cfg.getImapsHost(), cfg.getUser(), cfg.getPassword());
         }
         catch(MessagingException exc) {
             store.close();
@@ -77,7 +77,7 @@ public class ArubaReceiverService {
 
     @Scheduled( fixedDelay = 10 * 1000)
     protected void scanForMessages() {
-        if(StringUtils.isNotBlank( cfg.getUser() ) && !dao.isEmpty()) {
+        if(StringUtils.isNotBlank( cfg.getUser() ) && !dao.isEmpty() ) {
             log.info("Start pec polling");
             this.renewStore();
             store.listEntries()

@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class ArubaCfg {
 
+    private String imapsHost;
+    private String smtpsHost;
     private String user;
-
     private String password;
 }

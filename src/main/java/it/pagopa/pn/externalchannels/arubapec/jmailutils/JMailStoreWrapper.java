@@ -8,10 +8,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 
 @Slf4j
@@ -27,9 +24,16 @@ public class JMailStoreWrapper {
     public List<PecEntry> listEntries() {
         List<PecEntry> pecEntries = new LinkedList<>();
 
-        for(Folder f: allStoreFolders() ) {
+        try {
+            Folder f = store.getDefaultFolder().getFolder("INBOX");
             pecEntries.addAll( listEntries( f ) );
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
+
+        /*for(Folder f: allStoreFolders() ) {
+            pecEntries.addAll( listEntries( f ) );
+        }*/
 
         return new ArrayList<>( pecEntries );
     }
@@ -39,24 +43,26 @@ public class JMailStoreWrapper {
 
         try {
             Folder[] personalFolders = store.getPersonalNamespaces();
-            for( Folder f: personalFolders) {
-                allStoreFolders.addAll( walkFolderTree( f ));
-            }
+            //for( Folder f: personalFolders) {
+            //    allStoreFolders.addAll( walkFolderTree( f ));
+            //}
+            allStoreFolders.addAll(Arrays.asList( personalFolders ) );
         }
         catch ( MessagingException exc) {
             log.error("Listing personal folders", exc);
         }
 
 
-        try {
+        /*try {
             Folder[] sharedFolders = store.getSharedNamespaces();
-            for( Folder f: sharedFolders) {
-                allStoreFolders.addAll( walkFolderTree( f ));
-            }
+            //for( Folder f: sharedFolders) {
+            //    allStoreFolders.addAll( walkFolderTree( f ));
+            //}
+            allStoreFolders.addAll(Arrays.asList( sharedFolders ) );
         }
         catch ( MessagingException exc) {
             log.error("Listing shared folders", exc);
-        }
+        }*/
 
         return allStoreFolders;
     }
@@ -100,7 +106,7 @@ public class JMailStoreWrapper {
 
         while( !stack.empty() ) {
             Folder currentNode = stack.pop();
-
+            log.info("IMAP folder name=\"" + currentNode.getFullName() +"\"");
             try {
                 currentNode.open(Folder.READ_ONLY);
                 allNodes.add( currentNode );
@@ -110,7 +116,7 @@ public class JMailStoreWrapper {
                 currentNode.close( false );
 
             } catch (MessagingException exc) {
-                log.error("walking in IMAP folder " + currentNode.getFullName(), exc);
+                log.error("walking in IMAP folder name=\"" + currentNode.getFullName() +"\"", exc);
             }
         }
 

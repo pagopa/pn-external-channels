@@ -82,4 +82,5 @@ emailSender:
 aruba:
   user: ${PEC_SENDER_USERNAME:}
   password: ${PEC_SENDER_PASSWORD:}
-
+  imaps-host: imap.pec.it
+  smtps-host: smtp.pec.it
