@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.arubapec.jmailutils;
+package it.pagopa.pn.externalchannels.pecbysmtp.jmailutils;
 
 import lombok.Getter;
 
@@ -27,6 +27,7 @@ public class PecEntry {
         MESSAGE,
         ACCEPTED_RECIPE,
         DELIVERED_RECIPE,
+        DELIVERING_ERROR_RECIPE,
         IGNORED
     }
 
@@ -47,7 +48,7 @@ public class PecEntry {
         this.entryId = headers.get( MESSAGE_ID_HEADER_LOWERCASE_NAME );
         this.referredId = headers.get( REFERENCED_MESSAGE_ID_HEADER_LOWERCASE_NAME );
         this.to = headers.get( TO_HEADER_LOWERCASE_NAME);
-        this.from = headers.get( FROM_HEADER_LOWERCASE_NAME );;
+        this.from = headers.get( FROM_HEADER_LOWERCASE_NAME );
         this.whenReceived = jmailMsg.getReceivedDate().toInstant();
         this.subject = jmailMsg.getSubject();
     }
@@ -65,11 +66,13 @@ public class PecEntry {
                 case RECIPE_TYPE_HEADER__DELIVERED_VALUE:
                     pecEntryType = Type.DELIVERED_RECIPE;
                     break;
+                case "preavviso-errore-consegna":
+                case "errore-consegna":
+                    pecEntryType = Type.DELIVERING_ERROR_RECIPE;
+                    break;
                 case "non-accettazione":
                 case "presa-in-carico":
                 case "posta-certificata":
-                case "errore-consegna":
-                case "preavviso-errore-consegna":
                 case "rilevazione-virus":
                     pecEntryType = Type.IGNORED;
                     break;

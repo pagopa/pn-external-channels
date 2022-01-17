@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.arubapec;
+package it.pagopa.pn.externalchannels.pecbysmtp;
 
 import lombok.*;
 

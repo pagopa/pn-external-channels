@@ -79,7 +79,7 @@ emailSender:
   username: ${EMAIL_SENDER_USERNAME:}
   password: ${EMAIL_SENDER_PASSWORD:}
 
-aruba:
+pec-by-smtp:
   user: ${PEC_SENDER_USERNAME:}
   password: ${PEC_SENDER_PASSWORD:}
   imaps-host: imap.pec.it

@@ -4,7 +4,7 @@ import freemarker.template.Configuration;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import it.pagopa.pn.api.dto.events.PnExtChnPaperEvent;
 import it.pagopa.pn.api.dto.events.PnExtChnPecEvent;
-import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
+import it.pagopa.pn.externalchannels.pecbysmtp.SenderService;
 import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderConfigByDenomination;
 import it.pagopa.pn.externalchannels.entities.senderpa.SenderPecByDenomination;
@@ -69,7 +69,7 @@ class PnExtChnServiceFakeTest {
     SenderPecByDenominationRepository senderPecByDenominationRepository;
 
     @MockBean
-    ArubaSenderService arubaSenderService;
+    SenderService senderService;
 
     @MockBean
     PnExtChnFileTransferService fileTransferService;
