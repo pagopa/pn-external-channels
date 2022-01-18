@@ -63,6 +63,7 @@ public class JMailStoreWrapper {
         }
         catch ( MessagingException exc) {
             log.error("Listing personal folders", exc);
+            throw new PnInternalException( "Listing personal folders", exc );
         }
 
 
@@ -76,6 +77,7 @@ public class JMailStoreWrapper {
         }
         catch ( MessagingException exc) {
             log.error("Listing shared folders", exc);
+            throw new PnInternalException( "Listing shared folders", exc );
         }
 
         return allStoreFolders;

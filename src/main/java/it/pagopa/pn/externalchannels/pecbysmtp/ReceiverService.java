@@ -83,6 +83,8 @@ public class ReceiverService {
     @Scheduled( fixedDelay = 10 * 1000)
     protected void scanForMessages() {
         if(StringUtils.isNotBlank( cfg.getUser() ) && !dao.isEmpty() ) {
+            long startTIme = System.currentTimeMillis();
+
             log.info("Start IMAP pec polling on host={} with user={}", cfg.getImapsHost(), cfg.getUser());
             this.renewStore();
             store.listEntries()
@@ -101,6 +103,10 @@ public class ReceiverService {
                         sendAckEvent( entry.getEvt() );
                         dao.remove( entry.getMetadata().getKey() );
                     });
+
+            log.info("END IMAP pec polling on host={} with user={} durationMillis={}",
+                    cfg.getImapsHost(), cfg.getUser(), System.currentTimeMillis() - startTIme );
+
         }
     }
 
@@ -137,7 +143,9 @@ public class ReceiverService {
                 outcome = PnExtChnProgressStatus.PERMANENT_FAIL;
                 break;
             default:
-                throw new PnInternalException("Pec entry type " + entryType + " not mapped to event Type");
+                String msg = "Pec entry type " + entryType + " not mapped to event Type";
+                log.error( msg );
+                throw new PnInternalException( msg );
         }
 
         log.debug("Mapping pec entry to external-channel event eventId={} iun={} pecEntryId={}" +
@@ -170,9 +178,5 @@ public class ReceiverService {
         private PnExtChnProgressStatusEvent evt;
         private SimpleMessage metadata;
     }
-
-
-
-
 
 }

@@ -15,22 +15,23 @@ public class MemoryPecMetadataDao implements PecMetadataDao {
 
     @Override
     public void saveMessageMetadata(String messageId, SimpleMessage dto) {
-        log.info("Add messageId={}");
+        log.info("Add messageId={}", messageId);
         log.debug("Add messageId={} dto={}", messageId, dto);
         this.store.put( messageId, dto.toBuilder().key(messageId).build());
-        log.info("Added message with messageId={}");
     }
 
     @Override
     public Optional<SimpleMessage> getMessageMetadata(String originalMessageId) {
         log.debug("Retrieve messageId={} ; actualKeys={}", originalMessageId, store.keySet() );
         String msgId = originalMessageId.replaceAll("[<>]", "");
-        return Optional.ofNullable( store.get( msgId) );
+        SimpleMessage message = store.get(msgId);
+        log.debug("Retrieved message messageId={} ; message={}", originalMessageId, message );
+        return Optional.ofNullable(message);
     }
 
     @Override
     public void remove(String key) {
-        log.info("Remove messageId={}");
+        log.info("Remove messageId={}", key);
         this.store.remove( key );
     }
 
