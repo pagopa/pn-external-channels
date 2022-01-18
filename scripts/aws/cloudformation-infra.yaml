@@ -241,7 +241,7 @@ Resources:
             - Name: PECBYSMTP_SMTPSHOST
               Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:smtps-host}}'
             - Name: PECBYSMTP_SMTPSFOLDER
-              Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:smtps-folder}}'
+              Value: ""
             - Name: EMAILSENDER_USERNAME
               Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:email_user}}'
             - Name: EMAILSENDER_PASSWORD
