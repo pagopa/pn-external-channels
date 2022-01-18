@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.arubapec;
+package it.pagopa.pn.externalchannels.pecbysmtp;
 
 import java.util.Optional;
 
@@ -6,9 +6,9 @@ public interface PecMetadataDao {
 
     void saveMessageMetadata( String messageId, SimpleMessage dto);
 
-    Optional<SimpleMessage> getMessageMetadata(String originalMessageId);
+    Optional<SimpleMessage> getMessageMetadata(String messageId);
 
-    void remove(String key);
+    void remove(String messageId);
 
     boolean isEmpty();
 }

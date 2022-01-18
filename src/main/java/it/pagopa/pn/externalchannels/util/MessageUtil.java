@@ -44,7 +44,7 @@ public class MessageUtil {
 
 	private static final String TEXT_MSG_TEMPLATE = "Gentile ${recipientDenomination}\n"
 			+ "\n"
-			+ "La informiano che ti è stato notificato il seguente Atto:\n"
+			+ "La informiano che le è stato notificato il seguente Atto:\n"
 			+ "\n"
 			+ "Codice univoco (IUN):\n"
 			+ "${iun}\n"

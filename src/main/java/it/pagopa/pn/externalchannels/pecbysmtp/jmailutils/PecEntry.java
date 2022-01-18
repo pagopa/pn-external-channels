@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.arubapec.jmailutils;
+package it.pagopa.pn.externalchannels.pecbysmtp.jmailutils;
 
 import lombok.Getter;
 
@@ -26,7 +26,9 @@ public class PecEntry {
     public enum Type {
         MESSAGE,
         ACCEPTED_RECIPE,
-        DELIVERED_RECIPE
+        DELIVERED_RECIPE,
+        DELIVERING_ERROR_RECIPE,
+        IGNORED
     }
 
     private final Type type;
@@ -46,7 +48,7 @@ public class PecEntry {
         this.entryId = headers.get( MESSAGE_ID_HEADER_LOWERCASE_NAME );
         this.referredId = headers.get( REFERENCED_MESSAGE_ID_HEADER_LOWERCASE_NAME );
         this.to = headers.get( TO_HEADER_LOWERCASE_NAME);
-        this.from = headers.get( FROM_HEADER_LOWERCASE_NAME );;
+        this.from = headers.get( FROM_HEADER_LOWERCASE_NAME );
         this.whenReceived = jmailMsg.getReceivedDate().toInstant();
         this.subject = jmailMsg.getSubject();
     }
@@ -56,15 +58,28 @@ public class PecEntry {
         if( recipeType == null ) {
             pecEntryType = Type.MESSAGE;
         }
-        else if( RECIPE_TYPE_HEADER__ACCEPTED_VALUE.equals( recipeType )) {
-            pecEntryType = Type.ACCEPTED_RECIPE;
-        }
-        else if( RECIPE_TYPE_HEADER__DELIVERED_VALUE.equals( recipeType )) {
-            pecEntryType = Type.DELIVERED_RECIPE;
-        }
         else {
-            throw new IllegalArgumentException(String.format("Recipe type [%s] not supported", recipeType));
-        }
+            switch (recipeType) {
+                case RECIPE_TYPE_HEADER__ACCEPTED_VALUE:
+                    pecEntryType = Type.ACCEPTED_RECIPE;
+                    break;
+                case RECIPE_TYPE_HEADER__DELIVERED_VALUE:
+                    pecEntryType = Type.DELIVERED_RECIPE;
+                    break;
+                case "preavviso-errore-consegna":
+                case "errore-consegna":
+                    pecEntryType = Type.DELIVERING_ERROR_RECIPE;
+                    break;
+                case "non-accettazione":
+                case "presa-in-carico":
+                case "posta-certificata":
+                case "rilevazione-virus":
+                    pecEntryType = Type.IGNORED;
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Recipe type [%s] not supported", recipeType));
+                }
+            }
 
         return pecEntryType;
     }

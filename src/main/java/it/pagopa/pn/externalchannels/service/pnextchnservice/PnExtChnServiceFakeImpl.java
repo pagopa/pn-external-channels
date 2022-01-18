@@ -3,8 +3,8 @@ package it.pagopa.pn.externalchannels.service.pnextchnservice;
 
 import it.pagopa.pn.api.dto.events.*;
 import it.pagopa.pn.api.dto.notification.address.PhysicalAddress;
-import it.pagopa.pn.externalchannels.arubapec.ArubaSenderService;
-import it.pagopa.pn.externalchannels.arubapec.SimpleMessage;
+import it.pagopa.pn.externalchannels.pecbysmtp.SenderService;
+import it.pagopa.pn.externalchannels.pecbysmtp.SimpleMessage;
 import it.pagopa.pn.externalchannels.config.properties.S3Properties;
 import it.pagopa.pn.externalchannels.service.MessageBodyType;
 import it.pagopa.pn.externalchannels.service.PnExtChnFileTransferService;
@@ -27,7 +27,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 	private static final String IMMEDIATE_RESPONSE_NEW_ADDR_REGEX = "^ImmediateResponse\\(NEW_ADDR:(.*)\\)$";
 
 	@Autowired
-	private ArubaSenderService pecSvc;
+	private SenderService pecSvc;
 
 	@Autowired
 	private MessageUtil msgUtils;
