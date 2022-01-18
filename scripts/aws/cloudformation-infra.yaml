@@ -241,11 +241,11 @@ Resources:
             - Name: PECBYSMTP_SMTPSHOST
               Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:smtps-host}}'
             - Name: PECBYSMTP_SMTPSFOLDER
-              Value: ""
+              Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:smtps-folder}}'
             - Name: EMAILSENDER_USERNAME
-              Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:email_user}}'
+              Value: '{{resolve:secretsmanager:email_server_credentials:SecretString:email_user}}'
             - Name: EMAILSENDER_PASSWORD
-              Value: '{{resolve:secretsmanager:pec_server_credentials_iomsges:SecretString:email_pwd}}'
+              Value: '{{resolve:secretsmanager:email_server_credentials:SecretString:email_pwd}}'
           PortMappings:
             - ContainerPort: 8080
           # Send logs to CloudWatch Logs
