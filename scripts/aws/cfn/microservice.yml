@@ -115,17 +115,17 @@ Resources:
         MemoryAmount: 2GB
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'SPRING_DATA_CASSANDRA_KEYSPACENAME=${KeyspaceName}'
-        ContainerEnvEntry1: 'SPRING_DATA_CASSANDRA_SSL=true'
-        ContainerEnvEntry1: !Sub 'SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra.${AWS::Region}.${AWS::URLSuffix}:9142'
-        ContainerEnvEntry1: 'DEVOPTIONS_FAKEPNEXTCHNSERVICE=true'
-        ContainerEnvEntry1: !Sub 'JOB_CRONEXPRESSION=${SendCronExpression}'
-        ContainerEnvEntry1: !Sub 'CLOUD_AWS_REGION_STATIC=${AWS::Region}'
-        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        ContainerEnvEntry1: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNNOTIFPECINBOUND_DESTINATION=${ExternalChannelsInputsQueueName}'
-        ContainerEnvEntry1: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNELABRESULT_DESTINATION=${ExternalChannelsElabResQueueName}'
-        ContainerEnvEntry1: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION=${ExternalChannelsOutputsQueueName}'
-        ContainerEnvEntry1: !Sub 'S3_BUCKETS_EXTERNALCHANNELSOUT=${OutputBucketName}'
-        ContainerEnvEntry1: !Sub 'S3_BUCKETS_EXTERNALCHANNELSIN=${InputBucketName}'
+        ContainerEnvEntry2: 'SPRING_DATA_CASSANDRA_SSL=true'
+        ContainerEnvEntry3: !Sub 'SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra.${AWS::Region}.${AWS::URLSuffix}:9142'
+        ContainerEnvEntry4: 'DEVOPTIONS_FAKEPNEXTCHNSERVICE=true'
+        ContainerEnvEntry5: !Sub 'JOB_CRONEXPRESSION=${SendCronExpression}'
+        ContainerEnvEntry6: !Sub 'CLOUD_AWS_REGION_STATIC=${AWS::Region}'
+        ContainerEnvEntry7: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry8: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNNOTIFPECINBOUND_DESTINATION=${ExternalChannelsInputsQueueName}'
+        ContainerEnvEntry9: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNELABRESULT_DESTINATION=${ExternalChannelsElabResQueueName}'
+        ContainerEnvEntry10: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION=${ExternalChannelsOutputsQueueName}'
+        ContainerEnvEntry11: !Sub 'S3_BUCKETS_EXTERNALCHANNELSOUT=${OutputBucketName}'
+        ContainerEnvEntry12: !Sub 'S3_BUCKETS_EXTERNALCHANNELSIN=${InputBucketName}'
         MappedPaths: '/external-channels/*,/external-channels-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -139,7 +139,7 @@ Resources:
     Properties:
       PolicyName: !Sub '${ProjectName}-delivery-push-CustomTaskPolicy'
       Roles:
-        - !GetAtt DeliveryPushMicroservice.Outputs.TaskRoleName
+        - !GetAtt ExternalChannelMicroservice.Outputs.TaskRoleName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
