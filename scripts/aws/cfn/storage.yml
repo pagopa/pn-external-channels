@@ -1,0 +1,230 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Actions storage
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Nome dell'ambiente destinazione
+
+  MicroserviceNumber:
+    Type: Number
+    Description: unused
+
+  TemplateBucketBaseUrl:
+    Type: String
+    Description: URL da cui caricare i frammenti di template di infrastruttura
+
+Resources:
+
+  Keyspace:
+    Type: AWS::Cassandra::Keyspace
+    Properties:
+      KeyspaceName: !Sub '${ProjectName}_ext_channel'
+
+  QueuedMessageTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: queued_message
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: id
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: actcode
+          ColumnType: text
+        - ColumnName: eventstatus
+          ColumnType: text
+        - ColumnName: eventid
+          ColumnType: text
+        - ColumnName: iun
+          ColumnType: text
+        - ColumnName: address
+          ColumnType: text
+        - ColumnName: addressdetails
+          ColumnType: text
+        - ColumnName: at
+          ColumnType: text
+        - ColumnName: attachmentkeys
+          ColumnType: list<text>
+        - ColumnName: communicationtype
+          ColumnType: text
+        - ColumnName: municipality
+          ColumnType: text
+        - ColumnName: pecaddress
+          ColumnType: text
+        - ColumnName: printmodel
+          ColumnType: text
+        - ColumnName: province
+          ColumnType: text
+        - ColumnName: recipientdenomination
+          ColumnType: text
+        - ColumnName: recipienttaxid
+          ColumnType: text
+        - ColumnName: requestcorrelationid
+          ColumnType: text
+        - ColumnName: senderdenomination
+          ColumnType: text
+        - ColumnName: senderid
+          ColumnType: text
+        - ColumnName: senderpecaddress
+          ColumnType: text
+        - ColumnName: servicelevel
+          ColumnType: text
+        - ColumnName: template
+          ColumnType: text
+        - ColumnName: zip
+          ColumnType: text
+
+  DiscartedMessageTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: discarded_message
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: id
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: message
+          ColumnType: text
+        - ColumnName: reasons
+          ColumnType: list<text>
+
+  CsvTemplateTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: csv_template
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: id
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: columns
+          ColumnType: text
+        - ColumnName: description
+          ColumnType: text
+        - ColumnName: idcsv
+          ColumnType: text
+
+  ResultDescriptorTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: result_descriptor
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: code
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: positive
+          ColumnType: boolean
+        - ColumnName: retryable
+          ColumnType: boolean
+        - ColumnName: servicecode
+          ColumnType: text
+
+  SenderCfgByDenominationTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: sender_config_by_denomination
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: denomination
+          ColumnType: text
+        - ColumnName: channel
+          ColumnType: text
+        - ColumnName: servicelevel
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: printmodel
+          ColumnType: text
+        - ColumnName: template
+          ColumnType: text
+
+  SenderPecByDenominationTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      TableName: sender_pec_by_denomination
+      KeyspaceName: !Ref Keyspace
+      PointInTimeRecoveryEnabled: true
+      PartitionKeyColumns:
+        - ColumnName: denomination
+          ColumnType: text
+      RegularColumns:
+        - ColumnName: idpec
+          ColumnType: text
+        - ColumnName: pec
+          ColumnType: text
+
+  # Post recipe S3 Storage
+  RecipesBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      # No default retentin neither legal hold.
+      # Can define retention period or legal hold when upload new object or version
+      ObjectLockEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            ExposedHeaders:
+              - "x-amz-version-id"
+
+
+  # Internal queues
+  ExternalChannelsElabResQueue:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-external_channel_elab_res'
+        DelaySeconds: 1
+
+
+Outputs:
+
+  # Keyvalue store
+  KeyspaceName:
+    Description: Keyspace Name used by application to access the key-value store
+    Value: !Ref Keyspace
+
+
+  # Post recipes S3 bucket
+  RecipesBucketName:
+    Description: name of bucket going to contains notification documents
+    Value: !Ref RecipesBucket
+
+  RecipesBucketArn:
+    Description: ARN of bucket going to contains notification documents
+    Value: !Sub '${RecipesBucket.Arn}'
+
+
+  # external-channel internal queue
+  ExternalChannelsElabResQueueName:
+    Value: !GetAtt ExternalChannelsElabResQueue.Outputs.QueueName
+    Description: pn-delivery-push input queue name
+  ExternalChannelsElabResQueueURL:
+    Value: !GetAtt ExternalChannelsElabResQueue.Outputs.QueueURL
+    Description: pn-delivery-push input queue URL
+  ExternalChannelsElabResQueueARN:
+    Value: !GetAtt ExternalChannelsElabResQueue.Outputs.QueueARN
+    Description: pn-delivery-push input queue ARN
