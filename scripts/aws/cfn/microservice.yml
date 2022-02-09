@@ -137,7 +137,7 @@ Resources:
   ExternalChannelMicroserviceTaskPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${ProjectName}-delivery-push-CustomTaskPolicy'
+      PolicyName: !Sub '${ProjectName}-ext-channels-CustomTaskPolicy'
       Roles:
         - !GetAtt ExternalChannelMicroservice.Outputs.TaskRoleName
       PolicyDocument:
