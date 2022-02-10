@@ -201,6 +201,7 @@ Resources:
         MicroServiceUniqueName: !Sub '${ProjectName}-external-channel'
         IntendedUsage: B2B
         DnsName: !Ref ApiDnsName
+        ProjectName: !Ref ProjectName
         ServiceApiPath: 'external-channels'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
@@ -214,6 +215,7 @@ Resources:
         MicroServiceUniqueName: !Sub '${ProjectName}-external-channel'
         IntendedUsage: WEB
         DnsName: !Ref WebApiDnsName
+        ProjectName: !Ref ProjectName
         ServiceApiPath: 'external-channels'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
