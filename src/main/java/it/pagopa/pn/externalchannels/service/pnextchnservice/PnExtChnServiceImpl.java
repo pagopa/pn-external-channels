@@ -146,7 +146,9 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 		if (qm == null)
 			return null;
-		return qm.getAttachmentKeys();
+		return qm.getAttachmentKeys().stream()
+				.map( key -> key.replaceAll( "/", "~" ) )
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -208,11 +210,11 @@ public class PnExtChnServiceImpl implements PnExtChnService {
 
 	private List<String> putAttachmentsInList(ElaborationResult er){
 		List<String> attachments = Stream.of(
-						er.getAttachmentA(),
-						er.getAttachmentB(),
-						er.getAttachmentC(),
-						er.getAttachmentD(),
-						er.getAttachmentE()
+						er.getAttachmentA().replaceAll( "/", "~" ),
+						er.getAttachmentB().replaceAll( "/", "~" ),
+						er.getAttachmentC().replaceAll( "/", "~" ),
+						er.getAttachmentD().replaceAll( "/", "~" ),
+						er.getAttachmentE().replaceAll( "/", "~" )
 				).filter(StringUtils::isNotBlank)
 				.collect(Collectors.toList());
 		return attachments.isEmpty() ? null : attachments;

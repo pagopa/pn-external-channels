@@ -129,7 +129,7 @@ public class PnExtChnServiceFakeImpl extends PnExtChnServiceImpl {
 				fileTransferService.transferAttachment(attachmentExample, fileName);
 				evt = evt.toBuilder()
 						.payload(evt.getPayload().toBuilder()
-								.attachmentKeys(Arrays.asList(fileName))
+								.attachmentKeys(Arrays.asList(fileName.replaceAll( "/", "~" )))
 								.build()
 						).build();
 			} catch (Exception e) {
