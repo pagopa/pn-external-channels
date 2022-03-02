@@ -103,6 +103,7 @@ public class PnExtChnS3FileTransferService implements PnExtChnFileTransferServic
 
     @Override
     public String getDownloadLink(String attachmentKey) {
+        attachmentKey = attachmentKey.replaceAll( "~", "/" );
         Instant expiry = Instant.now().plus(3, ChronoUnit.HOURS);
         URL url = s3client.generatePresignedUrl(s3Properties.getInBucket(), attachmentKey,
                 Date.from(expiry), HttpMethod.GET);
