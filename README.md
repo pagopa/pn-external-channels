@@ -26,3 +26,5 @@ Istruzioni per la compilazione
 Istruzioni per il run
 ```
     ./mvnw spring-boot:run
+```
+
