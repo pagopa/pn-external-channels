@@ -1,10 +1,18 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
-  title: >- 
-    OpenAPI per external-channel, Permette di inviare messaggi digitali, anche a valore legale, 
-    oppure interfacciarsi con un operatore di corrispondenza cartacea.
+  title: ExternalChannel (AKA CarrierPigeon)
   description: >-
-    This API are used for ..... FIXME
+    ## Abstract
+      Questo servizio permette di inviare messaggi in modo asyncrono e ricevere aggiornamenti
+      sul loro stato di avanzamento. I canali gestiti sono i seguenti:
+
+      - __Messaggi digitali a valore legale__: PEC. <br/>
+      - __Messaggi digitali "di cortesia"__: eMail, SMS <br/>
+      - __Messaggi cartacei__, nello specifico: <br/>
+          - Raccomandata Internazionale, <br/>
+          - Raccomandata Semplice, <br/>
+          - Raccomandata con ricevuta di ritorno, <br/>
+          - Raccomandata a norma di legge 890/1982. <br/>
   license:
     name: PN software license
     url: 'https://www.pn.pagopa.it/LICENSE'
@@ -28,12 +36,11 @@ paths:
   /external-channels/v1/digital-deliveries/legal-full-message-requests/{requestIdx}:
     parameters:
       - $ref: '#/components/parameters/requestIdx' 
-      - $ref: '#/components/parameters/xPagopaExtchCxId'
     put:
       tags:
         - DigitalLegalMessages
       operationId: sendDigitalLegalMessage
-      summary: Send a new digital message delivery request
+      summary: Invio messaggio digitale legale
       requestBody:
         content:
           application/json:
@@ -50,20 +57,33 @@ paths:
       callbacks:
         deliveryStatusPushUpdates:
           'indirizzo_webhook_oppure_coda_sqs_legato_al_valore_header_xPagopaExtchCxId':
-            $ref: '#/components/callbacks/deliveryStatusPushUpdates'
+            post:
+              summary: Eventi avanzamento spediti ad SQS
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        $ref: '#/components/schemas/SingleStatusUpdate'
+                required: true
+              responses:
+                default:
+                  description: Error processing the update, the update must be re-sended
+                '200':
+                  description: Update correctly received
+                '400':
+                  description: Malformed update status
     get:
       tags:
         - DigitalLegalMessages
       operationId: getDigitalLegalMessageStatus
-      summary: Read the status of a digital delivery
+      summary: Pull avanzamenti messaggi digitali legali
       responses:
         '200':
           description: OK
-          headers:
-            etag: 
-              description: a checksum of the request
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -81,12 +101,11 @@ paths:
   /external-channels/v1/digital-deliveries/courtesy-full-message-requests/{requestIdx}:  
     parameters:
       - $ref: '#/components/parameters/requestIdx'  
-      - $ref: '#/components/parameters/xPagopaExtchCxId'
     put:
       tags:
         - DigitalCourtesyMessages
       operationId: sendDigitalCourtesyMessage
-      summary: Send a digital message without legal effects
+      summary: Invio messaggio digitale di cortesia
       requestBody:
         content:
           application/json:
@@ -103,20 +122,33 @@ paths:
       callbacks:
         deliveryStatusPushUpdates:
           'indirizzo_webhook_oppure_coda_sqs_legato_al_valore_header_xPagopaExtchCxId':
-            $ref: '#/components/callbacks/deliveryStatusPushUpdates'
+            post:
+              summary: Eventi avanzamento spediti ad SQS
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        $ref: '#/components/schemas/SingleStatusUpdate'
+                required: true
+              responses:
+                default:
+                  description: Error processing the update, the update must be re-sended
+                '200':
+                  description: Update correctly received
+                '400':
+                  description: Malformed update status
     get:
       tags:
         - DigitalCourtesyMessages
       operationId: getDigitalCourtesyMessageStatus
-      summary: Get status information about a message
+      summary: Pull avanzamenti messaggi digitali di cortesia
       responses:
         '200':
           description: OK
-          headers:
-            etag: 
-              description: a checksum of the request
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -133,12 +165,11 @@ paths:
   /external-channels/v1/digital-deliveries/courtesy-simple-message-requests/{requestIdx}:
     parameters:
       - $ref: '#/components/parameters/requestIdx'  
-      - $ref: '#/components/parameters/xPagopaExtchCxId'
     put:
       tags:
         - DigitalCourtesyMessages
       operationId: sendCourtesyShortMessage
-      summary: Send a digital short message without legal effects
+      summary: Invio messaggio digitale di cortesia breve
       requestBody:
         content:
           application/json:
@@ -155,20 +186,33 @@ paths:
       callbacks:
         deliveryStatusPushUpdates:
           'indirizzo_webhook_oppure_coda_sqs_legato_al_valore_header_xPagopaExtchCxId':
-            $ref: '#/components/callbacks/deliveryStatusPushUpdates'
+            post:
+              summary: Eventi avanzamento spediti ad SQS
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        $ref: '#/components/schemas/SingleStatusUpdate'
+                required: true
+              responses:
+                default:
+                  description: Error processing the update, the update must be re-sended
+                '200':
+                  description: Update correctly received
+                '400':
+                  description: Malformed update status
     get:
       tags:
         - DigitalCourtesyMessages
       operationId: getCourtesyShortMessageStatus
-      summary: Retrieve status information about a short message
+      summary: Pull avanzamenti messaggi digitali di cortesia brevi
       responses:
         '200':
           description: OK
-          headers:
-            etag: 
-              description: a checksum of the request
-              schema:
-                type: string
           content:
             application/json:
               schema:
@@ -186,12 +230,11 @@ paths:
   /external-channel/v1/paper-deliveries-engagements/{requestIdx}:
     parameters:
       - $ref: '#/components/parameters/requestIdx'  
-      - $ref: '#/components/parameters/xPagopaExtchCxId'
     put:
       operationId: sendPaperEngageRequest
       tags:
         - PaperMessages
-      summary: PN richiede l'invio di corrispondenza cartacea
+      summary: Invio di corrispondenza cartacea
       description: >- 
         Questa operazione sottomette ad external-channel una richiesta di invio di corrispondenza 
         cartacea. <br/>
@@ -215,13 +258,31 @@ paths:
       callbacks:
         deliveryStatusPushUpdates:
           'indirizzo_webhook_oppure_coda_sqs_legato_al_valore_header_xPagopaExtchCxId':
-            $ref: '#/components/callbacks/deliveryStatusPushUpdates'
+            post:
+              summary: Eventi avanzamento spediti ad SQS
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: array
+                      minItems: 1
+                      maxItems: 1000
+                      items:
+                        $ref: '#/components/schemas/SingleStatusUpdate'
+                required: true
+              responses:
+                default:
+                  description: Error processing the update, the update must be re-sended
+                '200':
+                  description: Update correctly received
+                '400':
+                  description: Malformed update status
     
     get:
       operationId: getPaperEngageProgresses
       tags:
         - PaperMessages
-      summary: PN richiede l'elenco dei progressi di una postalizzazione
+      summary: Pull avanzamenti messaggi cartacei
       description: >- 
         Questa richiesta permette di ottenere l'elenco degli eventi salienti 
         riguardanti un processo di postalizzazione. <br/>
@@ -242,37 +303,18 @@ paths:
 
 components:
   
-  callbacks:
-    deliveryStatusPushUpdates:
-      post:
-        tags:
-          - StatusUpdates
-        operationId: receiveStatusUpdates2
-        summary: Receive a status update
-        requestBody:
-          content:
-            application/json:
-              schema:
-                type: array
-                minItems: 1
-                maxItems: 1000
-                items:
-                  $ref: '#/components/schemas/SingleStatusUpdate'
-          required: true
-        responses:
-          default:
-            description: Error processing the update, the update must be re-sended
-          '200':
-            description: Update correctly received
-          '400':
-            description: Malformed update status
+    #############################################################################################
+    ###             PARAMETRI E RISPOSTE IN COMUNE PER TUTTI I TIPI DI MESSAGGIO              ###
+    #############################################################################################
   parameters:
+
     xPagopaExtchCxId:
       name: x-pagopa-extch-cx-id
       in: header
       required: true
       schema:
         type: string
+    
     requestIdx:
       name: requestIdx
       in: path
@@ -284,14 +326,17 @@ components:
         maxLength: 100
   
   responses:
+    
     putDeliveryOk:
       description: OK
+    
     putDeliveryBad:
       description: Errore di validazione sintattica della richiesta
       content:
         application/json:
           schema:
             $ref: 'schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
     putDeliveryDuplicated:
       description: >-
         Indica che la richiesta è già stata effettuata e non può essere sovrascritta.
@@ -299,6 +344,7 @@ components:
         application/json:
           schema:
             $ref: 'schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+    
     getDeliveryStatusHistoryNotFound:
       description: requestIdNotFound
       content:
@@ -308,6 +354,9 @@ components:
   
   schemas:
     
+    ### - DTO PER RICEZIONE ASINCRONA AVANZAMENTI MESSAGGI
+    ######################################################
+
     SingleStatusUpdate:
       type: object
       properties:
