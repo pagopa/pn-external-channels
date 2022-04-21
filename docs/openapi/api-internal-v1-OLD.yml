@@ -1,0 +1,215 @@
+openapi: 3.0.3
+info:
+  title: API che external channel fornisce per l'invio di messaggi 
+  description: >- 
+    TODO
+  version: v1.0
+  license:
+    name: Piattaforma Notifica License
+    url: https://url.licenza.pn.pagopa.it
+servers:
+  - url: 'https://api.pn.pagopa.it'
+    description: Server url
+tags:
+  - name: SendPaper
+  - name: SendDigital
+  - name: ProgressEvents
+
+
+paths:  
+  
+    #############################################################################################
+    ###                                MESSAGING SEND REQUESTS                                ###
+    #############################################################################################
+  /external-channel/v1/paper-deliveries-engagement:
+    post:
+      operationId: sendPaperEngageRequest
+      summary: PN richiede l'invio di corrispondenza cartacea
+      description: >- 
+        Questa operazione sottomette al consolidatore una richiesta di invio di 
+        corrispondenza cartacea. <br/>
+        Il consolidatore deve validare la sintatticamente la richiesta e, se tale 
+        validazione ha successo, registrare la richiesta in maniera sincrona.
+        Se vengono inviate molteplici richieste con lo stesso requestId solo una 
+        deve avere successo (status code HTTP 200, le altre devono ricevere lo 
+        status code 409).
+      parameters:                                                                   # NO EXTERNAL
+        - $ref: '#/components/parameters/xExtchCxId'                                # NO EXTERNAL
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperEngageRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '400':
+          description: errore di validazione della richiesta
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '401':
+          description: Mancano le credenziali di identificazione o sono sbagliate
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '409':
+          description: requestId già inviato quindi non riutilizzabile
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+  
+
+
+
+
+
+  /external-channel/v1/paper-deliveries-progresses/{requestId}:
+    get:
+      operationId: getPaperEngageProgresses
+      summary: PN richiede l'elenco dei progressi di una postalizzazione
+      description: >- 
+        Questa richiesta permette di ottenere l'elenco degli eventi salienti 
+        riguardanti un processo di postalizzazione. <br/>
+        Oltre all'elenco degli eventi si ottengono informazioni sulle cause di tali eventi 
+        e URL per effettuare il download delle scansioni digitali dei documenti prodotti 
+        durante il processo di postalizzazione. <br>
+      parameters:
+        - $ref: '#/components/parameters/xExtchCxId'
+        - name: requestId
+          description: Identificativo della richiesta di postalizzazione 
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+          in: path
+          required: true
+          schema:
+            type: string  
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperDeliveryProgressesResponse'
+              example:
+                responseId: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+                events: []
+
+        '401':
+          description: Mancano le credenziali di identificazione o sono sbagliate
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '404':
+          description: requestId non corrispondente a un requestId precedentemente richiesto.
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        
+
+
+
+  ##########################################################################
+  ###      NOTIFICHE DI AVANZAMENTO DEL PROCESSO DI POSTALIZZAZIONE      ###
+  ##########################################################################
+
+  'push-progress-events-to-notification-platform':
+    post:
+      operationId: sendPaperProgressStatusRequest
+      summary: Webhook con cui PN riceve progressi postalizzazioni
+      parameters:
+        - $ref: '#/components/parameters/xExtchCxId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/PaperProgressStatusEvent'
+        required: true
+      responses:
+        '202':
+          description: >-
+            OK, l'evento è stato registrato
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '400':
+          description: >- 
+            Il ricevente ha eseguito la validazione sintattica o semantica dei campi e 
+            tale validazione è fallita: possiblie mismatch di versione
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+        '401':
+          description: >- 
+            Il sistema chiamante non è stato identificato, verificare le configurazioni
+          content:
+            application/json:
+              schema:
+                $ref: './schemas-pn-errors-v1.yaml#/components/schemas/Problem'
+
+
+components:
+
+  parameters:
+    xExtchCxId:
+      name: x-pagopa-extch-cx-id
+      description: Identificativo del sistema client che utilizza External Channel
+      in: header
+      required: true
+      schema:
+        type: string
+  
+  schemas:
+
+    ### - LISTA DI EVENTI RELATIVI A UNA STESSA RICHIESTA
+    ######################################################
+      
+    PaperDeliveryProgressesResponse:
+      type: object
+      required:
+        - requestId
+        - events
+      properties:
+        requestId:
+          type: string
+          description: >-
+            Identificativo della richiesta di postalizzazione.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaperProgressStatusEvent'
+    
+
+
+    ### - RIFERIMENTI AD ALTRI FILE
+    ######################################################
+    
+    PaperEngageRequest:
+      $ref: 'schemas-paper-v1.yaml#/components/schemas/PaperEngageRequest'
+    PaperProgressStatusEvent:
+      $ref: 'schemas-paper-v1.yaml#/components/schemas/PaperProgressStatusEvent'
+
+#  securitySchemes:        # ONLY EXTERNAL
+#    ApiKeyAuth:           # ONLY EXTERNAL
+#      type: apiKey        # ONLY EXTERNAL
+#      in: header          # ONLY EXTERNAL
+#      name: x-api-key     # ONLY EXTERNAL
+
+#security:                 # ONLY EXTERNAL
+#  - ApiKeyAuth: [] # use the same name as under securitySchemes    # ONLY EXTERNAL
+              
