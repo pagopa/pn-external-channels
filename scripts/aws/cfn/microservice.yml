@@ -126,7 +126,7 @@ Resources:
         ContainerEnvEntry10: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION=${ExternalChannelsOutputsQueueName}'
         ContainerEnvEntry11: !Sub 'S3_BUCKETS_EXTERNALCHANNELSOUT=${OutputBucketName}'
         ContainerEnvEntry12: !Sub 'S3_BUCKETS_EXTERNALCHANNELSIN=${InputBucketName}'
-        MappedPaths: '/external-channels/*,/external-channels-private/*'
+        MappedPaths: '/external-channel/*,/external-channel-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
