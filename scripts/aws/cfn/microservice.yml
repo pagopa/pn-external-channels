@@ -126,7 +126,7 @@ Resources:
         ContainerEnvEntry10: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION=${ExternalChannelsOutputsQueueName}'
         ContainerEnvEntry11: !Sub 'S3_BUCKETS_EXTERNALCHANNELSOUT=${OutputBucketName}'
         ContainerEnvEntry12: !Sub 'S3_BUCKETS_EXTERNALCHANNELSIN=${InputBucketName}'
-        MappedPaths: '/external-channels/*,/external-channels-private/*'
+        MappedPaths: '/external-channel/*,/external-channel-private/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
@@ -202,7 +202,7 @@ Resources:
         IntendedUsage: B2B
         DnsName: !Ref ApiDnsName
         ProjectName: !Ref ProjectName
-        ServiceApiPath: 'external-channels'
+        ServiceApiPath: 'external-channel'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
 
@@ -216,6 +216,6 @@ Resources:
         IntendedUsage: WEB
         DnsName: !Ref WebApiDnsName
         ProjectName: !Ref ProjectName
-        ServiceApiPath: 'external-channels'
+        ServiceApiPath: 'external-channel'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
