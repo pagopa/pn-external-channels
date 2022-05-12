@@ -16,7 +16,7 @@ components:
         - clientRequestTimeStamp
         - eventType
         - productType
-        - attachmentUrl
+        - attachmentUri
         - printType
         - receiverName
         - receiverAddress
