@@ -81,7 +81,6 @@ components:
             - channel    
             - subjectText
             - messageContentType
-            - attachementUrls
           properties:
             channel:
               type: string
@@ -102,7 +101,7 @@ components:
                 - 'text/html'
               description: >-
                 Formato: HTML o PLAIN 
-            attachementUrls:
+            attachmentUrls:
               type: array
               items:
                 type: string
