@@ -101,7 +101,7 @@ components:
                 - 'text/html'
               description: >-
                 Formato: HTML o PLAIN 
-            attachmentUrls:
+            attachmentsUrls:
               type: array
               items:
                 type: string
