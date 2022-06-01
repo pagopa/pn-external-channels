@@ -16,7 +16,7 @@ components:
         - clientRequestTimeStamp
         - eventType
         - productType
-        - attachmentUri
+        - attachmentUrl
         - printType
         - receiverName
         - receiverAddress
@@ -49,7 +49,7 @@ components:
           type: string
           format: date-time
           description: >-
-            Timestamp della richiesta in UTC
+            Timestamp della richiesta in UTC specificando la timezone 'Z'
         productType:
           description: >-
             Tipo prodotto di cui viene chiesto il recapito: <br/>
@@ -60,7 +60,7 @@ components:
             - ... ulteriori prodotti 
           type: string
           example: 'AR'
-        attachmentUri:
+        attachmentUrl:
           type: string
           description: >-
             Coordinate per l'accesso al documento PDF da inviare. <br/>
@@ -298,7 +298,7 @@ components:
           type: string
           format: date-time
           description: >-
-            Timestamp della richiesta in UTC
+            Timestamp della richiesta in UTC specificando la timezone
 
     
     AttachmentDetails:
@@ -326,4 +326,4 @@ components:
           type: string
           format: date-time
           description: >-
-            Data di produzione del documento.
+            timestamp di produzione del documento specificando la timezone

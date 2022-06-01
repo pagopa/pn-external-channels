@@ -50,7 +50,7 @@ components:
           type: string
           format: date-time
           description: >-
-            Timestamp della richiesta in UTC
+            Timestamp della richiesta in UTC con timezone
         receiverDigitalAddress:
           type: string
           description: >-
@@ -181,6 +181,9 @@ components:
         requestId:
           type: string
         eventTimestamp:
+          description: >
+            timestamp della creazione dell'evento, in UTC con definizione della timezione 
+            secondo rfc 3339
           type: string
           format: date-time
         status:
