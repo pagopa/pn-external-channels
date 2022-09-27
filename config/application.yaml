@@ -1,76 +1,28 @@
 logging:
   config: config/logback-local.xml
 
+spring:
+  application:
+    name: pn-external-channels
+
 server:
   port: 8082
 
-aws:
-  regionCode: us-east-1
-  use-aws-keyspace: false
-  profile-name: ${PN_AWS_PROFILE_NAME:default}
-  endpoint-url: http://localhost:4566
 
-cloud:
-  aws:
-    credentials:
-      profile-name: ${PN_AWS_PROFILE_NAME:default}
-    region:
-      static: us-east-1
-    sqs:
-      endpoint: http://localhost:4566
-    s3:
-      endpoint: http://localhost:4566
+job:
+  cron-expression: "*/5 * * * * *" # OGNI 5 SECONDI
+#  batch-size: 10
+#  messages-csv-template-id: 8
+#  results-csv-template-id: 4
+#  customer: 8585
+#  macroservice:
+#    digital: 5066
+#    physical: 5065
+#
+#emailSender:
+#  content-type: HTML
+#  protocol: smtp
+#  host: smtp.gmail.com
+#  port: 587
 
-spring:
-  cloud:
-    stream:
-      bindings:
-        pnextchnnotifpecinbound:
-          destination: local-ext-channels-inputs
-        pnextchnelabresult:
-          destination: local-ext-channels-elab-res
-        pnextchnstatus:
-          destination: local-ext-channels-outputs
-  data:
-    cassandra:
-      password: cassandra
-      username: cassandra
-      keyspaceName: external_channel
-      contactPoints: localhost
-      port: 9042
-      schemaAction: CREATE_IF_NOT_EXISTS
-      local-datacenter: datacenter1
-
-
-#s3:
-#  profile-name: pn-develop-extchn
-#  region: eu-south-1
-#  # endpoint: http://localhost:4566
-#  buckets:
-#    external-channels-out: pn-develop-extchn-input
-#    external-channels-in: pn-develop-extchn-output
-#    physicalDestination: "EsitiCartacei/"
-#    digitalDestionation: "EsitiDigitali/"
-
-s3:
-  profile-name: ${PN_AWS_PROFILE_NAME:default}
-  region: us-east-1
-  endpoint: http://localhost:4566
-  buckets:
-    external-channels-out: external-channels-out
-    external-channels-in: external-channels-in
-    physicalDestination: "EsitiCartacei/"
-    digitalDestination: "EsitiDigitali/"
-
-emailSender:
-  content-type: HTML
-  protocol: smtp
-  host: smtp.gmail.com
-  port: 587
-  username: ${EMAIL_SENDER_USERNAME:}
-  password: ${EMAIL_SENDER_PASSWORD:}
-
-aruba:
-  user: ${PEC_SENDER_USERNAME:}
-  password: ${PEC_SENDER_PASSWORD:}
 
