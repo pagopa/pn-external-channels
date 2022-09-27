@@ -2,7 +2,7 @@ package it.pagopa.pn.externalchannels.event;
 
 import it.pagopa.pn.api.dto.events.GenericEvent;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
-import it.pagopa.pn.externalchannels.model.BaseMessageProgressEvent;
+import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PnDeliveryPushPecEvent implements GenericEvent<StandardEventHeader, BaseMessageProgressEvent> {
+public class PnDeliveryPushPecEvent implements GenericEvent<StandardEventHeader, SingleStatusUpdate> {
 
     private StandardEventHeader header;
-    private BaseMessageProgressEvent payload;
+    private SingleStatusUpdate payload;
 }

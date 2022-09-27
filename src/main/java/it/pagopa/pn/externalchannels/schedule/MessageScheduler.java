@@ -1,15 +1,12 @@
 package it.pagopa.pn.externalchannels.schedule;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
-import it.pagopa.pn.api.dto.events.EventType;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
-import it.pagopa.pn.externalchannels.model.BaseMessageProgressEvent;
-import it.pagopa.pn.externalchannels.model.DigitalMessageReference;
-import it.pagopa.pn.externalchannels.model.ProgressEventCategory;
+import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,7 +49,7 @@ public class MessageScheduler {
                 String requestId = notificationProgress.getRequestId();
                 String iun = notificationProgress.getIun();
 
-                BaseMessageProgressEvent baseMessageProgressEvent = buildBaseMessageProgressEvent(code, requestId);
+                SingleStatusUpdate baseMessageProgressEvent = buildBaseMessageProgressEvent(code, requestId);
                 PnDeliveryPushPecEvent pnDeliveryPushPecEvent = buildNotificationInEvent(baseMessageProgressEvent, iun);
 
                 log.info("Message to send: {}", pnDeliveryPushPecEvent);
@@ -68,14 +65,17 @@ public class MessageScheduler {
         }
     }
 
-    private BaseMessageProgressEvent buildBaseMessageProgressEvent(String code, String requestId) {
+    private SingleStatusUpdate buildBaseMessageProgressEvent(String code, String requestId) {
 
-        return new BaseMessageProgressEvent()
-                .eventCode(BaseMessageProgressEvent.EventCodeEnum.fromValue(code))
-                .requestId(requestId)
-                .status(buildStatus(code))
-                .eventTimestamp(OffsetDateTime.now())
-                .generatedMessage(new DigitalMessageReference().system("mock-system").id("mock-" + UUID.randomUUID()));
+        return new SingleStatusUpdate()
+                .digitalLegal(
+                        new LegalMessageSentDetails()
+                                .eventCode(LegalMessageSentDetails.EventCodeEnum.fromValue(code))
+                                .requestId(requestId)
+                                .status(buildStatus(code))
+                                .eventTimestamp(OffsetDateTime.now())
+                                .generatedMessage(new DigitalMessageReference().system("mock-system").id("mock-" + UUID.randomUUID()))
+                );
     }
 
     private ProgressEventCategory buildStatus(String code) {
@@ -88,12 +88,12 @@ public class MessageScheduler {
         return ProgressEventCategory.PROGRESS;
     }
 
-    private PnDeliveryPushPecEvent buildNotificationInEvent(BaseMessageProgressEvent event, String iun) {
+    private PnDeliveryPushPecEvent buildNotificationInEvent(SingleStatusUpdate event, String iun) {
         return PnDeliveryPushPecEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
-                        .eventId(event.getRequestId())
-                        .eventType(EventType.SEND_PEC_REQUEST.name())
+                        .eventId(event.getDigitalLegal().getRequestId())
+                        .eventType("EXTERNAL_CHANNELS_EVENT")
                         .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
                         .createdAt(Instant.now())
                         .build())
