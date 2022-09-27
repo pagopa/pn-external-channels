@@ -28,7 +28,7 @@ public class ExternalChannelsService {
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName);
+                digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName, digitalNotificationRequest.getChannel().name());
 
         notificationProgressDao.insert(notificationProgress);
         log.info("NotificationProgress saved: {}", notificationProgress);
@@ -36,7 +36,9 @@ public class ExternalChannelsService {
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
-        NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(), digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName);
+        NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesyMailRequest.getChannel().name());
+
         notificationProgressDao.insert(notificationProgress);
         log.info("NotificationProgress saved: {}", notificationProgress);
     }
@@ -103,7 +105,7 @@ public class ExternalChannelsService {
 
     }
 
-    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName) {
+    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName, String channel) {
         NotificationProgress notificationProgress;
         String iun = requestId.split("_")[0];
 
@@ -120,6 +122,7 @@ public class ExternalChannelsService {
         notificationProgress.setCreateMessageTimestamp(Instant.now());
         notificationProgress.setAppSourceName(appSourceName);
         notificationProgress.setIun(iun);
+        notificationProgress.setChannel(channel);
 
         return notificationProgress;
 

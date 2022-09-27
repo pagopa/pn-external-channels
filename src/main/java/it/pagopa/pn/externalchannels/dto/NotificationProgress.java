@@ -11,7 +11,9 @@ import java.util.LinkedList;
 public class NotificationProgress implements Serializable {
 
     private String requestId;
+
     private String destinationAddress;
+
     private LinkedList<String> codeToSend;
 
     private LinkedList<Duration> timeToSend;
@@ -23,5 +25,7 @@ public class NotificationProgress implements Serializable {
     private String appSourceName;
 
     private String iun;
+
+    private String channel;
 
 }
