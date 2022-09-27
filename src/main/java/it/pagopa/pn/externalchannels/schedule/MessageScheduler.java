@@ -1,7 +1,12 @@
 package it.pagopa.pn.externalchannels.schedule;
 
+import it.pagopa.pn.api.dto.events.EventPublisher;
+import it.pagopa.pn.api.dto.events.EventType;
+import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
+import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
 import it.pagopa.pn.externalchannels.model.BaseMessageProgressEvent;
 import it.pagopa.pn.externalchannels.model.DigitalMessageReference;
 import it.pagopa.pn.externalchannels.model.ProgressEventCategory;
@@ -27,6 +32,8 @@ public class MessageScheduler {
 
     private final NotificationProgressDao dao;
 
+    private final DeliveryPushSendClient deliveryPushSendClient;
+
 
     @Scheduled(cron = "${job.cron-expression}")
     public void run() {
@@ -46,8 +53,11 @@ public class MessageScheduler {
                 String iun = notificationProgress.getIun();
 
                 BaseMessageProgressEvent baseMessageProgressEvent = buildBaseMessageProgressEvent(code, requestId);
+                PnDeliveryPushPecEvent pnDeliveryPushPecEvent = buildNotificationInEvent(baseMessageProgressEvent, iun);
 
-                log.info("Message to send: {}", baseMessageProgressEvent);
+                log.info("Message to send: {}", pnDeliveryPushPecEvent);
+                deliveryPushSendClient.sendNotification(pnDeliveryPushPecEvent);
+
                 notificationProgress.setLastMessageSentTimestamp(Instant.now());
 
                 if (notificationProgress.getCodeToSend().isEmpty()) {
@@ -76,5 +86,18 @@ public class MessageScheduler {
             return ProgressEventCategory.ERROR;
         }
         return ProgressEventCategory.PROGRESS;
+    }
+
+    private PnDeliveryPushPecEvent buildNotificationInEvent(BaseMessageProgressEvent event, String iun) {
+        return PnDeliveryPushPecEvent.builder()
+                .header(StandardEventHeader.builder()
+                        .iun(iun)
+                        .eventId(event.getRequestId())
+                        .eventType(EventType.SEND_PEC_REQUEST.name())
+                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                        .createdAt(Instant.now())
+                        .build())
+                .payload(event)
+                .build();
     }
 }
