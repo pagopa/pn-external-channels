@@ -4,6 +4,7 @@ import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
+import it.pagopa.pn.externalchannels.model.PaperEngageRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,13 @@ import java.util.List;
 @Slf4j
 public class ExternalChannelsService {
 
-    private static final List<String> FAIL_REQUEST_CODE = List.of("C001", "C007", "C004");
+    private static final List<String> FAIL_REQUEST_CODE_DIGITAL = List.of("C001", "C007", "C004");
 
-    private static final List<String> OK_REQUEST_CODE = List.of("C000", "C001", "C005", "C003");
+    private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("001", "002", "003", "005");
+
+    private static final List<String> OK_REQUEST_CODE_DIGITAL = List.of("C000", "C001", "C005", "C003");
+
+    private static final List<String> OK_REQUEST_CODE_PAPER = List.of("001", "002", "003", "004");
 
     private final NotificationProgressDao notificationProgressDao;
 
@@ -28,7 +33,7 @@ public class ExternalChannelsService {
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName, digitalNotificationRequest.getChannel().name());
+                digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName, digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL);
 
         notificationProgressDao.insert(notificationProgress);
         log.info("NotificationProgress saved: {}", notificationProgress);
@@ -37,23 +42,24 @@ public class ExternalChannelsService {
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesyMailRequest.getChannel().name());
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL);
 
         notificationProgressDao.insert(notificationProgress);
         log.info("NotificationProgress saved: {}", notificationProgress);
     }
 
+    public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSourceName) {
+        String address = paperEngageRequest.getReceiverAddressRow2() != null ? paperEngageRequest.getReceiverAddressRow2() : paperEngageRequest.getReceiverAddress();
+        NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
+                address, appSourceName, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER);
 
-    private NotificationProgress buildNotificationFail() {
-        NotificationProgress notificationProgress = new NotificationProgress();
-        notificationProgress.setCodeToSend(new LinkedList<>(FAIL_REQUEST_CODE));
-        notificationProgress.setTimeToSend(new LinkedList<>(List.of(Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5))));
-        return notificationProgress;
+        notificationProgressDao.insert(notificationProgress);
+        log.info("NotificationProgress saved: {}", notificationProgress);
     }
 
-    private NotificationProgress buildNotificationSuccess() {
+    private NotificationProgress buildNotification(List<String> codeToSend) {
         NotificationProgress notificationProgress = new NotificationProgress();
-        notificationProgress.setCodeToSend(new LinkedList<>(OK_REQUEST_CODE));
+        notificationProgress.setCodeToSend(new LinkedList<>(codeToSend));
         notificationProgress.setTimeToSend(new LinkedList<>(List.of(Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5))));
 
         return notificationProgress;
@@ -105,16 +111,17 @@ public class ExternalChannelsService {
 
     }
 
-    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName, String channel) {
+
+    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName, String channel, List<String> failRequests, List<String> okRequests) {
         NotificationProgress notificationProgress;
         String iun = requestId.split("_")[0];
 
         if (receiverDigitalAddress.contains("@fail")) {
-            notificationProgress = buildNotificationFail();
+            notificationProgress = buildNotification(failRequests);
         } else if (receiverDigitalAddress.contains("@sequence")) {
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId);
         } else {
-            notificationProgress = buildNotificationSuccess();
+            notificationProgress = buildNotification(okRequests);
         }
 
         notificationProgress.setRequestId(requestId);

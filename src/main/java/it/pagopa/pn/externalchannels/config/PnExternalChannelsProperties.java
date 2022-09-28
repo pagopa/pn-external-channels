@@ -18,6 +18,8 @@ public class PnExternalChannelsProperties {
 
         private String toDeliveryPushEmail;
 
+        private String toDeliveryPushPaper;
+
     }
 
 

@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.externalchannels.sqs.DeliveryPushEmailProducer;
+import it.pagopa.pn.externalchannels.sqs.DeliveryPushPaperProducer;
 import it.pagopa.pn.externalchannels.sqs.DeliveryPushPecProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,5 +27,10 @@ public class AppConfig {
     @Bean
     DeliveryPushEmailProducer deliveryPushEmailProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new DeliveryPushEmailProducer(sqs, properties.getTopics().getToDeliveryPushEmail(), objMapper);
+    }
+
+    @Bean
+    DeliveryPushPaperProducer deliveryPushPaperProducer(SqsClient sqs, ObjectMapper objMapper) {
+        return new DeliveryPushPaperProducer(sqs, properties.getTopics().getToDeliveryPushPaper(), objMapper);
     }
 }

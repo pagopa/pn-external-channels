@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.schedule;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEmailEvent;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
@@ -60,12 +61,19 @@ public class MessageScheduler {
         String requestId = notificationProgress.getRequestId();
         String iun = notificationProgress.getIun();
         String channel = notificationProgress.getChannel();
+        String destinationAddress = notificationProgress.getDestinationAddress();
 
-        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel);
+
+        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel, destinationAddress);
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             PnDeliveryPushPecEvent pnDeliveryPushPecEvent = EventMessageUtil.buildPecEvent(eventMessage, iun);
             log.info("Message to send: {}", pnDeliveryPushPecEvent);
             deliveryPushSendClient.sendNotification(pnDeliveryPushPecEvent);
+        }
+        else if(EventMessageUtil.PAPER_CHANNELS.contains(channel)) {
+            PnDeliveryPushPaperEvent pnDeliveryPushPaperEvent = EventMessageUtil.buildPaperEvent(eventMessage, iun);
+            log.info("Message to send: {}", pnDeliveryPushPaperEvent);
+            deliveryPushSendClient.sendNotification(pnDeliveryPushPaperEvent);
         } else {
             PnDeliveryPushEmailEvent pnDeliveryPushEmailEvent = EventMessageUtil.buildEmailEvent(eventMessage, iun);
             log.info("Message to send: {}", pnDeliveryPushEmailEvent);
