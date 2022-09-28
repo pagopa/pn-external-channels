@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
@@ -32,5 +33,10 @@ public class AppConfig {
     @Bean
     DeliveryPushPaperProducer deliveryPushPaperProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new DeliveryPushPaperProducer(sqs, properties.getTopics().getToDeliveryPushPaper(), objMapper);
+    }
+
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

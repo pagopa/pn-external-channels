@@ -11,6 +11,12 @@ public class PnExternalChannelsProperties {
 
     private Topics topics;
 
+    private String safeStorageBaseUrl;
+
+    private String safeStorageCxId;
+
+    private String safeStorageCxIdUpdatemetadata;
+
     @Data
     public static class Topics {
 
