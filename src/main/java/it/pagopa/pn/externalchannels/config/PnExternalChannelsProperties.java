@@ -22,7 +22,7 @@ public class PnExternalChannelsProperties {
 
         private String toDeliveryPushPec;
 
-        private String toDeliveryPushEmail;
+        private String toDeliveryPushCourtesy;
 
         private String toDeliveryPushPaper;
 

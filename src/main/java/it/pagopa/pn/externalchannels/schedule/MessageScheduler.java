@@ -4,7 +4,7 @@ import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushEmailEvent;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushCourtesyEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
@@ -95,9 +95,9 @@ public class MessageScheduler {
             log.info("Message to send: {}", pnDeliveryPushPaperEvent);
             deliveryPushSendClient.sendNotification(pnDeliveryPushPaperEvent);
         } else {
-            PnDeliveryPushEmailEvent pnDeliveryPushEmailEvent = EventMessageUtil.buildEmailEvent(eventMessage, iun);
-            log.info("Message to send: {}", pnDeliveryPushEmailEvent);
-            deliveryPushSendClient.sendNotification(pnDeliveryPushEmailEvent);
+            PnDeliveryPushCourtesyEvent pnDeliveryPushCourtesyEvent = EventMessageUtil.buildCourtesyEvent(eventMessage, iun);
+            log.info("Message to send: {}", pnDeliveryPushCourtesyEvent);
+            deliveryPushSendClient.sendNotification(pnDeliveryPushCourtesyEvent);
         }
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());

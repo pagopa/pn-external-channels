@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.api;
 
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
+import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
 import it.pagopa.pn.externalchannels.service.ExternalChannelsService;
 import lombok.RequiredArgsConstructor;
@@ -48,16 +49,17 @@ public class ExternalChannelsController implements ExternalChannelsApi {
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-//    public Mono<ResponseEntity<Void>> sendCourtesyShortMessage(String requestIdx, String xPagopaExtchCxId,
-//                                                               Mono<DigitalCourtesySmsRequest> digitalCourtesySmsRequest,
-//                                                               final ServerWebExchange exchange) {
-//
-//        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
-//
-//        return digitalCourtesySmsRequest
-//                .doOnNext(request -> externalChannelsService.sendDigitalCourtesyMessage(request, appSourceName))
-//                .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
-//                .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
-//    }
+    public Mono<ResponseEntity<Void>> sendCourtesyShortMessage(String requestIdx, String xPagopaExtchCxId,
+                                                               Mono<DigitalCourtesySmsRequest> digitalCourtesySmsRequest,
+                                                               final ServerWebExchange exchange) {
+
+        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
+
+        return digitalCourtesySmsRequest
+                .doOnNext(request -> externalChannelsService.sendCourtesyShortMessage(request, appSourceName))
+                .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
+                .log()
+                .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
+    }
 }
 

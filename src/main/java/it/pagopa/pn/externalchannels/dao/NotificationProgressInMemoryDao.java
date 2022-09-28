@@ -8,6 +8,18 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Classe dao che utilizza una ConcurrentHashMap ({@link #database}) per salvare in memoria i codici da inviare.
+ * <p>
+ * La mappa {@link #iunNumberOfAttempts} viene invece utilizzata per salvare in memoria i numeri di tentativi
+ * di richieste diverse (requestId diverse), ma con lo stesso iun. Questo è il caso avente come address @sequence con gli
+ * underscores per dividere i numeri di micro-tentativi da fare.
+ * (esempio: mock@sequence.5s-C008_5s-C008_5s-C008_5s-C000.5s-C001.5s-C005.5s-C003).
+ * <p>
+ * Ogni micro-tentativo corrisponde a un NotificationProgress diverso. In particolare, una volta
+ * inviato tutti i codici di un singolo micro-tentativo, il record associato di NotificationProgress verrà cancellato
+ * dalla mappa {@link #database} (ma non dalla mappa {@link #iunNumberOfAttempts}).
+ */
 @Repository
 @Slf4j
 public class NotificationProgressInMemoryDao implements NotificationProgressDao {
@@ -23,13 +35,18 @@ public class NotificationProgressInMemoryDao implements NotificationProgressDao 
         this.iunNumberOfAttempts = new ConcurrentHashMap<>();
     }
 
-    //incrementa il numero di tentativi
+
     @Override
-    public void insert(NotificationProgress notificationProgress) {
+    public boolean insert(NotificationProgress notificationProgress) {
         NotificationProgress valueInDatabase = database.putIfAbsent(notificationProgress.getIun(), notificationProgress);
 
         if (valueInDatabase != null) {
             log.warn("[{}] NotificationProgress did not insert because already exists!", notificationProgress.getIun());
+            return false;
+        }
+        else {
+            log.info("NotificationProgress saved: {}", notificationProgress);
+            return true;
         }
     }
 

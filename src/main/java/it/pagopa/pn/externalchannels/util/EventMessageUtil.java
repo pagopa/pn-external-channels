@@ -2,7 +2,7 @@ package it.pagopa.pn.externalchannels.util;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushEmailEvent;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushCourtesyEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
 import it.pagopa.pn.externalchannels.model.*;
@@ -96,8 +96,8 @@ public class EventMessageUtil {
                 .build();
     }
 
-    public static PnDeliveryPushEmailEvent buildEmailEvent(SingleStatusUpdate event, String iun) {
-        return PnDeliveryPushEmailEvent.builder()
+    public static PnDeliveryPushCourtesyEvent buildCourtesyEvent(SingleStatusUpdate event, String iun) {
+        return PnDeliveryPushCourtesyEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
                         .eventId(event.getDigitalCourtesy().getRequestId())

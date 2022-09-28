@@ -3,11 +3,14 @@ package it.pagopa.pn.externalchannels.service;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
+import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
 import it.pagopa.pn.externalchannels.model.PaperEngageRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -35,8 +38,11 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
                 digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName, digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL);
 
-        notificationProgressDao.insert(notificationProgress);
-        log.info("NotificationProgress saved: {}", notificationProgress);
+        boolean inserted = notificationProgressDao.insert(notificationProgress);
+
+        if (! inserted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalNotificationRequest.getRequestId()));
+        }
     }
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
@@ -44,8 +50,23 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
                 digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL);
 
-        notificationProgressDao.insert(notificationProgress);
-        log.info("NotificationProgress saved: {}", notificationProgress);
+        boolean inserted = notificationProgressDao.insert(notificationProgress);
+
+        if (! inserted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalCourtesyMailRequest.getRequestId()));
+        }
+    }
+
+    public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
+
+        NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
+                digitalCourtesySmsRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL);
+
+        boolean inserted = notificationProgressDao.insert(notificationProgress);
+
+        if (! inserted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalCourtesySmsRequest.getRequestId()));
+        }
     }
 
     public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSourceName) {
@@ -53,8 +74,11 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, appSourceName, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER);
 
-        notificationProgressDao.insert(notificationProgress);
-        log.info("NotificationProgress saved: {}", notificationProgress);
+        boolean inserted = notificationProgressDao.insert(notificationProgress);
+
+        if (! inserted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", paperEngageRequest.getRequestId()));
+        }
     }
 
     private NotificationProgress buildNotification(List<String> codeToSend) {
@@ -116,9 +140,9 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress;
         String iun = requestId.split("_")[0];
 
-        if (receiverDigitalAddress.contains("@fail")) {
+        if (receiverDigitalAddress.contains("@fail") || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
-        } else if (receiverDigitalAddress.contains("@sequence")) {
+        } else if (receiverDigitalAddress.contains("@sequence")) { //si presuppone che per gli sms non ci sia il caso sequence
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId);
         } else {
             notificationProgress = buildNotification(okRequests);

@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface NotificationProgressDao {
 
-    void insert(NotificationProgress notificationProgress);
+    boolean insert(NotificationProgress notificationProgress);
     Collection<NotificationProgress> findAll();
     Optional<NotificationProgress> findByIun(String iun);
     void delete(String iun);
