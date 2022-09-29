@@ -65,6 +65,7 @@ public class HistoricalRequestService {
             if(ifPresent != null) {
                 CompletableFuture<HistoricalRequest> historicalRequestCompletableFuture = ifPresent.thenApply(request -> {
                     request.getCodesSent().add(codeSent);
+                    request.setLastRequestId(requestId);
                     request.setLastUpdateInCache(Instant.now());
                     return request;
                 });

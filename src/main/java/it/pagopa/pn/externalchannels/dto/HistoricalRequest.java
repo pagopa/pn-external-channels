@@ -15,7 +15,7 @@ public class HistoricalRequest implements Serializable {
 
     private String iun;
 
-    private String requestId;
+    private String lastRequestId;
 
     private List<String> codesSent;
 
