@@ -11,6 +11,7 @@ import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.OperationResultCodeResponse;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.UpdateFileMetadataRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -38,7 +39,7 @@ public class PnSafeStorageClientImpl implements PnSafeStorageClient {
     private final PnExternalChannelsProperties cfg;
     private final RestTemplate restTemplate;
 
-    public PnSafeStorageClientImpl(RestTemplate restTemplate, PnExternalChannelsProperties cfg) {
+    public PnSafeStorageClientImpl(@Qualifier("withTracing") RestTemplate restTemplate, PnExternalChannelsProperties cfg) {
         it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.ApiClient newApiClient = new it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.ApiClient( restTemplate );
         newApiClient.setBasePath( cfg.getSafeStorageBaseUrl() );
 

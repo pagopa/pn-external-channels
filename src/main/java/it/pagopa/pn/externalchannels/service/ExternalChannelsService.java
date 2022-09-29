@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.service;
 
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
+import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,23 +83,24 @@ public class ExternalChannelsService {
         }
     }
 
-    private NotificationProgress buildNotification(List<String> codeToSend) {
+    private NotificationProgress buildNotification(List<String> codeToSendList) {
         NotificationProgress notificationProgress = new NotificationProgress();
-        notificationProgress.setCodeToSend(new LinkedList<>(codeToSend));
-        notificationProgress.setTimeToSend(new LinkedList<>(List.of(Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5), Duration.ofSeconds(5))));
+        List<CodeTimeToSend> codeTimeToSends = codeToSendList.stream().map(codeToSend -> new CodeTimeToSend(codeToSend,
+                Duration.ofSeconds(5))).collect(Collectors.toList());
+        notificationProgress.setCodeTimeToSendQueue(new LinkedList<>(codeTimeToSends));
+
 
         return notificationProgress;
     }
 
     private NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId) {
         NotificationProgress notificationProgress = new NotificationProgress();
-        notificationProgress.setCodeToSend(new LinkedList<>());
-        notificationProgress.setTimeToSend(new LinkedList<>());
+        notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
         String receiverClean = receiverDigitalAddress
                 .replaceFirst(".*@sequence\\.", "");
 
-        if(receiverClean.contains("attempt")) {
+        if (receiverClean.contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
         }
         if (receiverClean.contains("_")) {
@@ -110,8 +113,8 @@ public class ExternalChannelsService {
             String[] timeCodeCoupleSplit = timeCodeCouple.split("-");
             String time = "PT" + timeCodeCoupleSplit[0];
             String code = timeCodeCoupleSplit[1];
-            notificationProgress.getTimeToSend().add(Duration.parse(time));
-            notificationProgress.getCodeToSend().add(code);
+            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time));
+            notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 
         return notificationProgress;
@@ -123,11 +126,11 @@ public class ExternalChannelsService {
         if (numberOfAttempts == null) {
             index = 0;
         } else {
-           index = numberOfAttempts;
+            index = numberOfAttempts;
         }
         notificationProgressDao.incrementNumberOfAttempt(iun);
         String[] messageProgress = receiverClean.split("_");
-        if(notificationProgressDao.getNumberOfAttemptsByIun(iun) >= messageProgress.length ) {
+        if (notificationProgressDao.getNumberOfAttemptsByIun(iun) >= messageProgress.length) {
             //allora l'elemento processato è l'ultimo, quindi lo elimino dalla mappa
             notificationProgressDao.deleteNumberOfAttemptsByIun(iun);
         }

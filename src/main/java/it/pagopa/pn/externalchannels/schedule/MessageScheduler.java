@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.schedule;
 
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
+import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
@@ -57,7 +58,7 @@ public class MessageScheduler {
                 sendMessage(notificationProgress);
                 notificationProgress.setLastMessageSentTimestamp(Instant.now());
 
-                if (notificationProgress.getCodeToSend().isEmpty()) {
+                if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
                     dao.delete(notificationProgress.getIun());
                     log.info("Deleted message with requestId: {}", notificationProgress.getRequestId());
                 }
@@ -69,15 +70,18 @@ public class MessageScheduler {
         Instant messageTimestamp = notificationProgress.getLastMessageSentTimestamp() == null ? notificationProgress.getCreateMessageTimestamp()
                 : notificationProgress.getLastMessageSentTimestamp();
 
-        long seconds = notificationProgress.getTimeToSend().peek().getSeconds();
+        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        assert codeTimeToSend != null;
+        long seconds = codeTimeToSend.getTime().getSeconds();
         Instant messageTimestampPlusSeconds = messageTimestamp.plusSeconds(seconds);
 
         return now.getEpochSecond() >= messageTimestampPlusSeconds.getEpochSecond();
     }
 
     private void sendMessage(NotificationProgress notificationProgress) {
-        String code = notificationProgress.getCodeToSend().poll();
-        notificationProgress.getTimeToSend().poll();
+        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
+        assert codeTimeToSend != null;
+        String code = codeTimeToSend.getCode();
         String requestId = notificationProgress.getRequestId();
         String iun = notificationProgress.getIun();
         String channel = notificationProgress.getChannel();
