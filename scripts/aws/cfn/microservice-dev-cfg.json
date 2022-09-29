@@ -1,0 +1,8 @@
+{
+  "Parameters" : {
+    "SandboxSafeStorageBaseUrl": "https://14ej9p2krd.execute-api.eu-south-1.amazonaws.com/dev",
+    "CacheExpireDays": "90",
+    "CacheMaxSize": "100000",
+    "JobCronExpression": "*/2 * * * * *"
+  }
+}
