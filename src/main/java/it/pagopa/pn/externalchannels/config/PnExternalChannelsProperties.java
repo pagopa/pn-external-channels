@@ -21,6 +21,10 @@ public class PnExternalChannelsProperties {
 
     private String safeStorageCxIdUpdatemetadata;
 
+    private int cacheExpireAfterDays;
+
+    private int cacheMaxSize;
+
     @Data
     public static class Topics {
 

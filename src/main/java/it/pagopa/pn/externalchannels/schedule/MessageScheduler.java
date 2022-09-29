@@ -10,6 +10,7 @@ import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
+import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import it.pagopa.pn.externalchannels.util.EventCodeInt;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
@@ -46,6 +47,8 @@ public class MessageScheduler {
 
     private final SafeStorageService safeStorageService;
 
+    private final HistoricalRequestService historicalRequestService;
+
 
     @Scheduled(cron = "${job.cron-expression}")
     public void run() {
@@ -55,6 +58,7 @@ public class MessageScheduler {
         for (NotificationProgress notificationProgress : all) {
 
             if (isTimeToSendMessage(now, notificationProgress)) {
+                saveInCache(notificationProgress);
                 sendMessage(notificationProgress);
                 notificationProgress.setLastMessageSentTimestamp(Instant.now());
 
@@ -151,5 +155,13 @@ public class MessageScheduler {
         } catch (Exception e) {
             throw new RuntimeException("Error generating XML", e);
         }
+    }
+
+    private void saveInCache(NotificationProgress notificationProgress) {
+        String iun = notificationProgress.getIun();
+        String requestId = notificationProgress.getRequestId();
+        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        assert codeTimeToSend != null;
+        historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }
 }
