@@ -60,6 +60,13 @@
             <version>6.6</version>
         </dependency>
 
+        <!--PER CACHARE DATI STORICI-->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -95,7 +102,7 @@
                         <phase>process-resources</phase>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/docs/openapi/pn-external-channels/api-internal-v1.yaml
+                                ${project.basedir}/docs/openapi/api-internal-v1.yaml
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
