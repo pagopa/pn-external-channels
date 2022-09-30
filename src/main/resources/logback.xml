@@ -53,10 +53,7 @@
     </root>   
     <logger name="it.pagopa" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT" />
-    </logger>	
-    <logger name="org.springframework.kafka" level="ERROR" additivity="false">
-        <appender-ref ref="STDOUT" />
-    </logger>	
+    </logger>
     <logger name="org.springframework" level="ERROR" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>	

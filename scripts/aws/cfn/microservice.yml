@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Example microservice deploy'
+
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: 'Usually pn can be pnXYZ where XYZ are the feature number, useful to create
+      experimental environments without crash official development environment'
+
+  ExternalChannelsOutputsQueueName:
+    Type: String
+    Description: 'Push external-channel messages from this Queue'
+
+  ExternalChannelsOutputsQueueARN:
+    Type: String
+    Description: 'Push external-channel messages from this Queue'
+
+  SandboxSafeStorageBaseUrl:
+    Type: String
+    Description: 'Safe storage base url'
+
+  CacheExpireDays:
+    Type: String
+    Description: 'Cache expire in days'
+
+  CacheMaxSize:
+    Type: String
+    Description: 'Cache max size'
+
+  JobCronExpression:
+    Type: String
+    Description: 'Cron Expression of scheduler to read requests from Database'
+
+Resources:
+
+  # PN-External-Channels microservice
+  ExternalChannelsMicroservice:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
+      Parameters:
+        MicroServiceUniqueName: !Sub '${ProjectName}-external-channels'
+        CpuValue: 1024
+        MemoryAmount: 2GB
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
+        ContainerImageURI: !Sub '${ContainerImageUri}'
+        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
+        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSH=${ExternalChannelsOutputsQueueName}'
+        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
+        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
+        ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
+        ECSClusterName: !Ref ECSClusterName
+        Subnets: !Ref SubnetsIds
+        VpcId: !Ref VpcId
+        EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
+        LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
+        LoadbalancerRulePriority: !Ref MicroserviceNumber
+
+
+  ExternalChannelsMicroserviceTaskPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${ProjectName}-external-channels-CustomTaskPolicy'
+      Roles:
+        - !GetAtt ExternalChannelsMicroservice.Outputs.TaskRoleName
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ChangeMessageVisibility
+              - sqs:ChangeMessageVisibilityBatch
+              - sqs:DeleteMessage
+              - sqs:DeleteMessageBatch
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              - sqs:SendMessageBatch
+            Resource:
+              - !Ref ExternalChannelsOutputsQueueARN
+
