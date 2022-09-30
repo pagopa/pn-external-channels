@@ -8,17 +8,13 @@ Parameters:
     Description: 'Usually pn can be pnXYZ where XYZ are the feature number, useful to create
       experimental environments without crash official development environment'
 
-  ExternalChannelsPecOutputsQueueName:
+  ExternalChannelsOutputsQueueName:
     Type: String
-    Description: 'Push external-channel pec messages from this Queue'
+    Description: 'Push external-channel messages from this Queue'
 
-  ExternalChannelsCourtesyOutputsQueueName:
+  ExternalChannelsOutputsQueueARN:
     Type: String
-    Description: 'Push external-channel courtesy messages from this Queue'
-
-  ExternalChannelsPaperOutputsQueueName:
-    Type: String
-    Description: 'Push external-channel paper messages from this Queue'
+    Description: 'Push external-channel messages from this Queue'
 
   SandboxSafeStorageBaseUrl:
     Type: String
@@ -51,13 +47,11 @@ Resources:
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
-        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSHPEC=${ExternalChannelsPecOutputsQueueName}'
-        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSHCOURTESY=${ExternalChannelsCourtesyOutputsQueueName}'
-        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSHPAPER=${ExternalChannelsPaperOutputsQueueName}'
-        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
-        ContainerEnvEntry7: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
-        ContainerEnvEntry8: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
-        ContainerEnvEntry9: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSH=${ExternalChannelsOutputsQueueName}'
+        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
+        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
+        ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -88,30 +82,5 @@ Resources:
               - sqs:SendMessage
               - sqs:SendMessageBatch
             Resource:
-              - !Ref ExternalChannelsPecOutputsQueueName
-              - !Ref ExternalChannelsCourtesyOutputsQueueName
-              - !Ref ExternalChannelsPaperOutputsQueueName
-
-
-  # Expose PN-ExternalChannels microservice public API with API-GW for WEB usage
-  ExternalChannelsMicroservicePublicWebAPI:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service.yaml"
-      Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-external-channels'
-        IntendedUsage: WEB
-        DnsName: !Ref WebApiDnsName
-        ProjectName: !Ref ProjectName
-        ServiceApiPath: 'ext-channels'
-        NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
-        ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
-        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
-  ExternalChannelsMicroservicePublicWebApiWaf:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
-      Parameters:
-        WAFName: !Sub '${ProjectName}-external-channels-web'
-        APIGatewayARNs: !GetAtt ExternalChannelsMicroservicePublicWebAPI.Outputs.APIGatewayARN
+              - !Ref ExternalChannelsOutputsQueueARN
 

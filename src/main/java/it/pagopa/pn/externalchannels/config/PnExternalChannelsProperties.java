@@ -28,11 +28,7 @@ public class PnExternalChannelsProperties {
     @Data
     public static class Topics {
 
-        private String toDeliveryPushPec;
-
-        private String toDeliveryPushCourtesy;
-
-        private String toDeliveryPushPaper;
+        private String toDeliveryPush;
 
     }
 

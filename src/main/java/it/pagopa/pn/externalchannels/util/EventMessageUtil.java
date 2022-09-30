@@ -2,9 +2,7 @@ package it.pagopa.pn.externalchannels.util;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushCourtesyEvent;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.model.*;
 
 import java.time.Instant;
@@ -83,11 +81,11 @@ public class EventMessageUtil {
         return ProgressEventCategory.PROGRESS;
     }
 
-    public static PnDeliveryPushPecEvent buildPecEvent(SingleStatusUpdate event, String iun) {
-        return PnDeliveryPushPecEvent.builder()
+    public static PnDeliveryPushEvent buildDeliveryPushEvent(SingleStatusUpdate event, String iun, String requestId) {
+        return PnDeliveryPushEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
-                        .eventId(event.getDigitalLegal().getRequestId())
+                        .eventId(requestId)
                         .eventType("EXTERNAL_CHANNELS_EVENT")
                         .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
                         .createdAt(Instant.now())
@@ -95,32 +93,5 @@ public class EventMessageUtil {
                 .payload(event)
                 .build();
     }
-
-    public static PnDeliveryPushCourtesyEvent buildCourtesyEvent(SingleStatusUpdate event, String iun) {
-        return PnDeliveryPushCourtesyEvent.builder()
-                .header(StandardEventHeader.builder()
-                        .iun(iun)
-                        .eventId(event.getDigitalCourtesy().getRequestId())
-                        .eventType("EXTERNAL_CHANNELS_EVENT")
-                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
-                        .createdAt(Instant.now())
-                        .build())
-                .payload(event)
-                .build();
-    }
-
-    public static PnDeliveryPushPaperEvent buildPaperEvent(SingleStatusUpdate event, String iun) {
-        return PnDeliveryPushPaperEvent.builder()
-                .header(StandardEventHeader.builder()
-                        .iun(iun)
-                        .eventId(event.getAnalogMail().getRequestId())
-                        .eventType("EXTERNAL_CHANNELS_EVENT")
-                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
-                        .createdAt(Instant.now())
-                        .build())
-                .payload(event)
-                .build();
-    }
-
 
 }

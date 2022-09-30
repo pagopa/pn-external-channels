@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PnDeliveryPushPaperEvent implements GenericEvent<StandardEventHeader, SingleStatusUpdate> {
+public class PnDeliveryPushEvent implements GenericEvent<StandardEventHeader, SingleStatusUpdate> {
 
     private StandardEventHeader header;
     private SingleStatusUpdate payload;

@@ -5,9 +5,7 @@ import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushCourtesyEvent;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushPaperEvent;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushPecEvent;
+import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
@@ -95,18 +93,10 @@ public class MessageScheduler {
         SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel, destinationAddress);
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage);
-            PnDeliveryPushPecEvent pnDeliveryPushPecEvent = EventMessageUtil.buildPecEvent(eventMessage, iun);
-            log.info("Message to send: {}", pnDeliveryPushPecEvent);
-            deliveryPushSendClient.sendNotification(pnDeliveryPushPecEvent);
-        } else if (EventMessageUtil.PAPER_CHANNELS.contains(channel)) {
-            PnDeliveryPushPaperEvent pnDeliveryPushPaperEvent = EventMessageUtil.buildPaperEvent(eventMessage, iun);
-            log.info("Message to send: {}", pnDeliveryPushPaperEvent);
-            deliveryPushSendClient.sendNotification(pnDeliveryPushPaperEvent);
-        } else {
-            PnDeliveryPushCourtesyEvent pnDeliveryPushCourtesyEvent = EventMessageUtil.buildCourtesyEvent(eventMessage, iun);
-            log.info("Message to send: {}", pnDeliveryPushCourtesyEvent);
-            deliveryPushSendClient.sendNotification(pnDeliveryPushCourtesyEvent);
         }
+        PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun, requestId);
+        log.info("Message to send: {}", pnDeliveryPushEvent);
+        deliveryPushSendClient.sendNotification(pnDeliveryPushEvent);
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }
