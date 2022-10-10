@@ -55,6 +55,7 @@ public class MessageScheduler {
             Collection<NotificationProgress> all = dao.findAll();
             Instant now = Instant.now();
             for (NotificationProgress notificationProgress : all) {
+                log.debug("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
                 if (isTimeToSendMessage(now, notificationProgress)) {
                     log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
                     saveHistoricalDateInCache(notificationProgress);
@@ -79,8 +80,11 @@ public class MessageScheduler {
         Instant messageTimestamp = notificationProgress.getLastMessageSentTimestamp() == null ? notificationProgress.getCreateMessageTimestamp()
                 : notificationProgress.getLastMessageSentTimestamp();
 
+        log.debug("[{}] Compare date- messageTimestamp: {}, now: {}", notificationProgress.getIun(), messageTimestamp, now);
         CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        log.debug("[{}] CodeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
+        log.debug("[{}] CodeTimeToSend time value: {}", notificationProgress.getIun(), codeTimeToSend.getTime());
         long seconds = codeTimeToSend.getTime().getSeconds();
         Instant messageTimestampPlusSeconds = messageTimestamp.plusSeconds(seconds);
 
