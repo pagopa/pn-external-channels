@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class NotificationProgressInMemoryDao implements NotificationProgressDao {
 
-    //requestId -> NotificationProgress
+    //iun -> NotificationProgress
     private final ConcurrentHashMap<String, NotificationProgress> database;
 
     private final ConcurrentHashMap<String, Integer> iunNumberOfAttempts;

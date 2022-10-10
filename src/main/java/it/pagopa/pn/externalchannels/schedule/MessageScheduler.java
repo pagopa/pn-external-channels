@@ -51,21 +51,28 @@ public class MessageScheduler {
     @Scheduled(cron = "${job.cron-expression}")
     public void run() {
         log.debug("[{}] CLOCK!", Instant.now());
-        Collection<NotificationProgress> all = dao.findAll();
-        Instant now = Instant.now();
-        for (NotificationProgress notificationProgress : all) {
+        try {
+            Collection<NotificationProgress> all = dao.findAll();
+            Instant now = Instant.now();
+            for (NotificationProgress notificationProgress : all) {
+                if (isTimeToSendMessage(now, notificationProgress)) {
+                    log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
+                    saveHistoricalDateInCache(notificationProgress);
+                    sendMessage(notificationProgress);
+                    notificationProgress.setLastMessageSentTimestamp(Instant.now());
 
-            if (isTimeToSendMessage(now, notificationProgress)) {
-                saveInCache(notificationProgress);
-                sendMessage(notificationProgress);
-                notificationProgress.setLastMessageSentTimestamp(Instant.now());
-
-                if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                    dao.delete(notificationProgress.getIun());
-                    log.info("Deleted message with requestId: {}", notificationProgress.getRequestId());
+                    log.info("[{}] Value of queue: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
+                    if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
+                        dao.delete(notificationProgress.getIun());
+                        log.info("Deleted message with requestId: {}", notificationProgress.getRequestId());
+                    }
                 }
             }
         }
+        catch (Exception e) {
+            log.error("Error in scheduler", e);
+        }
+
     }
 
     private boolean isTimeToSendMessage(Instant now, NotificationProgress notificationProgress) {
@@ -82,6 +89,7 @@ public class MessageScheduler {
 
     private void sendMessage(NotificationProgress notificationProgress) {
         CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
+        log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
         String code = codeTimeToSend.getCode();
         String requestId = notificationProgress.getRequestId();
@@ -147,7 +155,8 @@ public class MessageScheduler {
         }
     }
 
-    private void saveInCache(NotificationProgress notificationProgress) {
+    private void saveHistoricalDateInCache(NotificationProgress notificationProgress) {
+        log.debug("[{}] Saving historical date in cache", notificationProgress);
         String iun = notificationProgress.getIun();
         String requestId = notificationProgress.getRequestId();
         CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
