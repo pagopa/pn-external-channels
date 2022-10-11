@@ -50,28 +50,35 @@ public class MessageScheduler {
 
     @Scheduled(cron = "${job.cron-expression}")
     public void run() {
-        log.debug("[{}] CLOCK!", Instant.now());
-        try {
-            Collection<NotificationProgress> all = dao.findAll();
-            Instant now = Instant.now();
-            for (NotificationProgress notificationProgress : all) {
-                log.debug("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
-                if (isTimeToSendMessage(now, notificationProgress)) {
-                    log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
-                    saveHistoricalDateInCache(notificationProgress);
-                    sendMessage(notificationProgress);
-                    notificationProgress.setLastMessageSentTimestamp(Instant.now());
+        log.trace("[{}] CLOCK!", Instant.now());
+        Collection<NotificationProgress> all = dao.findAll();
+        Instant now = Instant.now();
+        for (NotificationProgress notificationProgress : all) {
+            handleMessage(notificationProgress, now);
+        }
 
-                    log.info("[{}] Value of queue: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
-                    if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                        dao.delete(notificationProgress.getIun());
-                        log.info("Deleted message with requestId: {}", notificationProgress.getRequestId());
-                    }
+    }
+
+    private void handleMessage(NotificationProgress notificationProgress, Instant now) {
+        try {
+            log.trace("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
+            if (isTimeToSendMessage(now, notificationProgress)) {
+                log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
+                saveHistoricalDateInCache(notificationProgress);
+                sendMessage(notificationProgress);
+                notificationProgress.setLastMessageSentTimestamp(Instant.now());
+
+                log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
+                if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
+                    dao.delete(notificationProgress.getIun());
+                    log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
                 }
             }
         }
         catch (Exception e) {
-            log.error("Error in scheduler", e);
+            log.error(String.format("[%s] Error in handleMessage: %s", notificationProgress.getIun(), e.getMessage()), e);
+            //rimuovo il record dal database per non farlo rimanere in uno stato inconsistente
+            dao.delete(notificationProgress.getIun());
         }
 
     }
@@ -104,16 +111,17 @@ public class MessageScheduler {
 
         SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel, destinationAddress);
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
-            enrichWithLocation(eventMessage);
+            enrichWithLocation(eventMessage, iun);
         }
         PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun, requestId);
-        log.info("Message to send: {}", pnDeliveryPushEvent);
+        log.info("[{}] Message to send: {}", iun, pnDeliveryPushEvent);
         deliveryPushSendClient.sendNotification(pnDeliveryPushEvent);
+        log.debug("[{}] Message sent", iun);
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }
 
-    private void enrichWithLocation(SingleStatusUpdate eventMessage) {
+    private void enrichWithLocation(SingleStatusUpdate eventMessage, String iun) {
         String code = eventMessage.getDigitalLegal().getEventCode().name();
         if (EventCodeInt.isWithAttachment(code)) {
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
@@ -121,8 +129,9 @@ public class MessageScheduler {
             fileCreationRequest.setDocumentType(PN_LEGAL_FACTS);
             fileCreationRequest.setStatus(SAVED);
             fileCreationRequest.setContent(buildXml(eventMessage.getDigitalLegal().getRequestId(), code));
+            log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
-
+            log.info("[{}] Message sent to Safe Storage", iun);
             eventMessage.getDigitalLegal().getGeneratedMessage().setLocation(response.getKey());
         }
     }
