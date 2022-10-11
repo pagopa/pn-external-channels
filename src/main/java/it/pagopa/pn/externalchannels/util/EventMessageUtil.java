@@ -81,11 +81,11 @@ public class EventMessageUtil {
         return ProgressEventCategory.PROGRESS;
     }
 
-    public static PnDeliveryPushEvent buildDeliveryPushEvent(SingleStatusUpdate event, String iun, String requestId) {
+    public static PnDeliveryPushEvent buildDeliveryPushEvent(SingleStatusUpdate event, String iun) {
         return PnDeliveryPushEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
-                        .eventId(requestId)
+                        .eventId("mock-" + UUID.randomUUID())
                         .eventType("EXTERNAL_CHANNELS_EVENT")
                         .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
                         .createdAt(Instant.now())
