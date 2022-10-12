@@ -113,7 +113,7 @@ public class MessageScheduler {
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage, iun);
         }
-        PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun, requestId);
+        PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun);
         log.info("[{}] Message to send: {}", iun, pnDeliveryPushEvent);
         deliveryPushSendClient.sendNotification(pnDeliveryPushEvent);
         log.debug("[{}] Message sent", iun);
