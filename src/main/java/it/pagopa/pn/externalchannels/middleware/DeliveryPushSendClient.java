@@ -1,6 +1,6 @@
 package it.pagopa.pn.externalchannels.middleware;
 
-import it.pagopa.pn.commons.abstractions.MomProducer;
+import it.pagopa.pn.api.dto.events.MomProducer;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
