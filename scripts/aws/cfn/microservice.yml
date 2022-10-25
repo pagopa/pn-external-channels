@@ -226,7 +226,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
-        DashboardName: !Sub "${ProjectName}-delivery-push"
+        DashboardName: !Sub "${ProjectName}-external-channel"
         RestApiStageArns: !Join
           - ','
           - - !GetAtt ExternalChannelMicroservicePublicAPI.Outputs.RestApiStageArn
