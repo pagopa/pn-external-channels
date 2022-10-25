@@ -219,3 +219,27 @@ Resources:
         ServiceApiPath: 'external-channel'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
+
+  ## Dashboard
+  ExternalChannelsMicroserviceCloudWatchDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      Parameters:
+        DashboardName: !Sub "${ProjectName}-delivery-push"
+        RestApiStageArns: !Join
+          - ','
+          - - !GetAtt ExternalChannelMicroservicePublicAPI.Outputs.RestApiStageArn
+            - !GetAtt ExternalChannelMicroservicePublicWebAPI.Outputs.RestApiStageArn
+        RestApiNames: !Join
+          - ','
+          - - !GetAtt ExternalChannelMicroservicePublicAPI.Outputs.RestApiName
+            - !GetAtt ExternalChannelMicroservicePublicWebAPI.Outputs.RestApiName
+        AlarmArns: !Join
+          - ','
+          - - !GetAtt ExternalChannelMicroservice.Outputs.AutoScalingAlarmArn
+        QueueArns: !Join
+          - ','
+          - - !Ref ExternalChannelsElabResQueueARN
+            - !Ref ExternalChannelsOutputsQueueARN
+            - !Ref ExternalChannelsElabResQueueARN
