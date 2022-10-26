@@ -241,5 +241,5 @@ Resources:
         QueueArns: !Join
           - ','
           - - !Ref ExternalChannelsElabResQueueARN
+            - !Ref ExternalChannelsInputsQueueARN
             - !Ref ExternalChannelsOutputsQueueARN
-            - !Ref ExternalChannelsElabResQueueARN
