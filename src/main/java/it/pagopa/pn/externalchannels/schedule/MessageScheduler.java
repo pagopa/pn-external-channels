@@ -132,7 +132,7 @@ public class MessageScheduler {
             log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
-            eventMessage.getDigitalLegal().getGeneratedMessage().setLocation(response.getKey());
+            eventMessage.getDigitalLegal().getGeneratedMessage().setLocation("safestorage://" + response.getKey());
         }
     }
 
