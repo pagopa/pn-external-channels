@@ -36,7 +36,7 @@ import java.util.Collection;
 public class MessageScheduler {
 
     public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
-    public static final String PN_LEGAL_FACTS = "PN_LEGAL_FACTS";
+    public static final String PN_NOTIFICATION_ATTACHMENTS = "PN_NOTIFICATION_ATTACHMENTS";
     public static final String SAVED = "SAVED";
 
     private final NotificationProgressDao dao;
@@ -126,7 +126,7 @@ public class MessageScheduler {
         if (EventCodeInt.isWithAttachment(code)) {
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
             fileCreationRequest.setContentType(LEGALFACTS_MEDIATYPE_XML);
-            fileCreationRequest.setDocumentType(PN_LEGAL_FACTS);
+            fileCreationRequest.setDocumentType(PN_NOTIFICATION_ATTACHMENTS);
             fileCreationRequest.setStatus(SAVED);
             fileCreationRequest.setContent(buildXml(eventMessage.getDigitalLegal().getRequestId(), code));
             log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
