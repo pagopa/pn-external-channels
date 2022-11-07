@@ -46,7 +46,7 @@ public enum EventCodeInt {
     }
 
     public static String getValueFromEnumString(String enumString) {
-        return EventCodeInt.valueOf(EventCodeInt.class, enumString).value;
+        return Enum.valueOf(EventCodeInt.class, enumString).value;
     }
 
 }

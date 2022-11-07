@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @RestController
 @RequiredArgsConstructor
 public class ExternalChannelController implements ExternalChannelApi {
@@ -23,7 +25,7 @@ public class ExternalChannelController implements ExternalChannelApi {
                                                              final ServerWebExchange exchange) {
 
 
-        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
+        String appSourceName = getAppSourceName(exchange);
 
         return paperEngageRequest
                 .doOnNext(request -> externalChannelsService.sendPaperEngageRequest(request, appSourceName))
@@ -31,5 +33,14 @@ public class ExternalChannelController implements ExternalChannelApi {
                 .log(this.getClass().getName())
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
 
+    }
+
+    private String getAppSourceName(ServerWebExchange exchange) {
+        if(exchange.getRequest().getHeaders().containsKey(APP_SOURCE_NAME) &&
+                !Objects.requireNonNull(exchange.getRequest().getHeaders().get(APP_SOURCE_NAME)).isEmpty()) {
+            return Objects.requireNonNull(exchange.getRequest().getHeaders().get(APP_SOURCE_NAME)).get(0);
+        }
+
+        return null;
     }
 }

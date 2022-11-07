@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class ExternalChannelsController implements ExternalChannelsApi {
                                                               Mono<DigitalNotificationRequest> digitalNotificationRequest,
                                                               final ServerWebExchange exchange) {
 
-        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
+        String appSourceName = getAppSourceName(exchange);
 
         return digitalNotificationRequest
                 .doOnNext(request -> externalChannelsService.sendDigitalLegalMessage(request, appSourceName))
@@ -36,11 +38,12 @@ public class ExternalChannelsController implements ExternalChannelsApi {
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @Override
     public Mono<ResponseEntity<Void>> sendDigitalCourtesyMessage(String requestIdx, String xPagopaExtchCxId,
                                                                  Mono<DigitalCourtesyMailRequest> digitalCourtesyMailRequest,
                                                                  final ServerWebExchange exchange) {
 
-        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
+        String appSourceName = getAppSourceName(exchange);
 
         return digitalCourtesyMailRequest
                 .doOnNext(request -> externalChannelsService.sendDigitalCourtesyMessage(request, appSourceName))
@@ -49,11 +52,12 @@ public class ExternalChannelsController implements ExternalChannelsApi {
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @Override
     public Mono<ResponseEntity<Void>> sendCourtesyShortMessage(String requestIdx, String xPagopaExtchCxId,
                                                                Mono<DigitalCourtesySmsRequest> digitalCourtesySmsRequest,
                                                                final ServerWebExchange exchange) {
 
-        String appSourceName = exchange.getRequest().getHeaders().get(APP_SOURCE_NAME).get(0);
+        String appSourceName = getAppSourceName(exchange);
 
         return digitalCourtesySmsRequest
                 .doOnNext(request -> externalChannelsService.sendCourtesyShortMessage(request, appSourceName))
@@ -61,5 +65,15 @@ public class ExternalChannelsController implements ExternalChannelsApi {
                 .log()
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
     }
+
+    private String getAppSourceName(ServerWebExchange exchange) {
+        if(exchange.getRequest().getHeaders().containsKey(APP_SOURCE_NAME) &&
+                !Objects.requireNonNull(exchange.getRequest().getHeaders().get(APP_SOURCE_NAME)).isEmpty()) {
+            return Objects.requireNonNull(exchange.getRequest().getHeaders().get(APP_SOURCE_NAME)).get(0);
+        }
+
+        return null;
+    }
+
 }
 
