@@ -70,7 +70,7 @@ public class MessageScheduler {
 
                 log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
                 if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                    dao.delete(notificationProgress.getIun());
+                    dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
                     log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
                 }
             }
@@ -78,7 +78,7 @@ public class MessageScheduler {
         catch (Exception e) {
             log.error(String.format("[%s] Error in handleMessage: %s", notificationProgress.getIun(), e.getMessage()), e);
             //rimuovo il record dal database per non farlo rimanere in uno stato inconsistente
-            dao.delete(notificationProgress.getIun());
+            dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
         }
 
     }

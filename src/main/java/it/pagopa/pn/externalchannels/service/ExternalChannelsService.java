@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ExternalChannelsService {
 
+    private static final String IUN_ALREADY_EXISTS_MESSAGE = "[%s] Iun already inserted!";
+
     private static final List<String> FAIL_REQUEST_CODE_DIGITAL = List.of("C001", "C007", "C004");
 
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("001", "002", "003", "005");
@@ -43,7 +45,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalNotificationRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
     }
 
@@ -55,7 +57,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalCourtesyMailRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
         }
     }
 
@@ -67,7 +69,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", digitalCourtesySmsRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
         }
     }
 
@@ -79,7 +81,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("[%s] Iun already inserted!", paperEngageRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
         }
     }
 
@@ -104,7 +106,7 @@ public class ExternalChannelsService {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
         }
         if (receiverClean.contains("_")) {
-            receiverClean = getSequenceOfMicroAttempts(receiverClean, iun);
+            receiverClean = getSequenceOfMicroAttempts(receiverClean, iun, receiverDigitalAddress);
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
@@ -120,19 +122,19 @@ public class ExternalChannelsService {
         return notificationProgress;
     }
 
-    private String getSequenceOfMicroAttempts(String receiverClean, String iun) {
-        Integer numberOfAttempts = notificationProgressDao.getNumberOfAttemptsByIun(iun);
+    private String getSequenceOfMicroAttempts(String receiverClean, String iun, String recipient) {
+        Integer numberOfAttempts = notificationProgressDao.getNumberOfAttemptsByIun(iun, recipient);
         int index;
         if (numberOfAttempts == null) {
             index = 0;
         } else {
             index = numberOfAttempts;
         }
-        notificationProgressDao.incrementNumberOfAttempt(iun);
+        notificationProgressDao.incrementNumberOfAttempt(iun, recipient);
         String[] messageProgress = receiverClean.split("_");
-        if (notificationProgressDao.getNumberOfAttemptsByIun(iun) >= messageProgress.length) {
+        if (notificationProgressDao.getNumberOfAttemptsByIun(iun, recipient) >= messageProgress.length) {
             //allora l'elemento processato è l'ultimo, quindi lo elimino dalla mappa
-            notificationProgressDao.deleteNumberOfAttemptsByIun(iun);
+            notificationProgressDao.deleteNumberOfAttemptsByIun(iun, recipient);
         }
         return receiverClean.split("_")[index];
 
@@ -169,9 +171,7 @@ public class ExternalChannelsService {
         String numberOfAttemptsString = requestId.substring(attemptIndex + 8, attemptIndex + 9); //prendo il carattere successivo a attempt_
         int numberOfAttempts = Integer.parseInt(numberOfAttemptsString);
 
-        String finalString = receiverClean.split("attempt")[numberOfAttempts - 1];
-
-        return finalString;
+        return receiverClean.split("attempt")[numberOfAttempts - 1];
     }
 
 

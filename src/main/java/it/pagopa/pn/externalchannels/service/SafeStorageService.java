@@ -27,7 +27,6 @@ public class SafeStorageService {
 
             return getFileDownloadResponseInt(fileDownloadResponse);
         } catch (Exception e) {
-//            throw new PnInternalException("Cannot getfileinfo", ERROR_CODE_DELIVERYPUSH_GETFILEERROR, e);
             throw new RuntimeException("Cannot get file info", e);
         }
     }
@@ -69,7 +68,6 @@ public class SafeStorageService {
 
             return fileCreationResponseInt;
         } catch (Exception e) {
-//            throw new PnInternalException("Cannot createfile", ERROR_CODE_DELIVERYPUSH_UPLOADFILEERROR, e);
             throw new RuntimeException("Cannot create file", e);
         }
     }
@@ -91,7 +89,6 @@ public class SafeStorageService {
 
             return updateFileMetadataResponseInt;
         } catch (Exception e) {
-//            throw new PnInternalException("Cannot updatemetadata", ERROR_CODE_DELIVERYPUSH_UPDATEMETAFILEERROR, e);
             throw new RuntimeException("Cannot update metadata", e);
         }
     }
@@ -104,7 +101,6 @@ public class SafeStorageService {
             byte[] encodedHash = digest.digest( content );
             return bytesToBase64( encodedHash );
         } catch (Exception e) {
-//            throw new PnInternalException("cannot compute sha256", ERROR_CODE_DELIVERYPUSH_ERRORCOMPUTECHECKSUM, exc );
             throw new RuntimeException("Cannot compute sha256", e);
         }
     }

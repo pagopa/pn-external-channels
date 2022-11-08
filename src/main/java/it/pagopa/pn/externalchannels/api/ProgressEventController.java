@@ -25,9 +25,9 @@ public class ProgressEventController {
         return Mono.just(ResponseEntity.ok(notificationProgressDao.findAll()));
     }
 
-    @GetMapping("{iun}")
-    public Mono<ResponseEntity<NotificationProgress>> findByIun(@PathVariable String iun) {
-        Optional<NotificationProgress> response = notificationProgressDao.findByIun(iun);
+    @GetMapping("{iun}/{recipient}")
+    public Mono<ResponseEntity<NotificationProgress>> findByIun(@PathVariable String iun, @PathVariable String recipient) {
+        Optional<NotificationProgress> response = notificationProgressDao.findByIunAndRecipient(iun, recipient);
         return response.map(notificationProgress -> Mono.just(ResponseEntity.ok(notificationProgress))).orElseGet(() ->
                 Mono.just(ResponseEntity.notFound().build()));
 

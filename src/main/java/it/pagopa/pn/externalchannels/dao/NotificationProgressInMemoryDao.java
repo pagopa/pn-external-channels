@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.dao;
 
+import it.pagopa.pn.externalchannels.dto.IunRecipientPair;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -12,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Classe dao che utilizza una ConcurrentHashMap ({@link #database}) per salvare in memoria i codici da inviare.
  * <p>
  * La mappa {@link #iunNumberOfAttempts} viene invece utilizzata per salvare in memoria i numeri di tentativi
- * di richieste diverse (requestId diverse), ma con lo stesso iun. Questo è il caso avente come address @sequence con gli
- * underscores per dividere i numeri di micro-tentativi da fare.
+ * di richieste diverse (requestId diverse), ma con la stessa coppia iun-destinatario.
+ * Questo è il caso avente come address @sequence con gli underscores per dividere i numeri di micro-tentativi da fare.
  * (esempio: mock@sequence.5s-C008_5s-C008_5s-C008_5s-C000.5s-C001.5s-C005.5s-C003).
  * <p>
  * Ogni micro-tentativo corrisponde a un NotificationProgress diverso. In particolare, una volta
@@ -24,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class NotificationProgressInMemoryDao implements NotificationProgressDao {
 
-    //iun -> NotificationProgress
-    private final ConcurrentHashMap<String, NotificationProgress> database;
+    //(iun, recipient) -> NotificationProgress
+    private final ConcurrentHashMap<IunRecipientPair, NotificationProgress> database;
 
-    private final ConcurrentHashMap<String, Integer> iunNumberOfAttempts;
+    private final ConcurrentHashMap<IunRecipientPair, Integer> iunNumberOfAttempts;
 
 
     public NotificationProgressInMemoryDao() {
@@ -38,10 +39,16 @@ public class NotificationProgressInMemoryDao implements NotificationProgressDao 
 
     @Override
     public boolean insert(NotificationProgress notificationProgress) {
-        NotificationProgress valueInDatabase = database.putIfAbsent(notificationProgress.getIun(), notificationProgress);
+        IunRecipientPair iunRecipientPair = IunRecipientPair.builder()
+                .iun(notificationProgress.getIun())
+                .recipient(notificationProgress.getDestinationAddress())
+                .build();
+
+        NotificationProgress valueInDatabase = database.putIfAbsent(iunRecipientPair, notificationProgress);
 
         if (valueInDatabase != null) {
-            log.warn("[{}] NotificationProgress did not insert because already exists!", notificationProgress.getIun());
+            log.warn("[{}] NotificationProgress did not insert because already exists for recipient {}", notificationProgress.getIun(),
+                    notificationProgress.getDestinationAddress());
             return false;
         }
         else {
@@ -56,35 +63,41 @@ public class NotificationProgressInMemoryDao implements NotificationProgressDao 
     }
 
     @Override
-    public Optional<NotificationProgress> findByIun(String iun) {
-        NotificationProgress notificationProgress = database.get(iun);
+    public Optional<NotificationProgress> findByIunAndRecipient(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        NotificationProgress notificationProgress = database.get(iunRecipientPair);
         return Optional.ofNullable(notificationProgress);
     }
 
     @Override
-    public void delete(String iun) {
-        database.remove(iun);
+    public void delete(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        database.remove(iunRecipientPair);
     }
 
     @Override
-    public boolean iunAlreadyExists(String iun) {
-        return iunNumberOfAttempts.containsKey(iun);
+    public boolean iunWithRecipientAlreadyExists(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        return iunNumberOfAttempts.containsKey(iunRecipientPair);
     }
 
     @Override
-    public void incrementNumberOfAttempt(String iun) {
-        iunNumberOfAttempts.merge(iun, 1, Integer::sum);
+    public void incrementNumberOfAttempt(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        iunNumberOfAttempts.merge(iunRecipientPair, 1, Integer::sum);
     }
 
     @Override
-    public Integer getNumberOfAttemptsByIun(String iun) {
-        return iunNumberOfAttempts.get(iun);
+    public Integer getNumberOfAttemptsByIun(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        return iunNumberOfAttempts.get(iunRecipientPair);
     }
 
     @Override
-    public void deleteNumberOfAttemptsByIun(String iun) {
-        iunNumberOfAttempts.remove(iun);
-        log.info("Deleted NumberOfAttempts of iun: {}", iun);
+    public void deleteNumberOfAttemptsByIun(String iun, String recipient) {
+        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
+        iunNumberOfAttempts.remove(iunRecipientPair);
+        log.info("Deleted NumberOfAttempts of iun: {} of the recipient: {}", iun, recipient);
     }
 
 

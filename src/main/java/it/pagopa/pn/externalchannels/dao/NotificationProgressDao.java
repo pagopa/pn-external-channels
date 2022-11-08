@@ -9,14 +9,14 @@ public interface NotificationProgressDao {
 
     boolean insert(NotificationProgress notificationProgress);
     Collection<NotificationProgress> findAll();
-    Optional<NotificationProgress> findByIun(String iun);
-    void delete(String iun);
+    Optional<NotificationProgress> findByIunAndRecipient(String iun, String recipient);
+    void delete(String iun, String recipient);
 
-    boolean iunAlreadyExists(String iun);
+    boolean iunWithRecipientAlreadyExists(String iun, String recipient);
 
-    void incrementNumberOfAttempt(String iun);
+    void incrementNumberOfAttempt(String iun, String recipient);
 
-    Integer getNumberOfAttemptsByIun(String iun);
+    Integer getNumberOfAttemptsByIun(String iun, String recipient);
 
-    void deleteNumberOfAttemptsByIun(String iun);
+    void deleteNumberOfAttemptsByIun(String iun, String recipient);
 }

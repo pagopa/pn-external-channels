@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public class EventMessageUtil {
 
+    private EventMessageUtil() {}
+
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
 
