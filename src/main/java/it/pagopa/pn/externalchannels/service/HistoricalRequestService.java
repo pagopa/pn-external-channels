@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class HistoricalRequestService {
 
+    private static final String CACHE_WARNING_MESSAGE = "Cache not enabled";
+
 
     private final AsyncCache<String, HistoricalRequest> cacheHistoricalRequest;
 
@@ -39,7 +41,7 @@ public class HistoricalRequestService {
             return Flux.fromIterable(cacheHistoricalRequest.synchronous().asMap().values());
         }
         else {
-            log.warn("Cache not enabled");
+            log.warn(CACHE_WARNING_MESSAGE);
             return Flux.empty();
         }
 
@@ -54,7 +56,7 @@ public class HistoricalRequestService {
             return Mono.fromFuture(valueInCache);
         }
         else {
-            log.warn("Cache not enabled");
+            log.warn(CACHE_WARNING_MESSAGE);
             return Mono.empty();
         }
     }
@@ -78,7 +80,7 @@ public class HistoricalRequestService {
             }
         }
         else {
-            log.warn("Cache not enabled");
+            log.warn(CACHE_WARNING_MESSAGE);
         }
 
     }

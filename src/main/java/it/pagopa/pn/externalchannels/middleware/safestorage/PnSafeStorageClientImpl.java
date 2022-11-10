@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.middleware.safestorage;
 import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
+import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.api.FileDownloadApi;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.api.FileMetadataUpdateApi;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.api.FileUploadApi;
@@ -85,8 +86,7 @@ public class PnSafeStorageClientImpl implements PnSafeStorageClient {
 
             return operationResultCodeResponse;
         } catch (RestClientException e) {
-//            throw new PnInternalException("Exception invoking updateFileMetadata", PnDeliveryPushExceptionCodes.ERROR_CODE_DELIVERYPUSH_UPDATEMETAFILEERROR, e);
-            throw new RuntimeException("Exception invoking updateFileMetadata", e);
+            throw new ExternalChannelsMockException("Exception invoking updateFileMetadata", e);
         }
     }
 
@@ -110,7 +110,7 @@ public class PnSafeStorageClientImpl implements PnSafeStorageClient {
             
             if (res.getStatusCodeValue() != org.springframework.http.HttpStatus.OK.value())
             {
-//                throw new PnInternalException("File upload failed", PnDeliveryPushExceptionCodes.ERROR_CODE_DELIVERYPUSH_UPLOADFILEERROR);
+                throw new ExternalChannelsMockException("File upload failed");
             }
         } catch (PnInternalException ee)
         {
@@ -120,8 +120,7 @@ public class PnSafeStorageClientImpl implements PnSafeStorageClient {
         catch (Exception ee)
         {
             log.error("uploadContent Exception uploading file", ee);
-            throw new RuntimeException("Exception uploading file", ee);
-//            throw new PnInternalException("Exception uploading file", PnDeliveryPushExceptionCodes.ERROR_CODE_DELIVERYPUSH_UPLOADFILEERROR, ee);
+            throw new ExternalChannelsMockException("Exception uploading file", ee);
         }
     }
 

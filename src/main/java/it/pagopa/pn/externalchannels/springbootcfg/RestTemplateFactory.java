@@ -13,10 +13,10 @@ import java.time.OffsetDateTime;
 @Configuration
 public class RestTemplateFactory {
 
-    private final it.pagopa.pn.commons.pnclients.RestTemplateFactory restTemplateFactory;
+    private final it.pagopa.pn.commons.pnclients.RestTemplateFactory pnRestTemplateFactory;
 
-    public RestTemplateFactory(it.pagopa.pn.commons.pnclients.RestTemplateFactory restTemplateFactory) {
-        this.restTemplateFactory = restTemplateFactory;
+    public RestTemplateFactory(it.pagopa.pn.commons.pnclients.RestTemplateFactory pnRestTemplateFactory) {
+        this.pnRestTemplateFactory = pnRestTemplateFactory;
     }
 
 
@@ -35,7 +35,7 @@ public class RestTemplateFactory {
                         .configOverride(OffsetDateTime.class)
                         .setFormat(JsonFormat.Value.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX"))
                 );
-        restTemplateFactory.enrichWithTracing(template);
+        pnRestTemplateFactory.enrichWithTracing(template);
         return template;
     }
 

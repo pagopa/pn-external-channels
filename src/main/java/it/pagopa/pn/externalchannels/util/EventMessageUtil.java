@@ -14,6 +14,8 @@ public class EventMessageUtil {
 
     private EventMessageUtil() {}
 
+    private static final String MOCK_PREFIX = "mock-";
+
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
 
@@ -40,7 +42,7 @@ public class EventMessageUtil {
                                 .requestId(requestId)
                                 .status(buildStatus(code))
                                 .eventTimestamp(OffsetDateTime.now())
-                                .generatedMessage(new DigitalMessageReference().system("mock-system").id("mock-" + UUID.randomUUID()))
+                                .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
     }
 
@@ -53,7 +55,7 @@ public class EventMessageUtil {
                                 .requestId(requestId)
                                 .status(buildStatus(code))
                                 .eventTimestamp(OffsetDateTime.now())
-                                .generatedMessage(new DigitalMessageReference().system("mock-system").id("mock-" + UUID.randomUUID()))
+                                .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
     }
 
@@ -87,7 +89,7 @@ public class EventMessageUtil {
         return PnDeliveryPushEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
-                        .eventId("mock-" + UUID.randomUUID())
+                        .eventId(MOCK_PREFIX + UUID.randomUUID())
                         .eventType("EXTERNAL_CHANNELS_EVENT")
                         .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
                         .createdAt(Instant.now())

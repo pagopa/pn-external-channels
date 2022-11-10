@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.service;
 
 import it.pagopa.pn.externalchannels.dto.safestorage.*;
+import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileCreationResponse;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileDownloadResponse;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.UpdateFileMetadataRequest;
@@ -27,7 +28,7 @@ public class SafeStorageService {
 
             return getFileDownloadResponseInt(fileDownloadResponse);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot get file info", e);
+            throw new ExternalChannelsMockException("Cannot get file info", e);
         }
     }
 
@@ -68,7 +69,7 @@ public class SafeStorageService {
 
             return fileCreationResponseInt;
         } catch (Exception e) {
-            throw new RuntimeException("Cannot create file", e);
+            throw new ExternalChannelsMockException("Cannot create file", e);
         }
     }
 
@@ -89,7 +90,7 @@ public class SafeStorageService {
 
             return updateFileMetadataResponseInt;
         } catch (Exception e) {
-            throw new RuntimeException("Cannot update metadata", e);
+            throw new ExternalChannelsMockException("Cannot update metadata", e);
         }
     }
 
@@ -101,7 +102,7 @@ public class SafeStorageService {
             byte[] encodedHash = digest.digest( content );
             return bytesToBase64( encodedHash );
         } catch (Exception e) {
-            throw new RuntimeException("Cannot compute sha256", e);
+            throw new ExternalChannelsMockException("Cannot compute sha256", e);
         }
     }
 

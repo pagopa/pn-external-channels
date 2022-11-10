@@ -34,6 +34,8 @@ public class ExternalChannelsService {
 
     private static final List<String> OK_REQUEST_CODE_PAPER = List.of("001", "002", "003", "004");
 
+    private static final String SEQUENCE_REGEXP = ".*@sequence\\.";
+
     private final NotificationProgressDao notificationProgressDao;
 
 
@@ -100,7 +102,7 @@ public class ExternalChannelsService {
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
         String receiverClean = receiverDigitalAddress
-                .replaceFirst(".*@sequence\\.", "");
+                .replaceFirst(SEQUENCE_REGEXP, "");
 
         if (receiverClean.contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
