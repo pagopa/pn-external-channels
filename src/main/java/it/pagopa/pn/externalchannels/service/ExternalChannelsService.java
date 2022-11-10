@@ -101,7 +101,6 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
-//        String s = Pattern.compile(".*@sequence\\.").matcher(receiverDigitalAddress).replaceFirst("");
         String receiverClean = receiverDigitalAddress
                 .replaceFirst(SEQUENCE_REGEXP, "");
 
