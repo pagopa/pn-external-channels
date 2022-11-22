@@ -11,7 +11,9 @@
     <artifactId>pn-external-channels</artifactId>
     <version>0.0.3-SNAPSHOT</version>
     <name>pn-external-channels</name>
-
+    <properties>
+        <jacoco.min.line.cover.ratio>0.001</jacoco.min.line.cover.ratio>
+    </properties>
     <dependencies>
 
         <dependency>
