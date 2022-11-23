@@ -39,7 +39,7 @@ import java.util.Collection;
 public class MessageScheduler {
 
     public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
-    public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
+    public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_NOTIFICATION_ATTACHMENTS"; //"PN_EXTERNAL_LEGAL_FACTS"; // ci andrà questo
     public static final String SAVED = "SAVED";
 
     private final NotificationProgressDao dao;
