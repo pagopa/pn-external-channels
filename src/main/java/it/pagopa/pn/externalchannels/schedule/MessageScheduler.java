@@ -102,17 +102,10 @@ public class MessageScheduler {
     }
 
     private void sendMessage(NotificationProgress notificationProgress) {
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
-        log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
-        assert codeTimeToSend != null;
-        String code = codeTimeToSend.getCode();
-        String requestId = notificationProgress.getRequestId();
         String iun = notificationProgress.getIun();
         String channel = notificationProgress.getChannel();
-        String destinationAddress = notificationProgress.getDestinationAddress();
 
-
-        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel, destinationAddress);
+        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress);
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage, iun);
         }

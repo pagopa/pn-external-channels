@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.dto;
 
+import it.pagopa.pn.externalchannels.model.DiscoveredAddress;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -35,5 +36,7 @@ public class NotificationProgress implements Serializable {
     private String iun;
 
     private String channel;
+
+    private DiscoveredAddress discoveredAddress; // per notifica cartacea (esito negativo con indagine postino)
 
 }

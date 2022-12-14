@@ -2,14 +2,18 @@ package it.pagopa.pn.externalchannels.util;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
+import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.model.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 public class EventMessageUtil {
 
     private EventMessageUtil() {}
@@ -23,11 +27,26 @@ public class EventMessageUtil {
 
     private static final String OK_CODE = "C003";
 
-    public static SingleStatusUpdate buildMessageEvent(String code, String requestId, String channel, String destinationAddress) {
+    public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress) {
+        boolean isLastMessage = notificationProgress.getCodeTimeToSendQueue().size() == 1;
+        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
+        log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
+        assert codeTimeToSend != null;
+
+        String code = codeTimeToSend.getCode();
+        String requestId = notificationProgress.getRequestId();
+        String channel = notificationProgress.getChannel();
+        DiscoveredAddress discoveredAddress = null;
+
         if (LEGAL_CHANNELS.contains(channel)) {
             return buildLegalMessage(code, requestId);
         } else if (PAPER_CHANNELS.contains(channel)) {
-            return buildPaperMessage(code, requestId.split( "_")[0], requestId, channel, destinationAddress);
+
+            if(isLastMessage && notificationProgress.getDiscoveredAddress() != null) {
+                discoveredAddress = notificationProgress.getDiscoveredAddress();
+            }
+
+            return buildPaperMessage(code, requestId.split( "_")[0], requestId, channel, discoveredAddress);
         }
 
         return buildDigitalCourtesyMessage(code, requestId);
@@ -59,13 +78,12 @@ public class EventMessageUtil {
                 );
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, String destinationAddress) {
-
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress) {
         return new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
                                 .iun(iun)
-                                .discoveredAddress(new DiscoveredAddress().name("MockName").city("MockCity").address(destinationAddress))
+                                .discoveredAddress(discoveredAddress)
                                 .requestId(requestId)
                                 .productType(productType)
                                 .clientRequestTimeStamp(OffsetDateTime.now())
