@@ -51,7 +51,7 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
 2. Altrimenti, segue il seguente flusso SUCCESSO: \
    `"001", "002", "003", "004" (ogni cinque secondi)`.
 
-## Esempi di utilizzo del campo receiverAddressRow2 per l'invio di notifiche cartacee
+## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
 
 - via Milano@fail => segue il flusso di fallimento
 - via Milano => segue il flusso di successo
