@@ -3,7 +3,6 @@ package it.pagopa.pn.externalchannels.dto;
 import it.pagopa.pn.externalchannels.model.DiscoveredAddress;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.LinkedList;
 
