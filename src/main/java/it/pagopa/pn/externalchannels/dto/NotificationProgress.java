@@ -19,7 +19,7 @@ import java.util.LinkedList;
  * essendo {@link #lastMessageSentTimestamp} non popolato ancora.
  */
 @Data
-public class NotificationProgress implements Serializable {
+public class NotificationProgress {
 
     private String requestId;
 
