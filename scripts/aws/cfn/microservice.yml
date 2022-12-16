@@ -1,37 +1,16 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: 'Example microservice deploy'
 
+
 Parameters:
   ProjectName:
     Type: String
     Description: 'Usually pn can be pnXYZ where XYZ are the feature number, useful to create
       experimental environments without crash official development environment'
-
-  SendCronExpression:
+  
+  CorsAllowedDomains:
     Type: String
-    Description: Cron espression that activate sending to poste-italiane bucket
-
-  InputBucketName:
-    Type: String
-    Description: bucket for comunication to poste-italiane
-  InputBucketArn:
-    Type: String
-    Description: bucket for comunication to poste-italiane
-
-  OutputBucketName:
-    Type: String
-    Description: bucket for comunication from poste-italiane
-  OutputBucketArn:
-    Type: String
-    Description: bucket for comunication from poste-italiane
-
-  ApiDnsName:
-    Type: String
-    Description: 'The DNS name used for B2B rest API.'
-
-  WebApiDnsName:
-    Type: String
-    Description: 'The DNS name used for WEB rest API.'
+    Description: 'Comma separated list of domains allowed to make cross origin request'
 
   ContainerImageUri:
     Type: String
@@ -45,38 +24,9 @@ Parameters:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
 
-
-  RecipesBucketName:
-    Type: String
-    Description: 'Where to write post office recipes'
-  RecipesBucketArn:
-    Type: String
-    Description: 'Where to write post office recipes'
-
-  ExternalChannelsElabResQueueName:
-    Type: String
-    Description: 'Internal queue'
-  ExternalChannelsElabResQueueARN:
-    Type: String
-    Description: 'Internal Queue'
-
-  ExternalChannelsInputsQueueName:
-    Type: String
-    Description: 'Send external-channel messages to this Queue'
-  ExternalChannelsInputsQueueARN:
-    Type: String
-    Description: 'Send external-channel messages to this Queue'
-
-  ExternalChannelsOutputsQueueName:
-    Type: String
-    Description: 'Pull external-channel messages from this Queue'
-  ExternalChannelsOutputsQueueARN:
-    Type: String
-    Description: 'Pull external-channel messages from this Queue'
-
-  KeyspaceName:
-    Type: String
-    Description: 'Where to write database data'
+  SandboxSafeStorageBaseUrl:
+     Type: String
+     Description: 'Url to the SafeStorage microservice'
 
   ECSClusterName:
     Type: String
@@ -89,57 +39,78 @@ Parameters:
   VpcId:
     Type: String
     Description: 'VpcId where the microservice is going to be deployed'
+  
+  EcsDefaultSecurityGroup:
+    Type: String
+    Description: 'Default security group required by infrastructure'
 
   ApplicationLoadBalancerListenerArn:
     Type: String
     Description: 'Load balancer listener where HTTP endpoints is going to be registered'
 
-  ApplicationLoadBalancerDomain:
+  AlarmSNSTopicArn:
     Type: String
-    Description: 'Base URL of the load balancer where the service is going to be reachable'
+    Description: ARN of alarm topic
 
-  NetworkLoadBalancerLink:
+  Version:
     Type: String
-    Description: 'network load balancer link for API-GW'
+    Description: 'keep track of used projects commitIds'
+
+  ExternalChannelsOutputsQueueName:
+    Type: String
+    Description: 'Push external-channel messages from this Queue'
+
+  ExternalChannelsOutputsQueueARN:
+    Type: String
+    Description: 'Push external-channel messages from this Queue'
+
+  CacheExpireDays:
+    Type: String
+    Description: 'Cache expire in days'
+
+  CacheMaxSize:
+    Type: String
+    Description: 'Cache max size'
+
+  JobCronExpression:
+    Type: String
+    Description: 'Cron Expression of scheduler to read requests from Database'
 
 Resources:
 
-  # PN-external-channel microservice
-  ExternalChannelMicroservice:
+  # PN-External-Channels microservice
+  ExternalChannelsMicroservice:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-ext-channels'
+        MicroServiceUniqueName: !Sub '${ProjectName}-external-channels'
         CpuValue: 1024
         MemoryAmount: 2GB
+        AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
-        ContainerEnvEntry1: !Sub 'SPRING_DATA_CASSANDRA_KEYSPACENAME=${KeyspaceName}'
-        ContainerEnvEntry2: 'SPRING_DATA_CASSANDRA_SSL=true'
-        ContainerEnvEntry3: !Sub 'SPRING_DATA_CASSANDRA_CONTACTPOINTS=cassandra.${AWS::Region}.${AWS::URLSuffix}:9142'
-        ContainerEnvEntry4: 'DEVOPTIONS_FAKEPNEXTCHNSERVICE=true'
-        ContainerEnvEntry5: !Sub 'JOB_CRONEXPRESSION=${SendCronExpression}'
-        ContainerEnvEntry6: !Sub 'CLOUD_AWS_REGION_STATIC=${AWS::Region}'
-        ContainerEnvEntry7: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        ContainerEnvEntry8: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNNOTIFPECINBOUND_DESTINATION=${ExternalChannelsInputsQueueName}'
-        ContainerEnvEntry9: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNELABRESULT_DESTINATION=${ExternalChannelsElabResQueueName}'
-        ContainerEnvEntry10: !Sub 'SPRING_CLOUD_STREAM_BINDINGS_PNEXTCHNSTATUS_DESTINATION=${ExternalChannelsOutputsQueueName}'
-        ContainerEnvEntry11: !Sub 'S3_BUCKETS_EXTERNALCHANNELSOUT=${OutputBucketName}'
-        ContainerEnvEntry12: !Sub 'S3_BUCKETS_EXTERNALCHANNELSIN=${InputBucketName}'
-        MappedPaths: '/external-channel/*,/external-channel-private/*'
+        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
+        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSH=${ExternalChannelsOutputsQueueName}'
+        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
+        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
+        ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
+        EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
 
-  # Grant operational rights to PN-external-channel microservice
-  ExternalChannelMicroserviceTaskPolicy:
+
+  ExternalChannelsMicroserviceTaskPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${ProjectName}-ext-channels-CustomTaskPolicy'
+      PolicyName: !Sub '${ProjectName}-external-channels-CustomTaskPolicy'
       Roles:
-        - !GetAtt ExternalChannelMicroservice.Outputs.TaskRoleName
+        - !GetAtt ExternalChannelsMicroservice.Outputs.TaskRoleName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -155,67 +126,5 @@ Resources:
               - sqs:SendMessage
               - sqs:SendMessageBatch
             Resource:
-              - !Ref ExternalChannelsInputsQueueARN
               - !Ref ExternalChannelsOutputsQueueARN
-              - !Ref ExternalChannelsElabResQueueARN
-          - Effect: Allow
-            Action:
-              - s3:GetObject
-              - s3:GetObjectAcl
-              - s3:GetObjectLegalHold
-              - s3:GetObjectRetention
-              - s3:GetObjectTagging
-              - s3:GetObjectVersion
-              - s3:GetObjectVersionAcl
-              - s3:GetObjectVersionTagging
-              - s3:PutObject
-              - s3:PutObjectLegalHold
-              - s3:PutObjectRetention
-              - s3:PutObjectTagging
-              - s3:PutObjectVersionTagging
-            Resource:
-              - !Sub '${RecipesBucketArn}/*'
-              - !Sub '${InputBucketArn}/*'
-              - !Sub '${OutputBucketArn}/*'
-          - Effect: Allow
-            Action:
-              - s3:ListBucket
-            Resource:
-              - !Ref RecipesBucketArn
-              - !Ref InputBucketArn
-              - !Ref OutputBucketArn
-          - Effect: Allow
-            Action:
-              - cassandra:Modify
-              - cassandra:Select
-            Resource:
-              - !Sub "arn:aws:cassandra:*:${AWS::AccountId}:/keyspace/*/table/*"
 
-
-  # Expose PN-external-channel microservice public API with API-GW for B2B usage
-  ExternalChannelMicroservicePublicAPI:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service.yaml"
-      Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-external-channel'
-        IntendedUsage: B2B
-        DnsName: !Ref ApiDnsName
-        ProjectName: !Ref ProjectName
-        ServiceApiPath: 'external-channel'
-        NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
-        ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
-
-  # Expose PN-external-channel microservice public API with API-GW for WEB usage
-  ExternalChannelMicroservicePublicWebAPI:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service.yaml"
-      Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-external-channel'
-        IntendedUsage: WEB
-        DnsName: !Ref WebApiDnsName
-        ProjectName: !Ref ProjectName
-        ServiceApiPath: 'external-channel'
-        NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
-        ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
