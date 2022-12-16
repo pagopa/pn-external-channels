@@ -7,18 +7,18 @@ import java.util.List;
 public enum EventCodeIntForPaper {
 
     // codici in arrivo da ext-Channel (C) con/senza busta indica se lo stato contiene allegati
-    PAPER_001("__001__"), // Stampato
-    PAPER_002("__002__"), // Disponibile al recapitista
-    PAPER_003("__003__"), // Preso in carico dal recapitista
-    PAPER_004("__004__"), // Consegnata
-    PAPER_005("__005__"), // Mancata consegna
-    PAPER_006("__006__"), // Furto/Smarrimanto/deterioramento
-    PAPER_007("__007__"), // Consegnato Ufficio Postale
-    PAPER_008("__008__"), // Mancata consegna Ufficio Postale
-    PAPER_009("__009__"); // Compiuta giacenza
+    PAPER_001("001"), // Stampato
+    PAPER_002("002"), // Disponibile al recapitista
+    PAPER_003("003"), // Preso in carico dal recapitista
+    PAPER_004("004"), // Consegnata
+    PAPER_005("005"), // Mancata consegna
+    PAPER_006("006"), // Furto/Smarrimanto/deterioramento
+    PAPER_007("007"), // Consegnato Ufficio Postale
+    PAPER_008("008"), // Mancata consegna Ufficio Postale
+    PAPER_009("009"); // Compiuta giacenza
 
     private final String value;
-    private static final List<String> EVENT_CODES_WITH_ATTACHMENT = List.of("__004__"); // solo per A/R
+    private static final List<String> EVENT_CODES_WITH_ATTACHMENT = List.of("004"); // solo per A/R
 
 
     EventCodeIntForPaper(String value) {
