@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.List;
 
-public enum EventCodeInt {
+public enum EventCodeIntForDigital {
 
     // codici interni Delivery-Push (DP)
     DP00("DP00"), // Tentativo reinvio richiesto: codice interno a delivery push che indica una richiesta di ritentativo
@@ -27,7 +27,7 @@ public enum EventCodeInt {
     private static final List<String> EVENT_CODES_WITH_ATTACHMENT = List.of("C001", "C002", "C003", "C004", "C006");
 
 
-    EventCodeInt(String value) {
+    EventCodeIntForDigital(String value) {
         this.value = value;
     }
 
@@ -46,7 +46,7 @@ public enum EventCodeInt {
     }
 
     public static String getValueFromEnumString(String enumString) {
-        return Enum.valueOf(EventCodeInt.class, enumString).value;
+        return Enum.valueOf(EventCodeIntForDigital.class, enumString).value;
     }
 
 }

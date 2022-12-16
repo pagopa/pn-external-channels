@@ -3,10 +3,7 @@ package it.pagopa.pn.externalchannels.service;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
-import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
-import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
-import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
-import it.pagopa.pn.externalchannels.model.PaperEngageRequest;
+import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -76,7 +73,7 @@ public class ExternalChannelsService {
     }
 
     public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSourceName) {
-        String address = paperEngageRequest.getReceiverAddressRow2() != null ? paperEngageRequest.getReceiverAddressRow2() : paperEngageRequest.getReceiverAddress();
+        String address = paperEngageRequest.getReceiverAddress();
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, appSourceName, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER);
 
@@ -149,6 +146,9 @@ public class ExternalChannelsService {
 
         if (receiverDigitalAddress.contains("@fail") || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
+            if(receiverDigitalAddress.contains("discovered")) {
+                notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress());
+            }
         } else if (receiverDigitalAddress.contains("@sequence")) { //si presuppone che per gli sms non ci sia il caso sequence
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId);
         } else {
@@ -174,6 +174,16 @@ public class ExternalChannelsService {
         int numberOfAttempts = Integer.parseInt(numberOfAttemptsString);
 
         return receiverClean.split("attempt")[numberOfAttempts - 1];
+    }
+
+    private DiscoveredAddress buildMockDiscoveredAddress() {
+        return new DiscoveredAddress()
+                .city("Milan")
+                .address("via Roma")
+                .name("Milan")
+                .country("Italy")
+                .cap("20121")
+                .pr("MI");
     }
 
 

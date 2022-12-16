@@ -1,6 +1,5 @@
 package it.pagopa.pn.externalchannels.schedule;
 
-import it.pagopa.pn.commons.exceptions.PnRuntimeException;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
@@ -9,13 +8,16 @@ import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequ
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
+import it.pagopa.pn.externalchannels.model.AttachmentDetails;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
-import it.pagopa.pn.externalchannels.util.EventCodeInt;
+import it.pagopa.pn.externalchannels.util.EventCodeIntForDigital;
+import it.pagopa.pn.externalchannels.util.EventCodeIntForPaper;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -30,8 +32,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collection;
+
+import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
 
 @Component
 @RequiredArgsConstructor
@@ -102,19 +109,15 @@ public class MessageScheduler {
     }
 
     private void sendMessage(NotificationProgress notificationProgress) {
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
-        log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
-        assert codeTimeToSend != null;
-        String code = codeTimeToSend.getCode();
-        String requestId = notificationProgress.getRequestId();
         String iun = notificationProgress.getIun();
         String channel = notificationProgress.getChannel();
-        String destinationAddress = notificationProgress.getDestinationAddress();
 
-
-        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(code, requestId, channel, destinationAddress);
+        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress);
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage, iun);
+        }
+        else if(EventMessageUtil.AR.equals(channel)) {
+            enrichWithAttachmentDetail(eventMessage, iun);
         }
         PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun);
         log.info("[{}] Message to send: {}", iun, pnDeliveryPushEvent);
@@ -126,7 +129,7 @@ public class MessageScheduler {
 
     private void enrichWithLocation(SingleStatusUpdate eventMessage, String iun) {
         String code = eventMessage.getDigitalLegal().getEventCode().name();
-        if (EventCodeInt.isWithAttachment(code)) {
+        if (EventCodeIntForDigital.isWithAttachment(code)) {
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
             fileCreationRequest.setContentType(LEGALFACTS_MEDIATYPE_XML);
             fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
@@ -148,7 +151,7 @@ public class MessageScheduler {
             Document doc = dBuilder.newDocument();
             // add elements to Document
             Element rootElement = doc.createElement("Notifica");
-            rootElement.setAttribute("status", EventCodeInt.getValueFromEnumString(code));
+            rootElement.setAttribute("status", EventCodeIntForDigital.getValueFromEnumString(code));
             rootElement.setAttribute("requestId", requestId);
             // append root element to document
             doc.appendChild(rootElement);
@@ -182,4 +185,34 @@ public class MessageScheduler {
         assert codeTimeToSend != null;
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }
+
+    private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun) {
+        String code = eventMessage.getAnalogMail().getStatusCode();
+        if(EventCodeIntForPaper.isWithAttachment(code)) {
+            eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun));
+        }
+    }
+
+    private AttachmentDetails buildAttachment(String iun) {
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("avvisofronte-retro.pdf");
+            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+            fileCreationRequest.setContentType("application/pdf");
+            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
+            fileCreationRequest.setStatus(SAVED);
+            fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+            log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
+            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
+            log.info("[{}] Message sent to Safe Storage", iun);
+            return new AttachmentDetails()
+                    .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
+                    .id(iun + "DOCMock")
+                    .documentType("application/pdf")
+                    .date(OffsetDateTime.now());
+        } catch (IOException e) {
+            log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
+            return null;
+        }
+    }
+
 }

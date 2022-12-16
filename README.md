@@ -42,14 +42,16 @@ nel seguente modo:
 
 ## Come utilizzare il Mock per le notifiche cartacee
 Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/external-channel/v1/paper-deliveries-engagements/:requestIdx`)
-è receiverAddressRow2. In particolare:
+è receiverAddress. In particolare:
 
-1. Se il campo receiverAddressRow2 contiene la stringa **@fail**, segue il seguente flusso di FALLIMENTO di invio: \
-   `"001", "002", "003", "004" (ogni cinque secondi)`.
+1. Se il campo receiverAddress contiene la stringa **@fail**, segue il seguente flusso di FALLIMENTO di invio: \
+   `"001", "002", "003", "005" (ogni cinque secondi)`. \
+   In più, se il receiverAddress contiene anche la stringa **discovered**, nell'ultima notifica inviata a DeliveryPush 
+   (quella con codice 005) verrà valorizzato il campo discoveredAddress (corrispondente all'indirizzo del destinatario desunto dalle indagini del personale postale).
 2. Altrimenti, segue il seguente flusso SUCCESSO: \
-   `"001", "002", "003", "005" (ogni cinque secondi)`.
+   `"001", "002", "003", "004" (ogni cinque secondi)`.
 
-## Esempi di utilizzo del campo receiverAddressRow2 per l'invio di notifiche cartacee
+## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
 
 - via Milano@fail => segue il flusso di fallimento
 - via Milano => segue il flusso di successo
