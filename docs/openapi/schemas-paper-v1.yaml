@@ -49,7 +49,7 @@ components:
           type: string
           format: date-time
           description: >-
-            Timestamp della richiesta in UTC specificando la timezone 'Z'
+            Timestamp della richiesta in UTC
         productType:
           description: >-
             Tipo prodotto di cui viene chiesto il recapito: <br/>
@@ -60,7 +60,7 @@ components:
             - ... ulteriori prodotti 
           type: string
           example: 'AR'
-        attachmentUrl:
+        attachmentUri:
           type: string
           description: >-
             Coordinate per l'accesso al documento PDF da inviare. <br/>
@@ -250,55 +250,12 @@ components:
           items:
             $ref: '#/components/schemas/AttachmentDetails'
         discoveredAddress:
-          description: >-
-            Indirizzo del destinatario desunto dalle indagini del personale postale.
-          required:
-            - name
-            - address
-            - city
-          properties:  
-            name:
-              type: string
-              description: >-
-                Cognome e nome o ragione sociale del destinatario
-            nameRow2:
-              type: string
-              description: >-
-                Seconda riga sulla busta.
-            address:
-              type: string
-              description: >-
-                Indirizzo del destinatario.
-            addressRow2:
-              type: string
-              description: >-
-                Specifica dell’indirizzo di residenza del destinatario (seconda riga indirizzo sulla busta).
-            cap:
-              type: string
-              description: >-
-                Cap del destinatario; in caso di invio estero diventa facoltativo.
-            city:
-              type: string
-              description: >-
-                Comune del destinatario.
-            city2:
-              type: string
-              description: >-
-                Frazione del destinatario. Potrebbe essere utile se il chiamante non fornisce il cap.
-            pr:
-              type: string
-              description: >-
-                Provincia del destinatario; in caso di invio estero diventa facoltativo.
-            country:
-              type: string
-              description: >-
-                In caso di destinatario estero, diventa obbligatoria l’indicazione della nazione di destinazione, 
-                in standard UPU o altro standard condiviso.
+            $ref: '#/components/schemas/DiscoveredAddress'
         clientRequestTimeStamp:
           type: string
           format: date-time
           description: >-
-            Timestamp della richiesta in UTC specificando la timezone
+            Timestamp della richiesta in UTC
 
     
     AttachmentDetails:
@@ -326,4 +283,50 @@ components:
           type: string
           format: date-time
           description: >-
-            timestamp di produzione del documento specificando la timezone
+            Data di produzione del documento.
+
+    DiscoveredAddress:
+      description: >-
+        Indirizzo del destinatario desunto dalle indagini del personale postale.
+      required:
+        - name
+        - address
+        - city
+      properties:
+        name:
+          type: string
+          description: >-
+            Cognome e nome o ragione sociale del destinatario
+        nameRow2:
+          type: string
+          description: >-
+            Seconda riga sulla busta.
+        address:
+          type: string
+          description: >-
+            Indirizzo del destinatario.
+        addressRow2:
+          type: string
+          description: >-
+            Specifica dell’indirizzo di residenza del destinatario (seconda riga indirizzo sulla busta).
+        cap:
+          type: string
+          description: >-
+            Cap del destinatario; in caso di invio estero diventa facoltativo.
+        city:
+          type: string
+          description: >-
+            Comune del destinatario.
+        city2:
+          type: string
+          description: >-
+            Frazione del destinatario. Potrebbe essere utile se il chiamante non fornisce il cap.
+        pr:
+          type: string
+          description: >-
+            Provincia del destinatario; in caso di invio estero diventa facoltativo.
+        country:
+          type: string
+          description: >-
+            In caso di destinatario estero, diventa obbligatoria l’indicazione della nazione di destinazione, 
+            in standard UPU o altro standard condiviso.

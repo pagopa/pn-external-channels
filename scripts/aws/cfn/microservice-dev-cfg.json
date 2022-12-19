@@ -1,9 +1,8 @@
 {
   "Parameters" : {
-    "SendCronExpression": "0/30 * * ? * *",
-    "InputBucketName": "pn-pagopa-develop-extchn-output",
-    "OutputBucketName": "pn-pagopa-develop-extchn-input",
-    "InputBucketArn": "arn:aws:s3:::pn-pagopa-develop-extchn-output",
-    "OutputBucketArn": "arn:aws:s3:::pn-pagopa-develop-extchn-input"
+    "SandboxSafeStorageBaseUrl": "https://14ej9p2krd.execute-api.eu-south-1.amazonaws.com/dev",
+    "CacheExpireDays": "90",
+    "CacheMaxSize": "100000",
+    "JobCronExpression": "*/5 * * * * *"
   }
 }
