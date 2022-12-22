@@ -103,14 +103,12 @@ Resources:
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
+        TaskRoleManagedPolicyArn: !Ref ExternalChannelsMicroserviceTaskManagedPolicy
 
 
-  ExternalChannelsMicroserviceTaskPolicy:
-    Type: AWS::IAM::Policy
+  ExternalChannelsMicroserviceTaskManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: !Sub '${ProjectName}-external-channels-CustomTaskPolicy'
-      Roles:
-        - !GetAtt ExternalChannelsMicroservice.Outputs.TaskRoleName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
