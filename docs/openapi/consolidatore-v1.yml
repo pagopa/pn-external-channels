@@ -120,7 +120,105 @@ paths:
               schema:
                 $ref: '#/components/schemas/OperationResultCodeResponse'
         
+  /piattaforma-notifiche-ingress/v1/paper-replicas-engagement:
+    post:
+      operationId: sendPaperReplicasEngagementRequest
+      summary: PN richiede la generazione di un duplicato
+      description: >- 
+        Questa operazione sottomette al consolidatore una richiesta di invio di 
+        documento duplicato. <br/>
+        Il consolidatore deve validare la sintatticamente la richiesta e, se tale 
+        validazione ha successo, registrare la richiesta in maniera sincrona.
+        Se vengono inviate molteplici richieste con lo stesso requestId solo una 
+        deve avere successo (status code HTTP 200, le altre devono ricevere lo 
+        status code 409).
+      parameters:
+        - $ref: '#/components/parameters/xPagopaExtchServiceId'
+        - $ref: '#/components/parameters/xPagopaExtchApiKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaperReplicaRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: { resultCode: '200.00', resultDescription: 'OK', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+        '400':
+          description: errore di validazione della richiesta
+          content:
+            application/json:
+              examples: 
+                syntaxError: 
+                  summary: 'Errore sintattico'
+                  value: { resultCode: '400.01', resultDescription: 'Syntax Error', errorList: [ 'field requestId is required'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+                semanticError: 
+                  summary: 'Errore semantico'
+                  value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'unrecognized product Type'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+        '401':
+          description: Mancano le credenziali di identificazione o sono sbagliate
+          content:
+            application/json:
+              example: { resultCode: '401.00', resultDescription: 'Authentication Failed', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+        '409':
+          description: requestId già inviato quindi non riutilizzabile
+          content:
+            application/json:
+              example: { resultCode: '409.00', resultDescription: 'duplicated requestId', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
 
+  /piattaforma-notifiche-ingress/v1/paper-replicas-progresses/{requestId}:
+    get:
+      operationId: getPaperReplicasProgressesRequest
+      summary: PN richiede l'elenco dei progressi di una richiesta duplicato
+      description: >- 
+        Questa richiesta permette di ottenere l'elenco degli eventi salienti 
+        riguardanti un processo di richieta duplicato. <br/>
+      parameters:
+        - $ref: '#/components/parameters/xPagopaExtchServiceId'
+        - $ref: '#/components/parameters/xPagopaExtchApiKey'
+        - name: requestId
+          description: Identificativo della richiesta di richiesta duplicato 
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+          in: path
+          required: true
+          schema:
+            type: string  
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaperReplicasProgressesResponse'
+              example:
+                responseId: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+                events: []
+
+        '401':
+          description: Mancano le credenziali di identificazione o sono sbagliate
+          content:
+            application/json:
+              example: { resultCode: '401.00', resultDescription: 'Authentication Failed', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+        '404':
+          description: requestId non corrispondente a un requestId precedentemente richiesto.
+          content:
+            application/json:
+              example: { resultCode: '404.01', resultDescription: 'requestId never sent', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
 
 webhooks: 
 
@@ -143,6 +241,55 @@ webhooks:
               minItems: 1
               items:
                 $ref: '#/components/schemas/PaperProgressStatusEvent'
+        required: true
+      responses:
+        '202':
+          description: >-
+            OK, l'evento è stato registrato
+          content:
+            application/json:
+              example: { resultCode: '202.00', resultDescription: 'Accepted', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+        '400':
+          description: >- 
+            Il ricevente ha eseguito la validazione sintattica o semantica dei campi e 
+            tale validazione è fallita: possiblie mismatch di versione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+              examples: 
+                syntaxError: 
+                  summary: 'Errore sintattico'
+                  value: { resultCode: '400.01', resultDescription: 'Syntax Error', errorList: [ 'field requestId is required'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+                semanticError: 
+                  summary: 'Errore semantico'
+                  value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'unrecognized product Type'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}  
+        '401':
+          description: >- 
+            Il sistema chiamante non è stato identificato, verificare le configurazioni
+          content:
+            application/json:
+              example: { resultCode: '401.00', resultDescription: 'Authentication Failed', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+  
+  push-replicas-progress-events-to-notification-platform:
+    post:
+      operationId: sendPaperReplicasProgressStatusRequest
+      summary: Webhook con cui PN riceve progressi di richiesta duplicato
+      parameters:
+        - $ref: '#/components/parameters/xPagopaExtchServiceId'
+        - $ref: '#/components/parameters/xPagopaExtchApiKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/PaperReplicasStatusEvent'
         required: true
       responses:
         '202':
@@ -213,7 +360,7 @@ components:
         - clientRequestTimeStamp
         - eventType
         - productType
-        - attachmentUrl
+        - attachments
         - printType
         - receiverName
         - receiverAddress
@@ -257,16 +404,42 @@ components:
             - ... ulteriori prodotti 
           type: string
           example: 'AR'
-        attachmentUri:
-          type: string
+        attachments:
+          type: array
+          items:
+            type: object
+            required: 
+              - uri
+              - order
+              - documentType
+              - digestSha256
+            properties:
+              uri: 
+                type: string
+                description: URI indicante 
+                example: safestorage://PN_EXTERNAL_LEGALFACT_....
+              order: 
+                type: number
+                description: Ordine di stampa, intero positivo, continuo, inizia da 0
+                example: 0
+              documentType: 
+                type: string 
+                description: >-
+                  Tipo di documento: <br/>
+                  - __AAR__: Avviso di avvenuta ricezione, tipicamente associato a campo _order_ valorizzato a 0
+                  - __ATTO__: Documento inviato dalla pubblica amministrazione.
+                example: AAR
+              digestSha256:
+                type: string 
+                description: >-
+                  sha256 del contenuto del file riferenziato dal campo uri
           description: >-
-            Coordinate per l'accesso al documento PDF da inviare. <br/>
+            Coordinate per l'accesso ai documenti PDF da inviare. <br/>
         printType:
           type: string
           description: >-
             Indica il tipo di stampa richiesto al Consolidatore <br />
-            - __BN_FRONTE__: bianco e nero solo fronte <br/>
-            - __BN_FRONTE_RETRO__: bianco e nero fronte e retro <br/>
+            - __BN_FRONTE_RETRO__: bianco e nero fronte e retro, file differenti devono essere stampati su fogli distinti <br/>
             - ... ulteriori modalità previste dal contratto
           example: 'BN_FRONTE_RETRO'
         receiverName:
@@ -583,3 +756,125 @@ components:
           items:
             $ref: '#/components/schemas/PaperProgressStatusEvent'
 
+
+    ##########################################################################
+    ###                    RICHIESTA DI DUPLICATO                          ###
+    ##########################################################################
+
+    PaperReplicaRequest:
+      type: object
+      required:
+        - requestId
+        - paperEngageRequestId
+      properties:
+        requestId:
+          type: string
+          description: >-
+            Identificativo della richiesta di postalizzazione.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+        paperEngageRequestId:
+          type: string
+          description: >-
+            Identificativo della richiesta di postalizzazione.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+        documentType:
+          type: string
+          description: >-
+            Tipologia di documento richiesto
+            TODO: da codividere i possibili valori
+          
+    ##########################################################################
+    ###      NOTIFICHE DI AVANZAMENTO DEL PROCESSO DI POSTALIZZAZIONE      ###
+    ##########################################################################
+
+    ### - EVENTO SINGOLO
+    #####################
+    PaperReplicasStatusEvent:
+      type: object
+      required:
+        - requestId
+        - paperEngageRequestId
+        - statusCode
+        - statusDescription
+        - statusDateTime        
+        - productType
+        - clientRequestTimeStamp
+      properties:
+        requestId:
+          type: string
+          description: >-
+            Identificativo della richiesta.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
+        paperEngageRequestId:
+          type: string
+          description: >-
+            Identificativo della richiesta.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
+        statusCode:
+          type: string
+          description: >-
+            _Codifica sintetica dello stato dell'esito._  <br/>
+        statusDescription: 
+          type: string
+          example: 'Stampato'
+          description: >-
+            Descrizione dello stato del delivery cartaceo che viene notificato.
+        statusDateTime:
+          type: string
+          format: date-time
+          description: >-
+            Data stato con timezone
+        attachment: 
+          type: object
+          required: 
+            - id
+            - documentType
+            - url
+            - date
+          properties:
+            id: 
+              type: string
+              description: >-
+                Identificativo di riga.
+            documentType:
+              type: string
+              description: >-
+                La descrizione della tipologia di oggetto.
+            url:
+              type: string
+              description: >-
+                Le coordinate del documento correlato allo stato. 
+            date:
+              type: string
+              format: date-time
+              description: >-
+                Data di produzione del documento.
+        clientRequestTimeStamp:
+          type: string
+          format: date-time
+          description: >-
+            Timestamp della richiesta in UTC
+
+    ### - LISTA DI EVENTI RELATIVI A UNA STESSA RICHIESTA
+    ######################################################
+    PaperReplicasProgressesResponse:
+      type: object
+      required:
+        - requestId
+        - paperEngageRequestId
+        - events
+      properties:
+        requestId:
+          type: string
+          description: >-
+            Identificativo della richiesta di postalizzazione.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+        paperEngageRequestId:
+          type: string
+          description: >-
+            Identificativo della richiesta.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaperReplicasStatusEvent'
