@@ -770,7 +770,7 @@ components:
         requestId:
           type: string
           description: >-
-            Identificativo della richiesta di postalizzazione.
+            Identificativo della richiesta di richiesta duplicato.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
         paperEngageRequestId:
           type: string
@@ -867,7 +867,7 @@ components:
         requestId:
           type: string
           description: >-
-            Identificativo della richiesta di postalizzazione.
+            Identificativo della richiesta di richiesta duplicato.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
         paperEngageRequestId:
           type: string
