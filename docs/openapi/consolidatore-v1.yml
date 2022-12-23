@@ -716,6 +716,7 @@ components:
               - id
               - documentType
               - url
+              - digestSha256
               - date
             properties:
               id: 
@@ -730,6 +731,10 @@ components:
                 type: string
                 description: >-
                   Le coordinate del documento correlato allo stato. 
+              digestSha256:
+                type: string 
+                description: >-
+                  sha256 del contenuto del file riferenziato dal campo uri
               date:
                 type: string
                 format: date-time
@@ -878,6 +883,7 @@ components:
           required: 
             - documentType
             - url
+            - digestSha256
             - date
           properties:
             documentType:
@@ -888,6 +894,10 @@ components:
               type: string
               description: >-
                 Le coordinate del documento correlato allo stato. 
+            digestSha256:
+                type: string 
+                description: >-
+                  sha256 del contenuto del file riferenziato dal campo uri
             date:
               type: string
               format: date-time
