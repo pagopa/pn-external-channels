@@ -324,7 +324,56 @@ webhooks:
               schema:
                 $ref: '#/components/schemas/OperationResultCodeResponse'
 
-
+  push-attachments-preload:
+    post:
+      summary: Richiesta di pre-caricamento dei documenti da comunicare a PN
+      description: |-
+        Operazione che richiede a Piattaforma Notifica le informazioni e le autorizzazioni necessarie 
+        a precaricare uno o più file.
+      operationId: presignedUploadRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - preloads
+              properties: 
+                preloads:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PreLoadRequest"
+                  minItems: 1
+                  maxItems: 15
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - preloads
+                properties: 
+                  preloads:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PreLoadResponse"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+              examples: 
+                syntaxError: 
+                  summary: 'Errore sintattico'
+                  value: { resultCode: '400.01', resultDescription: 'Syntax Error', errorList: [ 'field requestId is required'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
+                semanticError: 
+                  summary: 'Errore semantico'
+                  value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'unrecognized product Type'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}  
+      
 components:
 
   parameters:
@@ -873,3 +922,68 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PaperReplicasStatusEvent'
+
+
+    ##########################################################################
+    ###                 PRECARICAMENTO FILE SU SAFESTORAGE                 ###
+    ##########################################################################
+
+    PreLoadRequest:
+      title: Richiesta di precaricamento di un File
+      type: object
+      properties:
+        preloadIdx:
+          title: Id della richiesta di precaricamento di un file
+          description: >-
+            Identificativo univoco all'interno della request HTTP, serve per correlare la risposta. 
+          type: string
+        contentType:
+          title: MIME type del file che verrà caricato
+          description: >-
+            Il MIME type dell'allegato che dovrà essere caricato. Attualmente è supportato solo
+              - application/pdf
+          type: string
+          example: application/pdf
+        sha256:
+          title: checksum sha256 del file che verrà caricato
+          description: >-
+            checksum sha256, codificato in base 64, del contenuto binario del file che verrà
+            caricato
+          type: string
+          example: jezIVxlG1M1woCSUngM6KipUN3/p8cG5RMIPnuEanlE=
+
+    PreLoadResponse:
+      title: Informazioni per il caricamento file
+      description: >-
+        Per ogni richiesta che è stata fatta viene fornito un presigned URL e le 
+        informazioni per usarlo.
+      type: object
+      properties:
+        preloadIdx:
+          description: per correlazione con la richiesta
+          type: string
+        secret:
+          description: >-
+            Token aggiuntivo per far si che sia necessario intercettare anche gli 
+            header e non solo l'URL di upload del contenuto del documento.
+          example: AZ23RF12
+          type: string
+        httpMethod:
+          description: >-
+            Indica se per l'upload del contenuto file bisogna utilizzare il metodo PUT o POST
+          type: string
+          example: PUT
+          enum:
+            - POST
+            - PUT
+        url:
+          description: >-
+            URL a cui effettuare l'upload del contenuto del documento.
+          type: string
+          example: 'https://preloadpn.aws.amazon.......'
+        key:
+          description: >-
+            la chiave restituita sarà globalmente unica e andrà utilizzata nella richiesta 
+            di notifica.
+          example: 'PN_NOTIFICATION_ATTACHMENTS-0001-301W-B9CB-9U72-WIKD'
+          type: string
