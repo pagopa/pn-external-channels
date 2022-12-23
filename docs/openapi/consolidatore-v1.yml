@@ -771,7 +771,7 @@ components:
           type: string
           description: >-
             Identificativo della richiesta di richiesta duplicato.
-          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1'
         paperEngageRequestId:
           type: string
           description: >-
@@ -803,12 +803,12 @@ components:
         requestId:
           type: string
           description: >-
-            Identificativo della richiesta.
-          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
+            Identificativo della richiesta duplicato.
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1' 
         paperEngageRequestId:
           type: string
           description: >-
-            Identificativo della richiesta.
+            Identificativo della richiesta di postalizzazione.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
         statusCode:
           type: string
@@ -868,7 +868,7 @@ components:
           type: string
           description: >-
             Identificativo della richiesta di richiesta duplicato.
-          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
+          example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1'
         paperEngageRequestId:
           type: string
           description: >-
