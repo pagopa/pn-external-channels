@@ -461,7 +461,7 @@ components:
               - uri
               - order
               - documentType
-              - digestSha256
+              - sha256
             properties:
               uri: 
                 type: string
@@ -478,10 +478,10 @@ components:
                   - __AAR__: Avviso di avvenuta ricezione, tipicamente associato a campo _order_ valorizzato a 0
                   - __ATTO__: Documento inviato dalla pubblica amministrazione.
                 example: AAR
-              digestSha256:
+              sha256:
                 type: string 
                 description: >-
-                  sha256 del contenuto del file riferenziato dal campo uri
+                  sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
           description: >-
             Coordinate per l'accesso ai documenti PDF da inviare. <br/>
         printType:
@@ -715,8 +715,8 @@ components:
             required: 
               - id
               - documentType
-              - url
-              - digestSha256
+              - uri
+              - sha256
               - date
             properties:
               id: 
@@ -727,14 +727,14 @@ components:
                 type: string
                 description: >-
                   La descrizione della tipologia di oggetto.
-              url:
+              uri:
                 type: string
                 description: >-
                   Le coordinate del documento correlato allo stato. 
-              digestSha256:
+              sha256:
                 type: string 
                 description: >-
-                  sha256 del contenuto del file riferenziato dal campo uri
+                  sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
               date:
                 type: string
                 format: date-time
@@ -878,31 +878,33 @@ components:
           format: date-time
           description: >-
             Data stato con timezone
-        attachment: 
-          type: object
-          required: 
-            - documentType
-            - url
-            - digestSha256
-            - date
-          properties:
-            documentType:
-              type: string
-              description: >-
-                La descrizione della tipologia di oggetto.
-            url:
-              type: string
-              description: >-
-                Le coordinate del documento correlato allo stato. 
-            digestSha256:
-                type: string 
+        attachments:
+          type: array
+          items: 
+            type: object
+            required: 
+              - documentType
+              - uri
+              - sha256
+              - date
+            properties:
+              documentType:
+                type: string
                 description: >-
-                  sha256 del contenuto del file riferenziato dal campo uri
-            date:
-              type: string
-              format: date-time
-              description: >-
-                Data di produzione del documento.
+                  La descrizione della tipologia di oggetto.
+              uri:
+                type: string
+                description: >-
+                  Le coordinate del documento correlato allo stato. 
+              sha256:
+                  type: string 
+                  description: >-
+                    sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
+              date:
+                type: string
+                format: date-time
+                description: >-
+                  Data di produzione del documento.
         clientRequestTimeStamp:
           type: string
           format: date-time
@@ -950,8 +952,7 @@ components:
         contentType:
           title: MIME type del file che verrà caricato
           description: >-
-            Il MIME type dell'allegato che dovrà essere caricato. Attualmente è supportato solo
-              - application/pdf
+            Il MIME type dell'allegato che dovrà essere caricato. 
           type: string
           example: application/pdf
         sha256:
