@@ -4,6 +4,7 @@ import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class EventMessageUtil {
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
     public static final String AR = "AR";
 
-    public static final List<String> PAPER_CHANNELS = List.of(AR, "890", "RI", "RS");
+    public static final List<String> PAPER_CHANNELS = List.of(AR, "890", "RI", "RS", "RN_AR");
 
     private static final String OK_CODE = "C003";
 
@@ -106,6 +107,19 @@ public class EventMessageUtil {
 
     public static PnDeliveryPushEvent buildDeliveryPushEvent(SingleStatusUpdate event, String iun) {
         return PnDeliveryPushEvent.builder()
+                .header(StandardEventHeader.builder()
+                        .iun(iun)
+                        .eventId(MOCK_PREFIX + UUID.randomUUID())
+                        .eventType("EXTERNAL_CHANNELS_EVENT")
+                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                        .createdAt(Instant.now())
+                        .build())
+                .payload(event)
+                .build();
+    }
+
+    public static PaperChannelEvent buildPaperChannelEvent(SingleStatusUpdate event, String iun) {
+        return PaperChannelEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
                         .eventId(MOCK_PREFIX + UUID.randomUUID())

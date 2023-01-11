@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.externalchannels.sqs.DeliveryPushProducer;
+import it.pagopa.pn.externalchannels.sqs.PaperChannelProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,11 @@ public class AppConfig {
     @Bean
     DeliveryPushProducer deliveryPushProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new DeliveryPushProducer(sqs, properties.getTopics().getToDeliveryPush(), objMapper);
+    }
+
+    @Bean
+    PaperChannelProducer paperChannelProducer(SqsClient sqs, ObjectMapper objMapper) {
+        return new PaperChannelProducer(sqs, properties.getTopics().getToPaperChannel(), objMapper);
     }
 
 }
