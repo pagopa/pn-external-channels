@@ -44,7 +44,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
     }
 
@@ -56,7 +56,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
         }
     }
 
@@ -68,7 +68,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
         }
     }
 
@@ -80,7 +80,7 @@ public class ExternalChannelsService {
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
         if (! inserted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
         }
     }
 

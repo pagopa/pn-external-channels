@@ -25,7 +25,7 @@ public class EventMessageUtil {
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
     public static final String AR = "AR";
 
-    public static final List<String> PAPER_CHANNELS = List.of(AR, "890", "RI", "RS", "RN_AR");
+    public static final List<String> PAPER_CHANNELS = List.of(AR, "890", "RI", "RS");
 
     private static final String OK_CODE = "C003";
 
