@@ -64,6 +64,14 @@ Parameters:
     Type: String
     Description: 'Push external-channel messages from this Queue'
 
+  ExternalChannels2PaperChannelQueueName:
+    Type: String
+    Description: 'Push external-channel messages from this Queue to paper channel'
+
+  ExternalChannels2PaperChannelQueueARN:
+    Type: String
+    Description: 'Push external-channel messages from this Queue to paper channel'
+
   CacheExpireDays:
     Type: String
     Description: 'Cache expire in days'
@@ -96,6 +104,7 @@ Resources:
         ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
         ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
         ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        ContainerEnvEntry8: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -125,4 +134,5 @@ Resources:
               - sqs:SendMessageBatch
             Resource:
               - !Ref ExternalChannelsOutputsQueueARN
+              - !Ref ExternalChannels2PaperChannelQueueARN
 

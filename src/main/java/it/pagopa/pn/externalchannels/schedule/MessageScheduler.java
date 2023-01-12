@@ -5,9 +5,8 @@ import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
-import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
+import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.model.AttachmentDetails;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
@@ -51,7 +50,7 @@ public class MessageScheduler {
 
     private final NotificationProgressDao dao;
 
-    private final DeliveryPushSendClient deliveryPushSendClient;
+    private final ProducerHandler producerHandler;
 
     private final SafeStorageService safeStorageService;
 
@@ -119,10 +118,8 @@ public class MessageScheduler {
         else if(EventMessageUtil.AR.equals(channel)) {
             enrichWithAttachmentDetail(eventMessage, iun);
         }
-        PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun);
-        log.info("[{}] Message to send: {}", iun, pnDeliveryPushEvent);
-        deliveryPushSendClient.sendNotification(pnDeliveryPushEvent);
-        log.debug("[{}] Message sent", iun);
+
+        producerHandler.sendToQueue(notificationProgress, eventMessage);
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }

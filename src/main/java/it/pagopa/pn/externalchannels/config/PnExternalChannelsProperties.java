@@ -30,6 +30,8 @@ public class PnExternalChannelsProperties {
 
         private String toDeliveryPush;
 
+        private String toPaperChannel;
+
     }
 
 
