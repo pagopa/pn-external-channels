@@ -115,7 +115,7 @@ public class MessageScheduler {
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage, iun);
         }
-        else if(EventMessageUtil.AR.equals(channel)) {
+        else if(EventMessageUtil.AR.equals(channel) || EventMessageUtil._890.equals(channel)) {
             enrichWithAttachmentDetail(eventMessage, iun);
         }
 
