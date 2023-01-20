@@ -835,6 +835,9 @@ components:
           type: string
           description: >-
             Tipologia di documento richiesto
+            Facoltativo, se non specificato il consolidatore dovrà fornire tutti i documenti relativi alla 
+            richesta di postalizzazione identificata dal "paperEngageRequestId" richiedendoli al recapitista 
+            ove necessario
             TODO: da codividere i possibili valori
           
     ##########################################################################
@@ -869,6 +872,7 @@ components:
           description: >-
             _Codifica sintetica dello stato dell'esito._  <br/>
             TODO: Elencare possibili esiti delle richieste di duplicato
+            N.B: i duplicati non sono producibili se il recapito è ancora in corso.
         statusDescription: 
           type: string
           description: >-
