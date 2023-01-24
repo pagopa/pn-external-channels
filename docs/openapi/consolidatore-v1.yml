@@ -226,6 +226,7 @@ webhooks:
   ###      NOTIFICHE DI AVANZAMENTO DEL PROCESSO DI POSTALIZZAZIONE      ###
   ##########################################################################
 
+  # Path /consolidatore-ingress/v1/push-progress-events/
   push-progress-events-to-notification-platform:
     post:
       operationId: sendPaperProgressStatusRequest
@@ -275,6 +276,7 @@ webhooks:
               schema:
                 $ref: '#/components/schemas/OperationResultCodeResponse'
   
+  # Path /consolidatore-ingress/v1/replicas-push-progress-events/
   push-replicas-progress-events-to-notification-platform:
     post:
       operationId: sendPaperReplicasProgressStatusRequest
@@ -324,6 +326,7 @@ webhooks:
               schema:
                 $ref: '#/components/schemas/OperationResultCodeResponse'
 
+  # Path /consolidatore-ingress/v1/attachement-preload/
   push-attachments-preload:
     post:
       summary: Richiesta di pre-caricamento dei documenti da comunicare a PN
