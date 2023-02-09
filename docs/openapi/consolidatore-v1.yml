@@ -448,12 +448,12 @@ components:
             Timestamp della richiesta in UTC
         productType:
           description: >-
-            Tipo prodotto di cui viene chiesto il recapito: <br/>
-            - __AR__: Raccomandata Andata e Ritorno, <br/>
-            - __890__: Recapito a norma della legge 890/1982, <br/>
-            - __RI__: Raccomandata Internazionale, <br/>
-            - __RS__: Raccomandata Semplice (per Avviso di mancato Recapito). <br/>
-            - ... ulteriori prodotti 
+            Tipo prodotto di cui viene chiesto il recapito:  <br/>
+            - __AR__: Raccomandata Andata e Ritorno nazionale,  <br/>
+            - __890__: Recapito a norma della legge 890/1982,  <br/>
+            - __RS__: Raccomandata Semplice nazionale (per Avviso di mancato Recapito). <br/>
+            - __RIS__: Raccomandata Internazionale Semplice,  <br/>
+            - __RIR__: Raccomandata Internazionale con AR.  <br/>
           type: string
           example: 'AR'
         attachments:
@@ -699,14 +699,14 @@ components:
         deliveryFailureCause: 
           description: >-
             _Motivazione di mancata consegna_ obbligtorie negli stati di mancata consegna  <br/>
-            - __01__ destinatario irreperibile <br/>
-            - __02__ destinatario deceduto <br/>
-            - __03__ destinatario sconosciuto <br/>
-            - __04__ destinatario trasferito <br/>
-            - __05__ invio rifiutato <br/>
-            - __06__ indirizzo inesatto <br/>
-            - __07__ indirizzo inesistente <br/>
-            - __08__ indirizzo insufficiente <br/>
+            - __M01__ destinatario irreperibile <br/>
+            - __M02__ destinatario deceduto <br/>
+            - __M03__ destinatario sconosciuto <br/>
+            - __M04__ destinatario trasferito <br/>
+            - __M05__ invio rifiutato <br/>
+            - __M06__ indirizzo inesatto <br/>
+            - __M07__ indirizzo inesistente <br/>
+            - __M08__ indirizzo insufficiente <br/>
             - __F01__ - in caso di furto  <br/>
             - __F02__ - in caso di smarrimento  <br/>
             - __F03__  - in caso di deterioramento  <br/>
@@ -732,7 +732,7 @@ components:
               documentId:
                 type: string
                 description: >-
-                  Il codice di tracciatura per il prodotto postale figlio
+                  Codice postale dell'oggetto di ritorno
               documentType:
                 type: string
                 description: >-
@@ -913,6 +913,10 @@ components:
                 type: string
                 description: >-
                   La descrizione della tipologia di oggetto.
+              documentId:
+                type: string
+                description: >-
+                  Codice postale dell'oggetto
               uri:
                 type: string
                 description: >-
