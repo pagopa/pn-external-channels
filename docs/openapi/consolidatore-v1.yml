@@ -656,15 +656,16 @@ components:
           type: string
           description: >-
             Il codice di tracciatura obbligatorio per i prodotti di corrispondenza tracciata.
+            "Del prodotto padre"
           example: '123456789abc'
         productType:
           description: >-
             Tipo prodotto di cui viene chiesto il recapito:  <br/>
-            - __AR__: Raccomandata Andata e Ritorno,  <br/>
+            - __AR__: Raccomandata Andata e Ritorno nazionale,  <br/>
             - __890__: Recapito a norma della legge 890/1982,  <br/>
-            - __RI__: Raccomandata Internazionale,  <br/>
-            - __RS__: Raccomandata Semplice (per Avviso di mancato Recapito). <br/>
-            - ... ulteriori prodotti concordati con il consolidatore <br/>
+            - __RS__: Raccomandata Semplice nazionale (per Avviso di mancato Recapito). <br/>
+            - __RIS__: Raccomandata Internazionale Semplice,  <br/>
+            - __RIR__: Raccomandata Internazionale con AR.  <br/>
           type: string
         iun: 
           type: string
@@ -706,7 +707,9 @@ components:
             - __06__ indirizzo inesatto <br/>
             - __07__ indirizzo inesistente <br/>
             - __08__ indirizzo insufficiente <br/>
-            - ... Motivazioni aggiuntive concordate con il consolidatore
+            - __F01__ - in caso di furto  <br/>
+            - __F02__ - in caso di smarrimento  <br/>
+            - __F03__  - in caso di deterioramento  <br/>
           type: string
         attachments:
           description: >-
@@ -726,10 +729,21 @@ components:
                 type: string
                 description: >-
                   Identificativo di riga.
+              documentId:
+                type: string
+                description: >-
+                  Il codice di tracciatura per il prodotto postale figlio
               documentType:
                 type: string
                 description: >-
-                  La descrizione della tipologia di oggetto.
+                  _La descrizione della tipologia di oggetto._
+                  - __23L__ <br/>
+                  - __ARCAD__ <br/>
+                  - __CAD__ <br/>
+                  - __CAN__ <br/>
+                  - __Plico__ <br/>
+                  - __Indagine__ <br/>
+                  - __AR__ <br/>
               uri:
                 type: string
                 description: >-
