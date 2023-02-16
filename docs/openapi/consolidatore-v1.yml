@@ -425,6 +425,8 @@ components:
       properties:
         iun: 
           type: string
+          minLength: 30 
+          maxLength: 50
           example: 'ABCD-HILM-YKWX-202202-1'
           description: >-
             Identificativo Unico della Notifica. Può essere usato per migliorare il servizio 
@@ -432,11 +434,15 @@ components:
             Pubbliche Amministrazioni di ricercare anche per Identificativo Univoco Notifica.
         requestId:
           type: string
+          minLength: 30
+          maxLength: 250
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
           description: >-
             Identificativo della richiesta.
         requestPaId:
           type: string
+          minLength: 1
+          maxLength: 80
           example: '00414580183'
           description: >-
             Identificativo della PA che ha richiesto il recapito. Utile per autorizzare il
@@ -455,6 +461,8 @@ components:
             - __RIS__: Raccomandata Internazionale Semplice,  <br/>
             - __RIR__: Raccomandata Internazionale con AR.  <br/>
           type: string
+          minLength: 2
+          maxLength: 3
           example: 'AR'
         attachments:
           type: array
@@ -470,12 +478,16 @@ components:
                 type: string
                 description: URI indicante 
                 example: safestorage://PN_EXTERNAL_LEGALFACT_....
+                minLength: 5
+                maxLength: 2000
               order: 
                 type: number
                 description: Ordine di stampa, intero positivo, continuo, inizia da 0
                 example: 0
               documentType: 
-                type: string 
+                type: string
+                minLength: 3
+                maxLength: 4 
                 description: >-
                   Tipo di documento: <br/>
                   - __AAR__: Avviso di avvenuta ricezione, tipicamente associato a campo _order_ valorizzato a 0
@@ -485,14 +497,20 @@ components:
                 type: string 
                 description: >-
                   sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
+                minLength: 40
+                maxLength: 50
           description: >-
             Coordinate per l'accesso ai documenti PDF da inviare. <br/>
+          minItems: 0
+          maxItems: 200
         printType:
           type: string
           description: >-
             Indica il tipo di stampa richiesto al Consolidatore <br />
             - __BN_FRONTE_RETRO__: bianco e nero fronte e retro, file differenti devono essere stampati su fogli distinti <br/>
             - ... ulteriori modalità previste dal contratto
+          minLength: 5
+          maxLength: 30
           example: 'BN_FRONTE_RETRO'
         receiverName:
           type: string
@@ -598,6 +616,8 @@ components:
       properties:
         resultCode:
           type: string
+          minLength: 3
+          maxLength: 10
           example: '400.00'
           description: >-
             Codice a 5 cifre separate da punto che indica l’esito della richiesta.  LE prime tre sono ripetizione del codice HTTP<br/>
@@ -611,6 +631,8 @@ components:
             - .... Altri errori previsti dalla specifica implementazione <br />
         resultDescription:
           type: string
+          minLength: 5
+          maxLength: 250
           example: 'Request validation errors'
           description: >-
             Descrizione dell’Esito dell’operazione, sempre valorizzato, anche in caso di esito positivo. <br />
@@ -618,8 +640,12 @@ components:
             In nessun caso conterrà dettagli tecnici e/o stack trace. <br />
         errorList: 
           type: array
+          minItems: 0
+          maxItems: 50
           items:
             type: string
+            minLength: 3
+            maxLength: 250
             example: 'unsupported printType value'
           description: >-
             Elenco degli errori di validazione, se presenti.
@@ -649,6 +675,8 @@ components:
       properties:
         requestId:
           type: string
+          minLength: 30
+          maxLength: 250
           description: >-
             Identificativo della richiesta.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'  
@@ -665,14 +693,20 @@ components:
             - __RS__: Raccomandata Semplice nazionale (per Avviso di mancato Recapito). <br/>
             - __RIS__: Raccomandata Internazionale Semplice,  <br/>
             - __RIR__: Raccomandata Internazionale con AR.  <br/>
+          minLength: 2
+          maxLength: 3
           type: string
         iun: 
           type: string
+          minLength: 30 
+          maxLength: 50
           description: >-
             Identificativo Unico della Notifica. Proviene dalla richiesta originaria di PN.
           example: 'ABCD-HILM-YKWX-202202-1'
         statusCode:
           type: string
+          minLength: 3 
+          maxLength: 20
           description: >-
             _Codifica sintetica dello stato dell'esito._  <br/>
             Eventi relativi alla fase di __Stampa/Postalizzazione__ <br/>
@@ -764,6 +798,8 @@ components:
             - __REC090__		  - [ALL] - Archiviazione fisica materialità di ritorno
         statusDescription: 
           type: string
+          minLength: 5
+          maxLength: 250
           example: 'Stampato'
           description: >-
             Descrizione dello stato del delivery cartaceo che viene notificato.
@@ -787,11 +823,15 @@ components:
             - __F02__ - in caso di smarrimento  <br/>
             - __F03__  - in caso di deterioramento  <br/>
           type: string
+          minLength: 2
+          maxLength: 10
         attachments:
           description: >-
             elenco dei documenti prodotti che attestano quanto accaduto durante il processo 
             di postalizzazione
           type: array
+          minItems: 0
+          maxItems: 10
           items:
             type: object
             required: 
@@ -805,12 +845,16 @@ components:
                 type: string
                 description: >-
                   Identificativo di riga.
+                minLength: 1 
+                maxLength: 10
               documentId:
                 type: string
                 description: >-
                   Codice postale dell'oggetto di ritorno
               documentType:
                 type: string
+                minLength: 2
+                maxLength: 10
                 description: >-
                   _La descrizione della tipologia di oggetto._
                   - __23L__ <br/>
@@ -822,10 +866,14 @@ components:
                   - __AR__ <br/>
               uri:
                 type: string
+                minLength: 5
+                maxLength: 2000
                 description: >-
                   Le coordinate del documento correlato allo stato. 
               sha256:
                 type: string 
+                minLength: 40
+                maxLength: 50
                 description: >-
                   sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
               date:
@@ -895,11 +943,15 @@ components:
       properties:
         requestId:
           type: string
+          minLength: 30
+          maxLength: 250
           description: >-
             Identificativo della richiesta di postalizzazione.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
         events:
           type: array
+          minItems: 0
+          maxItems: 500
           items:
             $ref: '#/components/schemas/PaperProgressStatusEvent'
 
@@ -916,16 +968,22 @@ components:
       properties:
         requestId:
           type: string
+          minLength: 30
+          maxLength: 250
           description: >-
             Identificativo della richiesta di richiesta duplicato.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1'
         paperEngageRequestId:
           type: string
+          minLength: 30
+          maxLength: 250
           description: >-
             Identificativo della richiesta di postalizzazione.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
         documentType:
           type: string
+          minLength: 2
+          maxLength: 15
           description: >-
             Tipologia di documento richiesto
             Facoltativo, se non specificato il consolidatore dovrà fornire tutti i documenti relativi alla 
@@ -951,23 +1009,31 @@ components:
         - clientRequestTimeStamp
       properties:
         requestId:
+          minLength: 30
+          maxLength: 250
           type: string
           description: >-
             Identificativo della richiesta duplicato.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1' 
         paperEngageRequestId:
+          minLength: 30
+          maxLength: 250
           type: string
           description: >-
             Identificativo della richiesta di postalizzazione.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
         statusCode:
           type: string
+          minLength: 3 
+          maxLength: 20
           description: >-
             _Codifica sintetica dello stato dell'esito._  <br/>
             TODO: Elencare possibili esiti delle richieste di duplicato
             N.B: i duplicati non sono producibili se il recapito è ancora in corso.
         statusDescription: 
           type: string
+          minLength: 3 
+          maxLength: 250
           description: >-
             Descrizione dello stato della richiesta di duplicato
         statusDateTime:
@@ -977,6 +1043,8 @@ components:
             Data stato con timezone
         attachments:
           type: array
+          minItems: 1
+          maxItems: 10
           items: 
             type: object
             required: 
@@ -989,6 +1057,8 @@ components:
                 type: string
                 description: >-
                   La descrizione della tipologia di oggetto.
+                minItems: 2
+                maxItems: 10
               documentId:
                 type: string
                 description: >-
@@ -997,10 +1067,14 @@ components:
                 type: string
                 description: >-
                   Le coordinate del documento correlato allo stato. 
+                minLength: 5
+                maxLength: 2000
               sha256:
-                  type: string 
-                  description: >-
-                    sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
+                type: string 
+                minLength: 40
+                maxLength: 50
+                description: >-
+                  sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
               date:
                 type: string
                 format: date-time
@@ -1026,13 +1100,19 @@ components:
           description: >-
             Identificativo della richiesta di richiesta duplicato.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1_replicarequest1'
+          minLength: 30
+          maxLength: 250
         paperEngageRequestId:
           type: string
+          minLength: 30
+          maxLength: 250
           description: >-
             Identificativo della richiesta.
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1' 
         events:
           type: array
+          minItems: 0
+          maxItems: 500
           items:
             $ref: '#/components/schemas/PaperReplicasStatusEvent'
 
@@ -1050,13 +1130,19 @@ components:
           description: >-
             Identificativo univoco all'interno della request HTTP, serve per correlare la risposta. 
           type: string
+          minLength: 1
+          maxLength: 250
         contentType:
           title: MIME type del file che verrà caricato
           description: >-
             Il MIME type dell'allegato che dovrà essere caricato. 
           type: string
+          minLength: 3
+          maxLength: 127
           example: application/pdf
         sha256:
+          minLength: 40
+          maxLength: 50
           title: checksum sha256 del file che verrà caricato
           description: >-
             checksum sha256, codificato in base 64, del contenuto binario del file che verrà
@@ -1074,11 +1160,15 @@ components:
         preloadIdx:
           description: per correlazione con la richiesta
           type: string
+          minLength: 1
+          maxLength: 250
         secret:
           description: >-
             Token aggiuntivo per far si che sia necessario intercettare anche gli 
             header e non solo l'URL di upload del contenuto del documento.
           example: AZ23RF12
+          minLength: 1
+          maxLength: 250
           type: string
         httpMethod:
           description: >-
@@ -1093,9 +1183,13 @@ components:
             URL a cui effettuare l'upload del contenuto del documento.
           type: string
           example: 'https://preloadpn.aws.amazon.......'
+          minLength: 5
+          maxLength: 2000
         key:
           description: >-
             la chiave restituita sarà globalmente unica e andrà utilizzata nella richiesta 
             di notifica.
           example: 'PN_NOTIFICATION_ATTACHMENTS-0001-301W-B9CB-9U72-WIKD'
           type: string
+          minLength: 30
+          maxLength: 250
