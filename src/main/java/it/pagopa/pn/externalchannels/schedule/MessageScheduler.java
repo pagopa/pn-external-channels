@@ -1,7 +1,9 @@
 package it.pagopa.pn.externalchannels.schedule;
 
+import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
+import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
@@ -12,7 +14,6 @@ import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import it.pagopa.pn.externalchannels.util.EventCodeIntForDigital;
-import it.pagopa.pn.externalchannels.util.EventCodeIntForPaper;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,8 @@ public class MessageScheduler {
     public static final String SAVED = "SAVED";
 
     private final NotificationProgressDao dao;
+
+    private final EventCodeDocumentsDao eventCodeDocumentsDao;
 
     private final ProducerHandler producerHandler;
 
@@ -115,8 +118,12 @@ public class MessageScheduler {
         if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
             enrichWithLocation(eventMessage, iun);
         }
-        else if(EventMessageUtil.AR.equals(channel) || EventMessageUtil._890.equals(channel)) {
-            enrichWithAttachmentDetail(eventMessage, iun);
+        else if(EventMessageUtil.PAPER_CHANNELS.contains(channel)) {
+            EventCodeMapKey eventCodeMapKey = EventCodeMapKey.builder()
+                    .iun(iun)
+                    .recipient(notificationProgress.getDestinationAddress())
+                    .code(eventMessage.getAnalogMail().getStatusCode()).build();
+            enrichWithAttachmentDetail(eventMessage, iun, eventCodeMapKey);
         }
 
         producerHandler.sendToQueue(notificationProgress, eventMessage);
@@ -183,14 +190,15 @@ public class MessageScheduler {
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }
 
-    private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun) {
-        String code = eventMessage.getAnalogMail().getStatusCode();
-        if(EventCodeIntForPaper.isWithAttachment(code)) {
-            eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun));
+    private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey) {
+        if(eventCodeDocumentsDao.findByKey(eventCodeMapKey).isPresent()) {
+            for(String documentType: eventCodeDocumentsDao.findByKey(eventCodeMapKey).get()){
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, documentType));
+            }
         }
     }
 
-    private AttachmentDetails buildAttachment(String iun) {
+    private AttachmentDetails buildAttachment(String iun,String documentType) {
         try {
             ClassPathResource classPathResource = new ClassPathResource("avvisofronte-retro.pdf");
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
@@ -204,7 +212,7 @@ public class MessageScheduler {
             return new AttachmentDetails()
                     .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
                     .id(iun + "DOCMock")
-                    .documentType("application/pdf")
+                    .documentType(documentType)
                     .date(OffsetDateTime.now());
         } catch (IOException e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
