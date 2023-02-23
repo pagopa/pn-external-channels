@@ -161,7 +161,9 @@ public class ExternalChannelsService {
         if(receiverClean.contains(DISCOVERED_MARKER)) {
             String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
             discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence");
-            buildMockDiscoveredAddress(discoveredSequence);
+
+            notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
+            
             receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
         }
 
