@@ -102,7 +102,8 @@ public class ExternalChannelsService {
 
     private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName, String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
         NotificationProgress notificationProgress;
-        String iun = requestId.split("_")[0];
+        String iun = requestId.split("\\.")[1];
+        iun = iun.contains("IUN_")? iun.substring(iun.indexOf("IUN_")+4) : iun;
 
         if(requestSearched.isPresent()){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId);
