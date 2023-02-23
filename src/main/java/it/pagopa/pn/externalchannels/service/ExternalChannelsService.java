@@ -203,21 +203,22 @@ public class ExternalChannelsService {
     //example: MOCK-SEQU-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1
     //example: NRJT-MAWM-HJXN-202209-T-1_digital_delivering_progress_0_attempt_1_sourceSPECIAL_progidx_34
     private String getSequenceOfMacroAttempts(String receiverClean, String requestId) {
-        int attemptIndex = requestId.indexOf("attempt_");
-        String numberOfAttemptsString = requestId.substring(attemptIndex + 8, attemptIndex + 9); //prendo il carattere successivo a attempt_
+        int attemptIndex = requestId.indexOf("SENTATTEMPTMADE_");
+        String numberOfAttemptsString = requestId.substring(attemptIndex + 16, attemptIndex + 17); //prendo il carattere successivo a attempt_
         int numberOfAttempts = Integer.parseInt(numberOfAttemptsString);
 
-        return receiverClean.split("attempt")[numberOfAttempts - 1];
+        String[] attempts = receiverClean.split("attempt");
+        return attempts[numberOfAttempts >= attempts.length ? (attempts.length-1) : numberOfAttempts - 1];
     }
 
     private String getSequenceOfRetry(String receiverClean, String requestId) {
-        int retryIndex = requestId.indexOf("PC_RETRY_"); //ARRIVA PARTENDO DA 0 ? IL CODICE è AD UNA SOLA CIFRA?
-        String numberOfRetryString = requestId.substring(retryIndex + 9, retryIndex + 10); //prendo il carattere successivo a PC_RETRY_
+        int retryIndex = requestId.indexOf("PCRETRY_"); //ARRIVA PARTENDO DA 0 ? IL CODICE è AD UNA SOLA CIFRA?
+        String numberOfRetryString = requestId.substring(retryIndex + 8, retryIndex + 9); //prendo il carattere successivo a PC_RETRY_
         int numberOfRetry = Integer.parseInt(numberOfRetryString);
 
         String[] split = receiverClean.split("@retry");
-        String result = split[numberOfRetry >= split.length ? (numberOfRetry-1) : numberOfRetry ];
-        return result.contains("@sequence")? result : ("@sequence"+result);
+        String result = split[numberOfRetry >= split.length ? (split.length - 1) : numberOfRetry];
+        return result.charAt(0) == '.' ? result.substring(1) : result;
     }
 
     private Optional<String> selectSequenceInParameter(String receiverDigitalAddress,String producType,String parameterStoreName){
