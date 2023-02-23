@@ -191,14 +191,16 @@ public class MessageScheduler {
     }
 
     private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey) {
-        if(eventCodeDocumentsDao.findByKey(eventCodeMapKey).isPresent()) {
-            for(String documentType: eventCodeDocumentsDao.findByKey(eventCodeMapKey).get()){
-                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, documentType));
+        if(eventCodeDocumentsDao.consumeByKey(eventCodeMapKey).isPresent()) {
+            int id = 1;
+            for(String documentType: eventCodeDocumentsDao.consumeByKey(eventCodeMapKey).get()){
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType));
             }
+            eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
         }
     }
 
-    private AttachmentDetails buildAttachment(String iun,String documentType) {
+    private AttachmentDetails buildAttachment(String iun,int id, String documentType) {
         try {
             ClassPathResource classPathResource = new ClassPathResource("avvisofronte-retro.pdf");
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
@@ -211,7 +213,7 @@ public class MessageScheduler {
             log.info("[{}] Message sent to Safe Storage", iun);
             return new AttachmentDetails()
                     .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
-                    .id(iun + "DOCMock")
+                    .id(iun + "DOCMock_"+id)
                     .documentType(documentType)
                     .date(OffsetDateTime.now());
         } catch (IOException e) {

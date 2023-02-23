@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.kms.KmsAsyncClient;
 
 import java.net.URI;
 
@@ -23,8 +23,9 @@ public class AwsServicesClientsConfig {
     }
 
     @Bean
-    public SsmClient ssmClient() { return configureBuilder( SsmClient.builder() ); }
-
+    public KmsAsyncClient kmsAsyncClient() {
+        return configureBuilder(KmsAsyncClient.builder() );
+    }
 
     private <C> C configureBuilder(AwsClientBuilder<?, C> builder) {
         if( props != null ) {

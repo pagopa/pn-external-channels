@@ -9,8 +9,11 @@ public interface EventCodeDocumentsDao {
     boolean insert(EventCodeMapKey eventCodeMapKey, List<String> documents);
     boolean insert(String iun, String recipient, String eventCode, List<String> documents);
 
-    Optional<List<String>> findByKey(EventCodeMapKey eventCodeMapKey);
-    Optional<List<String>> findByIunRecipientAndEventCode(String iun, String recipient, String eventCode);
+    Optional<List<String>> consumeByKey(EventCodeMapKey eventCodeMapKey);
+    Optional<List<String>> consumeByIunRecipientAndEventCode(String iun, String recipient, String eventCode);
+
+    boolean deleteIfEmpty(String iun, String recipient, String eventCode);
+    boolean deleteIfEmpty(EventCodeMapKey eventCodeMapKey);
 
     void delete(String iun, String recipient, String eventCode);
     void delete(EventCodeMapKey eventCodeMapKey);
