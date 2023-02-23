@@ -37,6 +37,8 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
 
@@ -191,9 +193,10 @@ public class MessageScheduler {
     }
 
     private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey) {
-        if(eventCodeDocumentsDao.consumeByKey(eventCodeMapKey).isPresent()) {
+        Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
+        if(eventCodeList.isPresent()) {
             int id = 1;
-            for(String documentType: eventCodeDocumentsDao.consumeByKey(eventCodeMapKey).get()){
+            for(String documentType: eventCodeList.get()){
                 eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType));
             }
             eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
