@@ -38,6 +38,8 @@ public class ExternalChannelsService {
 
     private static final String SEQUENCE_REGEXP = ".*@sequence\\.";
 
+    private static final String DISCOVERED_MARKER = "@discovered";
+
     private final ParameterConsumer parameterConsumer;
 
     private static final String SEQUENCE_PARAMETER_NAME = "MapExternalChannelMockSequence";
@@ -156,11 +158,11 @@ public class ExternalChannelsService {
             receiverClean = getSequenceOfRetry(receiverClean,requestId);
         }
 
-        if(receiverClean.contains("@discovered")) {
-            String discoveredSequence = receiverClean.substring(receiverClean.indexOf("@discovered"));
-            discoveredSequence = discoveredSequence.replace("@discovered", "@sequence");
+        if(receiverClean.contains(DISCOVERED_MARKER)) {
+            String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
+            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence");
             buildMockDiscoveredAddress(discoveredSequence);
-            receiverClean = receiverClean.substring(0, receiverClean.indexOf("@discovered"));
+            receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
