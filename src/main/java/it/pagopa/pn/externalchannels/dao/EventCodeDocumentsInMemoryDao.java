@@ -28,7 +28,7 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
         } else  {
             LinkedList<List<String>> entry = new LinkedList<>();
             entry.add(documents);
-            database.put(eventCodeMapKey, entry);
+            return database.putIfAbsent(eventCodeMapKey, entry) != null;
         }
 
         log.info("Event code document saved: {}", eventCodeMapKey);
