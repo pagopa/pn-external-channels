@@ -205,7 +205,7 @@ public class MessageScheduler {
 
     private AttachmentDetails buildAttachment(String iun,int id, String documentType) {
         try {
-            ClassPathResource classPathResource = new ClassPathResource("avvisofronte-retro.pdf");
+            ClassPathResource classPathResource = new ClassPathResource("test.pdf");
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
             fileCreationRequest.setContentType("application/pdf");
             fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);

@@ -47,7 +47,7 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 
     @Override
     public Optional<List<String>> consumeByKey(EventCodeMapKey eventCodeMapKey) {
-        if(database.contains(eventCodeMapKey) && !database.get(eventCodeMapKey).isEmpty()){
+        if(database.get(eventCodeMapKey) != null && !database.get(eventCodeMapKey).isEmpty()){
             return Optional.of(database.get(eventCodeMapKey).remove(0));
         }
         return Optional.empty();
