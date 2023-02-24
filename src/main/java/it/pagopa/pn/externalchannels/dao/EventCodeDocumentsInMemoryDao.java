@@ -23,7 +23,7 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 
     @Override
     public boolean insert(EventCodeMapKey eventCodeMapKey, List<String> documents) {
-        if(database.contains(eventCodeMapKey)){
+        if(database.containsKey(eventCodeMapKey)){
             database.get(eventCodeMapKey).add(documents);
         } else  {
             LinkedList<List<String>> entry = new LinkedList<>();
@@ -47,7 +47,7 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 
     @Override
     public Optional<List<String>> consumeByKey(EventCodeMapKey eventCodeMapKey) {
-        if(database.get(eventCodeMapKey) != null && !database.get(eventCodeMapKey).isEmpty()){
+        if( database.containsKey(eventCodeMapKey) && !database.get(eventCodeMapKey).isEmpty()){
             return Optional.of(database.get(eventCodeMapKey).remove(0));
         }
         return Optional.empty();
@@ -72,7 +72,7 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 
     @Override
     public boolean deleteIfEmpty(EventCodeMapKey eventCodeMapKey) {
-        if(database.contains(eventCodeMapKey) && database.get(eventCodeMapKey).isEmpty()){
+        if(database.containsKey(eventCodeMapKey) && database.get(eventCodeMapKey).isEmpty()){
             database.remove(eventCodeMapKey);
             return true;
         }
