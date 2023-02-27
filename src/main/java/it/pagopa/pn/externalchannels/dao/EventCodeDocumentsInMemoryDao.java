@@ -47,9 +47,6 @@ public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 
     @Override
     public Optional<List<String>> consumeByKey(EventCodeMapKey eventCodeMapKey) {
-        if(eventCodeMapKey.getCode().equalsIgnoreCase("RECAG001B")){
-            System.out.println("TEST");
-        }
         if( database.containsKey(eventCodeMapKey) && !database.get(eventCodeMapKey).isEmpty()){
             return Optional.of(database.get(eventCodeMapKey).remove(0));
         }
