@@ -108,14 +108,14 @@ public class ExternalChannelsService {
         iun = iun.contains("IUN_")? iun.substring(iun.indexOf("IUN_")+4) : iun;
 
         if(requestSearched.isPresent()){
-            notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId);
+            notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.contains("@fail") || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
             if(receiverDigitalAddress.contains("discovered")) {
                 notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(""));
             }
         } else if (receiverDigitalAddress.contains("@sequence")) { //si presuppone che per gli sms non ci sia il caso sequence
-            notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId);
+            notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId,receiverDigitalAddress);
         } else {
             notificationProgress = buildNotification(okRequests);
         }
@@ -141,7 +141,7 @@ public class ExternalChannelsService {
         return notificationProgress;
     }
 
-    private NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId) {
+    private NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
@@ -177,7 +177,7 @@ public class ExternalChannelsService {
                 String documents = code.substring(code.indexOf("[")+1,code.lastIndexOf("]"));
                 String[] documentList = documents.split(";");
                 code = code.substring(0,code.indexOf("["));
-                eventCodeDocumentsDao.insert(iun,receiverDigitalAddress,code,Arrays.asList(documentList));
+                eventCodeDocumentsDao.insert(iun,addressAlias,code,Arrays.asList(documentList));
             }
             CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time));
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
