@@ -226,19 +226,23 @@ public class ExternalChannelsService {
         return result.charAt(0) == '.' ? result.substring(1) : result;
     }
 
-    private Optional<String> selectSequenceInParameter(String receiverDigitalAddress,String producType,String parameterStoreName){
+    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName){
         Optional<EventCodeSequenceDTO[]> sequenceEventCode = parameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
         if(sequenceEventCode.isEmpty())return Optional.empty();
         EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
         EventCodeSequenceDTO eventCodeSequenceDTO = null;
-        if(receiverDigitalAddress.contains("@fail")){
-            String search = receiverDigitalAddress.substring(receiverDigitalAddress.lastIndexOf("fail"));
+        log.info("Search for receiverAddress {}",receiverAddress);
+        if(receiverAddress.contains("@fail")){
+            log.info("Enter in fail");
+            String search = receiverAddress.substring(receiverAddress.lastIndexOf("fail"));
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("fail")? search + "_" + producType : search);
 
-        }else if(receiverDigitalAddress.contains("@ok") || !receiverDigitalAddress.contains("@")){
-            String search = receiverDigitalAddress.contains("@ok")? receiverDigitalAddress.substring(receiverDigitalAddress.lastIndexOf("ok")) : "ok";
+        }else if(receiverAddress.contains("@ok") || !receiverAddress.contains("@")){
+            log.info("Enter in ok");
+            String search = receiverAddress.contains("@ok")? receiverAddress.substring(receiverAddress.lastIndexOf("ok")) : "ok";
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("ok")? search + "_" + producType : search);
         }
+        log.info("Find sequence {}",eventCodeSequenceDTO);
 
         return eventCodeSequenceDTO == null ? Optional.empty() : Optional.of(eventCodeSequenceDTO.sequence());
     }
