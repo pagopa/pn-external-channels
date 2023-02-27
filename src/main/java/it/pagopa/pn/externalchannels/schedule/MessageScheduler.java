@@ -121,6 +121,7 @@ public class MessageScheduler {
             enrichWithLocation(eventMessage, iun);
         }
         else if(EventMessageUtil.PAPER_CHANNELS.contains(channel)) {
+            log.info("Enter in paper channel productType {}",channel);
             EventCodeMapKey eventCodeMapKey = EventCodeMapKey.builder()
                     .iun(iun)
                     .recipient(notificationProgress.getDestinationAddress())
@@ -194,6 +195,7 @@ public class MessageScheduler {
 
     private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey) {
         Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
+        log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
         if(eventCodeList.isPresent()) {
             int id = 1;
             for(String documentType: eventCodeList.get()){
