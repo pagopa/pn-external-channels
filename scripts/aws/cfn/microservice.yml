@@ -135,4 +135,10 @@ Resources:
             Resource:
               - !Ref ExternalChannelsOutputsQueueARN
               - !Ref ExternalChannels2PaperChannelQueueARN
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
 
