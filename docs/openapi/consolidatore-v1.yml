@@ -425,7 +425,7 @@ components:
       properties:
         iun: 
           type: string
-          minLength: 30 
+          minLength: 10 
           maxLength: 50
           example: 'ABCD-HILM-YKWX-202202-1'
           description: >-
@@ -698,7 +698,7 @@ components:
           type: string
         iun: 
           type: string
-          minLength: 30 
+          minLength: 10 
           maxLength: 50
           description: >-
             Identificativo Unico della Notifica. Proviene dalla richiesta originaria di PN.
