@@ -16,7 +16,7 @@ components:
         - clientRequestTimeStamp
         - eventType
         - productType
-        - attachmentUrl
+        - attachments
         - printType
         - receiverName
         - receiverAddress
@@ -60,10 +60,41 @@ components:
             - ... ulteriori prodotti 
           type: string
           example: 'AR'
-        attachmentUri:
-          type: string
-          description: >-
-            Coordinate per l'accesso al documento PDF da inviare. <br/>
+        attachments:
+          type: array
+          items:
+            type: object
+            required: 
+              - uri
+              - order
+              - documentType
+              - sha256
+            properties:
+              uri: 
+                type: string
+                description: URI indicante 
+                example: safestorage://PN_EXTERNAL_LEGALFACT_....
+                minLength: 5
+                maxLength: 2000
+              order: 
+                type: number
+                description: Ordine di stampa, intero positivo, continuo, inizia da 0
+                example: 0
+              documentType: 
+                type: string
+                minLength: 3
+                maxLength: 4 
+                description: >-
+                  Tipo di documento: <br/>
+                  - __AAR__: Avviso di avvenuta ricezione, tipicamente associato a campo _order_ valorizzato a 0
+                  - __ATTO__: Documento inviato dalla pubblica amministrazione.
+                example: AAR
+              sha256:
+                type: string 
+                description: >-
+                  sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
+                minLength: 40
+                maxLength: 50
         printType:
           type: string
           description: >-
