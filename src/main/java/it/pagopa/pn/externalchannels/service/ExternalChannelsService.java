@@ -181,9 +181,10 @@ public class ExternalChannelsService {
                 additionalActions = getAdditionalActionsFromCode(code);
                 List<String> documentList = additionalActions.stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DOC)
                         .map(AdditionalAction::getInfo).toList();
+
+                code = code.substring(0,code.indexOf("["));
                 if (!documentList.isEmpty())
                     eventCodeDocumentsDao.insert(iun,addressAlias,code,documentList);
-                code = code.substring(0,code.indexOf("["));
             }
             CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);

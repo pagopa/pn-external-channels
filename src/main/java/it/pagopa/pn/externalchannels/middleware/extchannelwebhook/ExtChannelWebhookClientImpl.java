@@ -42,8 +42,9 @@ public class ExtChannelWebhookClientImpl implements ExtChannelWebhookClient {
             log.debug("End call sendPaperProgressStatusRequest requestId={} res={}", event.getRequestId(), operationResultCodeResponse.getResultCode());
 
             return operationResultCodeResponse;
-        } catch (RestClientException e) {
-            throw new ExternalChannelsMockException("Exception invoking sendPaperProgressStatusRequest", e);
+        } catch (Exception e) {
+            log.error("Exception invoking sendPaperProgressStatusRequest", e);
+            return null;
         }
     }
 }
