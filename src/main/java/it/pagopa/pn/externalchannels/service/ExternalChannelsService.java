@@ -4,6 +4,7 @@ import it.pagopa.pn.commons.abstractions.ParameterConsumer;
 import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceDTO;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
+import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.*;
@@ -15,11 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +49,7 @@ public class ExternalChannelsService {
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), appSourceName, digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
+                digitalNotificationRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
@@ -65,7 +62,7 @@ public class ExternalChannelsService {
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -77,7 +74,7 @@ public class ExternalChannelsService {
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
-                digitalCourtesySmsRequest.getReceiverDigitalAddress(), appSourceName, digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
+                digitalCourtesySmsRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -86,11 +83,11 @@ public class ExternalChannelsService {
         }
     }
 
-    public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSourceName) {
+    public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, NotificationProgress.PROGRESS_OUTPUT_CHANNEL output) {
         String address = paperEngageRequest.getReceiverAddress();
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
-                address, appSourceName, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
+                address, output, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
                 selectSequenceInParameter(address,paperEngageRequest.getProductType(),SEQUENCE_PARAMETER_NAME));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
@@ -102,7 +99,8 @@ public class ExternalChannelsService {
 
 
 
-    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress, String appSourceName, String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
+    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress,
+                                                           NotificationProgress.PROGRESS_OUTPUT_CHANNEL output, String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
         NotificationProgress notificationProgress;
         String iun = requestId;
         if (requestId.contains(".")) {
@@ -126,7 +124,7 @@ public class ExternalChannelsService {
         notificationProgress.setRequestId(requestId);
         notificationProgress.setDestinationAddress(receiverDigitalAddress);
         notificationProgress.setCreateMessageTimestamp(Instant.now());
-        notificationProgress.setAppSourceName(appSourceName);
+        notificationProgress.setOutput(output);
         notificationProgress.setIun(iun);
         notificationProgress.setChannel(channel);
 
@@ -137,7 +135,7 @@ public class ExternalChannelsService {
     private NotificationProgress buildNotification(List<String> codeToSendList) {
         NotificationProgress notificationProgress = new NotificationProgress();
         List<CodeTimeToSend> codeTimeToSends = codeToSendList.stream().map(codeToSend -> new CodeTimeToSend(codeToSend,
-                Duration.ofSeconds(5))).collect(Collectors.toList());
+                Duration.ofSeconds(5), null)).toList();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>(codeTimeToSends));
 
 
@@ -166,6 +164,7 @@ public class ExternalChannelsService {
             discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
+            log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
             
             receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
         }
@@ -176,17 +175,35 @@ public class ExternalChannelsService {
             String[] timeCodeCoupleSplit = timeCodeCouple.split("-");
             String time = "PT" + timeCodeCoupleSplit[0];
             String code = timeCodeCoupleSplit[1];
+
+            List<AdditionalAction> additionalActions = null;
             if(code.contains("[")) {
-                String documents = code.substring(code.indexOf("[")+1,code.lastIndexOf("]"));
-                String[] documentList = documents.split(";");
+                additionalActions = getAdditionalActionsFromCode(code);
+                List<String> documentList = additionalActions.stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DOC)
+                        .map(AdditionalAction::getInfo).toList();
+                if (!documentList.isEmpty())
+                    eventCodeDocumentsDao.insert(iun,addressAlias,code,documentList);
                 code = code.substring(0,code.indexOf("["));
-                eventCodeDocumentsDao.insert(iun,addressAlias,code,Arrays.asList(documentList));
             }
-            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time));
+            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 
         return notificationProgress;
+    }
+
+    private List<AdditionalAction> getAdditionalActionsFromCode(String code) {
+        List<AdditionalAction> res = new ArrayList<>();
+        String additionalActionsRaw = code.substring(code.indexOf("[")+1,code.lastIndexOf("]"));
+        for (String addActRaw :
+                additionalActionsRaw.split(";")) {
+            if (addActRaw.contains(":"))
+                res.add(new AdditionalAction(AdditionalAction.ADDITIONAL_ACTIONS.valueOf(addActRaw.split(":")[0]),
+                        addActRaw.split(":")[1]));
+            else
+                res.add(new AdditionalAction(AdditionalAction.ADDITIONAL_ACTIONS.valueOf(addActRaw), null));
+        }
+        return res;
     }
 
     private String getSequenceOfMicroAttempts(String receiverClean, String iun, String recipient) {

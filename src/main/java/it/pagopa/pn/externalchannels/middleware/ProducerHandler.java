@@ -20,7 +20,7 @@ public class ProducerHandler {
 
 
     public void sendToQueue(NotificationProgress notificationProgress, SingleStatusUpdate eventMessage) {
-        if(notificationProgress.getAppSourceName().equals("PAPER_CHANNEL")) {
+        if(notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_PAPER_CHANNEL) {
             PaperChannelEvent event = EventMessageUtil.buildPaperChannelEvent(eventMessage, notificationProgress.getIun());
             log.info("[{}] Message to send to paper-channel: {}", notificationProgress.getIun(), event);
             paperChannelSendClient.sendNotification(event);

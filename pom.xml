@@ -36,6 +36,11 @@
             <artifactId>springfox-swagger2</artifactId>
             <version>3.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -143,6 +148,41 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>openapi-external-channels-consolidatore</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/docs/wsclient/consolidatore/consolidatore-v1.yml
+                            </inputSpec>
+                            <library>spring-boot</library>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>it.pagopa.pn.externalchannels.api.consolidatore</apiPackage>
+                            <modelPackage>it.pagopa.pn.externalchannels.model.consolidatore</modelPackage>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <skipValidateSpec>true</skipValidateSpec>
+                            </additionalProperties>
+                            <supportingFilesToGenerate>
+                                ApiUtil.java
+                            </supportingFilesToGenerate>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <!--								<delegatePattern>true</delegatePattern>-->
+                                <dateLibrary>java8</dateLibrary>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <!--								<openApiNullable>false</openApiNullable>-->
+                            </configOptions>
+                        </configuration>
+                    </execution>
                     <!-- OPEN API CLIENT PN-SAFESTORAGE -->
                     <execution>
                         <id>generate-client-pn-safestorage</id>
@@ -170,6 +210,35 @@
                             </configOptions>
                             <modelPackage>${project.groupId}.pn-delivery.microservice.client.safestorage.v1.dto</modelPackage>
                             <apiPackage>${project.groupId}.pn-delivery.microservice.client.safestorage.v1.api</apiPackage>
+                        </configuration>
+                    </execution>
+                    <!-- OPEN API CLIENT EXT-CHANNEL-WEBHOOK -->
+                    <execution>
+                        <id>generate-client-ext-channel-webhook</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/docs/wsclient/consolidatore/consolidatore-v1-webhook.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>resttemplate</library>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <typeMappings><typeMapping>OffsetDateTime=Instant</typeMapping></typeMappings>
+                            <importMappings><importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping></importMappings>
+                            <configOptions>
+                                <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.api</apiPackage>
+                                <modelPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model</modelPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <useAbstractionForFiles>true</useAbstractionForFiles>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                            <modelPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.dto</modelPackage>
+                            <apiPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.api</apiPackage>
                         </configuration>
                     </execution>
                 </executions>

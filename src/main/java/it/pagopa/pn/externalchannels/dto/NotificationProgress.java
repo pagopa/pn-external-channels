@@ -20,6 +20,14 @@ import java.util.LinkedList;
 @Data
 public class NotificationProgress {
 
+    public enum PROGRESS_OUTPUT_CHANNEL{
+        QUEUE_DELIVERY_PUSH,
+        QUEUE_PAPER_CHANNEL,
+        WEBHOOK_EXT_CHANNEL
+    }
+
+    private PROGRESS_OUTPUT_CHANNEL output;
+
     private String requestId;
 
     private String destinationAddress;
@@ -29,8 +37,6 @@ public class NotificationProgress {
     private Instant lastMessageSentTimestamp;
 
     private Instant createMessageTimestamp;
-
-    private String appSourceName;
 
     private String iun;
 
