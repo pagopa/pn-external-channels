@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.util;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
@@ -31,7 +32,6 @@ public class EventMessageUtil {
     private static final String OK_CODE = "C003";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress) {
-        boolean isLastMessage = notificationProgress.getCodeTimeToSendQueue().size() == 1;
         CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
         log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
@@ -45,11 +45,14 @@ public class EventMessageUtil {
             return buildLegalMessage(code, requestId);
         } else if (PAPER_CHANNELS.contains(channel)) {
 
-            if(isLastMessage && notificationProgress.getDiscoveredAddress() != null) {
+            if (codeTimeToSend.getAdditionalActions() != null
+                    && codeTimeToSend.getAdditionalActions().stream().anyMatch(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DISCOVERY)
+                    &&  notificationProgress.getDiscoveredAddress() != null) {
                 discoveredAddress = notificationProgress.getDiscoveredAddress();
+                log.info("found code with discovery enabled, using discovered={}", discoveredAddress.getAddress());
             }
 
-            return buildPaperMessage(code, requestId.split( "_")[0], requestId, channel, discoveredAddress);
+            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress);
         }
 
         return buildDigitalCourtesyMessage(code, requestId);

@@ -8,8 +8,11 @@ import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
+import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
+import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebhookClient;
 import it.pagopa.pn.externalchannels.model.AttachmentDetails;
+import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
@@ -60,6 +63,8 @@ public class MessageScheduler {
     private final SafeStorageService safeStorageService;
 
     private final HistoricalRequestService historicalRequestService;
+
+    private final ExtChannelWebhookClient extChannelWebhookClient;
 
 
     @Scheduled(cron = "${job.cron-expression}")
@@ -129,10 +134,19 @@ public class MessageScheduler {
             enrichWithAttachmentDetail(eventMessage, iun, eventCodeMapKey);
         }
 
-        producerHandler.sendToQueue(notificationProgress, eventMessage);
+        if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
+        {
+            extChannelWebhookClient.sendPaperProgressStatusRequest(
+                    PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
+        }
+        else
+        {
+            producerHandler.sendToQueue(notificationProgress, eventMessage);
+        }
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }
+
 
     private void enrichWithLocation(SingleStatusUpdate eventMessage, String iun) {
         String code = eventMessage.getDigitalLegal().getEventCode().name();

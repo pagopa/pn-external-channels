@@ -28,6 +28,14 @@ Parameters:
      Type: String
      Description: 'Url to the SafeStorage microservice'
 
+  ExtChannelWebhookBaseUrl:
+     Type: String
+     Description: 'Url to the ExtChannelWebhookBaseUrl microservice'
+
+  xPagopaExtchServiceId:
+     Type: String
+     Description: 'xPagopaExtchServiceId'
+
   ECSClusterName:
     Type: String
     Description: 'The name of the ECS cluster where the microservice is going to be deployed'
@@ -105,6 +113,9 @@ Resources:
         ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
         ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
         ContainerEnvEntry8: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
+        ContainerEnvEntry9: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOK_BASEURL=${ExtChannelWebhookBaseUrl}'
+        ContainerEnvEntry10: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOK_SERVICEID=${xPagopaExtchServiceId}'
+        ContainerSecret1: !Sub 'PN_EXTERNALREGISTRY_EXTCHANNELWEBHOOK_API_KEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds

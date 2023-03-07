@@ -5,16 +5,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Duration;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CodeTimeToSend implements Serializable {
+public class AdditionalAction implements Serializable  {
 
+    public enum ADDITIONAL_ACTIONS {
+        DISCOVERY,
+        DOC
+    }
 
-    private String code;
-    private Duration time;
-    private List<AdditionalAction> additionalActions;
+    private ADDITIONAL_ACTIONS action;
+    private String info;
 }

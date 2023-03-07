@@ -21,6 +21,11 @@ public class PnExternalChannelsProperties {
 
     private String safeStorageCxIdUpdatemetadata;
 
+    private String extchannelwebhookBaseurl;
+    private String extchannelwebhookServiceid;
+    private String extchannelwebhookApiKey;
+
+
     private int cacheExpireAfterDays;
 
     private int cacheMaxSize;
