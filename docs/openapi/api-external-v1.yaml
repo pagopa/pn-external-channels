@@ -229,7 +229,7 @@ paths:
     #############################################################################################
     ###                                  PAPER MAIL MESSAGES                                  ###
     #############################################################################################
-  /external-channel/v1/paper-deliveries-engagements/{requestIdx}:
+  /external-channels/v1/paper-deliveries-engagements/{requestIdx}:
     parameters:
       - $ref: '#/components/parameters/requestIdx'  
     put:
