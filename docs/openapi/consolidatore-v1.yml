@@ -228,7 +228,7 @@ webhooks:
 
   # Path /consolidatore-ingress/v1/push-progress-events/
   push-progress-events-to-notification-platform:
-    post:
+    put:
       operationId: sendPaperProgressStatusRequest
       summary: Webhook con cui PN riceve progressi postalizzazioni
       parameters:
@@ -278,7 +278,7 @@ webhooks:
   
   # Path /consolidatore-ingress/v1/replicas-push-progress-events/
   push-replicas-progress-events-to-notification-platform:
-    post:
+    put:
       operationId: sendPaperReplicasProgressStatusRequest
       summary: Webhook con cui PN riceve progressi di richiesta duplicato
       parameters:
@@ -328,7 +328,7 @@ webhooks:
 
   # Path /consolidatore-ingress/v1/attachement-preload/
   push-attachments-preload:
-    post:
+    put:
       summary: Richiesta di pre-caricamento dei documenti da comunicare a PN
       description: |-
         Operazione che richiede a Piattaforma Notifica le informazioni e le autorizzazioni necessarie 
