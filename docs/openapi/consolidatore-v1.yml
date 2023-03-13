@@ -326,13 +326,16 @@ webhooks:
               schema:
                 $ref: '#/components/schemas/OperationResultCodeResponse'
 
-  # Path /consolidatore-ingress/v1/attachement-preload/
+  # Path /consolidatore-ingress/v1/attachments-preload/
   push-attachments-preload:
     put:
       summary: Richiesta di pre-caricamento dei documenti da comunicare a PN
       description: |-
         Operazione che richiede a Piattaforma Notifica le informazioni e le autorizzazioni necessarie 
         a precaricare uno o più file.
+      parameters:
+        - $ref: '#/components/parameters/xPagopaExtchServiceId'
+        - $ref: '#/components/parameters/xPagopaExtchApiKey'
       operationId: presignedUploadRequest
       requestBody:
         content:
@@ -394,6 +397,9 @@ webhooks:
         pronto verrà comunicato un evento al client che ha invocato la chiamata. Molteplici 
         invocazioni di questa API generano un solo evento per client. <br/>
         Il file rimane hot per ```stayHotTime````.
+      parameters:
+        - $ref: '#/components/parameters/xPagopaExtchServiceId'
+        - $ref: '#/components/parameters/xPagopaExtchApiKey'
       operationId: getFile
       responses:
         '200':
