@@ -1,7 +1,7 @@
 package it.pagopa.pn.externalchannels.middleware.extchannelwebhook;
 
-import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
-import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
+import it.pagopa.pn.commons.utils.LogUtils;
+import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.ApiClient;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.api.DefaultApi;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.OperationResultCodeResponse;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -20,24 +19,23 @@ import java.util.List;
 @EnableRetry
 public class ExtChannelWebhookClientImpl implements ExtChannelWebhookClient {
 
-    private final DefaultApi defaultApi;
-    private final PnExternalChannelsProperties cfg;
-
-    public ExtChannelWebhookClientImpl(@Qualifier("withTracing") RestTemplate restTemplate, PnExternalChannelsProperties cfg) {
-        ApiClient newApiClient = new ApiClient( restTemplate );
-        newApiClient.setBasePath( cfg.getSafeStorageBaseUrl() );
-
-        this.defaultApi = new DefaultApi( newApiClient );
-        this.cfg = cfg;
+    private final RestTemplate restTemplate;
+    public ExtChannelWebhookClientImpl(@Qualifier("withTracing") RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Override
-    public OperationResultCodeResponse sendPaperProgressStatusRequest(PaperProgressStatusEvent event){
+    public OperationResultCodeResponse sendPaperProgressStatusRequest(NotificationProgress notificationProgress, PaperProgressStatusEvent event){
         try {
-            log.debug("Start call sendPaperProgressStatusRequest - requestId={} statusCode={}", event.getRequestId(), event.getStatusCode());
+            ApiClient newApiClient = new ApiClient( restTemplate );
+            newApiClient.setBasePath( notificationProgress.getOutputEndpoint());
+
+            DefaultApi defaultApi = new DefaultApi( newApiClient );
+
+            log.info("Start call sendPaperProgressStatusRequest - requestId={} statusCode={} endoint={} serviceid={} apikey={}", event.getRequestId(), event.getStatusCode(), notificationProgress.getOutputEndpoint(), notificationProgress.getOutputServiceId(), LogUtils.maskGeneric(notificationProgress.getOutputApiKey()));
 
             OperationResultCodeResponse operationResultCodeResponse = defaultApi.sendPaperProgressStatusRequest(
-                    cfg.getExtchannelwebhookServiceid(), cfg.getExtchannelwebhookApiKey(), List.of(event) );
+                    notificationProgress.getOutputServiceId(), notificationProgress.getOutputApiKey(), List.of(event) );
 
             log.debug("End call sendPaperProgressStatusRequest requestId={} res={}", event.getRequestId(), operationResultCodeResponse.getResultCode());
 

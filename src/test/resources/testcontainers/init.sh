@@ -50,4 +50,30 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 
 
 
+echo "### START PARAMETER STORE CREATION FOR EXTERNAL CHANNEL MOCK ###"
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    ssm put-parameter \
+    --name "MapExternalChannelMockServiceIdEndpoint" \
+    --type String \
+    --overwrite \
+    --value "[
+				{
+					\"serviceId\":\"pn-cons-000\",
+					\"endpoint\":\"http://localhost:8080\",
+					\"endpointServiceId\":\"pn-extchannel-000\"
+				},
+				{
+					\"serviceId\":\"pn-cons-001\",
+          \"endpoint\":\"http://localhost:8081\",
+          \"endpointServiceId\":\"pn-extchannel-001\"
+				}
+			]"
+
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+  secretsmanager create-secret \
+  --name pn-ExternalChannels-Secrets \
+  --secret-string '[{"ExternalChannelApiKey":"[{\"serviceId\": \"pn-cons-000\", \"apiKey\":\"1234567\"}, {\"serviceId\": \"pn-cons-001\", \"apiKey\":\"98765432\"}]"}]'
+
+
+
 echo "Initialization terminated"

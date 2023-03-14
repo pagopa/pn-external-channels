@@ -1,7 +1,11 @@
 package it.pagopa.pn.externalchannels.service;
 
-import it.pagopa.pn.commons.abstractions.ParameterConsumer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceDTO;
+import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsumer;
+import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
+import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.AdditionalAction;
@@ -17,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -37,19 +42,25 @@ public class ExternalChannelsService {
 
     private static final String DISCOVERED_MARKER = "@discovered";
 
-    private final ParameterConsumer parameterConsumer;
+    private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
+    private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
     private static final String SEQUENCE_PARAMETER_NAME = "MapExternalChannelMockSequence";
+    private static final String SERVICEID_PARAMETER_NAME = "MapExternalChannelMockServiceIdEndpoint";
 
     private final NotificationProgressDao notificationProgressDao;
 
     private final EventCodeDocumentsDao eventCodeDocumentsDao;
 
+    private final PnExternalChannelsProperties pnExternalChannelsProperties;
+
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
+                digitalNotificationRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                null,null,null,
+                digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
@@ -62,7 +73,9 @@ public class ExternalChannelsService {
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                null,null,null,
+                digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -74,7 +87,9 @@ public class ExternalChannelsService {
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
-                digitalCourtesySmsRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH, digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
+                digitalCourtesySmsRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                null,null,null,
+                digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -83,11 +98,36 @@ public class ExternalChannelsService {
         }
     }
 
-    public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, NotificationProgress.PROGRESS_OUTPUT_CHANNEL output) {
+    public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSource) {
         String address = paperEngageRequest.getReceiverAddress();
+        // Per il cartaceo, l'endpoint finale dipende dalla configurazione
+        // per semplicità degli step successivi, la salvo direttamente nel notification progress
+        AtomicReference<NotificationProgress.PROGRESS_OUTPUT_CHANNEL> output = new AtomicReference<>(NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_PAPER_CHANNEL);
+        AtomicReference<String> outputEndpoint = new AtomicReference<>();
+        AtomicReference<String> outputServiceId = new AtomicReference<>();
+        AtomicReference<String> outputApiKey = new AtomicReference<>();
+        if (appSource != null) {
+            Optional<ServiceIdEndpointDTO[]> sequenceEventCode = serviceIdEndpointParameterConsumer.getParameterValue(SERVICEID_PARAMETER_NAME, ServiceIdEndpointDTO[].class);
+            sequenceEventCode.ifPresent(sequenceEventCodes -> {
+                Optional<ServiceIdEndpointDTO> optres = Arrays.stream(sequenceEventCode.get()).filter(x -> x.serviceId().equals(appSource)).findFirst();
+                optres.ifPresent(serviceIdEndpointDTO -> {
+                    output.set(NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL);
+                    outputEndpoint.set(serviceIdEndpointDTO.endpoint());
+                    outputServiceId.set(serviceIdEndpointDTO.endpointServiceId());
+                    try {
+                        Optional<PnExternalChannelsProperties.WebhookApikeys> res = pnExternalChannelsProperties.findExtchannelwebhookApiKey(appSource);
+                        res.ifPresent(webhookApikeys -> outputApiKey.set(webhookApikeys.getApiKey()));
+
+                    } catch (JsonProcessingException e) {
+                        log.error("cannot parse apikeys", e);
+                    }
+                });
+            });
+        }
+
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
-                address, output, paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
+                address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
                 selectSequenceInParameter(address,paperEngageRequest.getProductType(),SEQUENCE_PARAMETER_NAME));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
@@ -100,7 +140,9 @@ public class ExternalChannelsService {
 
 
     private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress,
-                                                           NotificationProgress.PROGRESS_OUTPUT_CHANNEL output, String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
+                                                           NotificationProgress.PROGRESS_OUTPUT_CHANNEL output,
+                                                           String outputEndpoint, String outputServiceId, String outputApikey,
+                                                           String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
         NotificationProgress notificationProgress;
         String iun = requestId;
         if (requestId.contains(".")) {
@@ -127,6 +169,9 @@ public class ExternalChannelsService {
         notificationProgress.setOutput(output);
         notificationProgress.setIun(iun);
         notificationProgress.setChannel(channel);
+        notificationProgress.setOutputEndpoint(outputEndpoint);
+        notificationProgress.setOutputServiceId(outputServiceId);
+        notificationProgress.setOutputApiKey(outputApikey);
 
         return notificationProgress;
 
@@ -248,7 +293,7 @@ public class ExternalChannelsService {
     }
 
     private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName){
-        Optional<EventCodeSequenceDTO[]> sequenceEventCode = parameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
+        Optional<EventCodeSequenceDTO[]> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
         if(sequenceEventCode.isEmpty())return Optional.empty();
         EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
         EventCodeSequenceDTO eventCodeSequenceDTO = null;

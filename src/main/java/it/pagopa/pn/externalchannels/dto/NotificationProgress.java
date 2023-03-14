@@ -28,6 +28,12 @@ public class NotificationProgress {
 
     private PROGRESS_OUTPUT_CHANNEL output;
 
+    private String outputEndpoint;
+
+    private String outputServiceId;
+
+    private String outputApiKey;
+
     private String requestId;
 
     private String destinationAddress;

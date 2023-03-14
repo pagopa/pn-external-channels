@@ -136,7 +136,7 @@ public class MessageScheduler {
 
         if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
         {
-            extChannelWebhookClient.sendPaperProgressStatusRequest(
+            extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress,
                     PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
         }
         else
