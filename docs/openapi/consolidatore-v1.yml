@@ -380,7 +380,7 @@ webhooks:
                   summary: 'Errore semantico'
                   value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'unrecognized product Type'], clientResponseTimeStamp: '2019-08-24T14:15:22Z'}  
 
-  # Path /consolidatore-ingress/v1/get-attachment/    
+  # Path /consolidatore-ingress/v1/get-attachment/{fileKey}    
   get-attachment:
     get:
       summary: ottieni metadati e contenuto di un file.
@@ -398,6 +398,7 @@ webhooks:
         invocazioni di questa API generano un solo evento per client. <br/>
         Il file rimane hot per ```stayHotTime````.
       parameters:
+        - $ref: '#/components/parameters/fileKey'
         - $ref: '#/components/parameters/xPagopaExtchServiceId'
         - $ref: '#/components/parameters/xPagopaExtchApiKey'
       operationId: getFile
@@ -447,6 +448,14 @@ webhooks:
 components:
 
   parameters:
+    fileKey: 
+      name: fileKey
+      description: La chiave definita per il file di cui si sta richiedendo il download
+      in: path
+      required: true
+      schema:
+        type: string
+      example: '8F7E/9A3B/1234/AB87'
     xPagopaExtchServiceId:
       name: x-pagopa-extch-service-id
       description: Identificativo con cui Piattaforma Notifiche si identifica
