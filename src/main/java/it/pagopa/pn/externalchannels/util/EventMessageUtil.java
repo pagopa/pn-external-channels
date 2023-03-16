@@ -10,10 +10,13 @@ import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class EventMessageUtil {
@@ -40,9 +43,16 @@ public class EventMessageUtil {
         String requestId = notificationProgress.getRequestId();
         String channel = notificationProgress.getChannel();
         DiscoveredAddress discoveredAddress = null;
+        AtomicReference<Duration> delay = new AtomicReference<>(Duration.ZERO);
+
+        if (codeTimeToSend.getAdditionalActions() != null) {
+            Optional<AdditionalAction> additionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAY).findFirst();
+            additionalAction.ifPresent(x -> delay.set(org.springframework.boot.convert.DurationStyle.detectAndParse(x.getInfo().replace("+","-"))));
+            log.info("found code with DELAY, using delay={}", delay);
+        }
 
         if (LEGAL_CHANNELS.contains(channel)) {
-            return buildLegalMessage(code, requestId);
+            return buildLegalMessage(code, requestId, delay.get());
         } else if (PAPER_CHANNELS.contains(channel)) {
 
             if (codeTimeToSend.getAdditionalActions() != null
@@ -52,13 +62,13 @@ public class EventMessageUtil {
                 log.info("found code with discovery enabled, using discovered={}", discoveredAddress.getAddress());
             }
 
-            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress);
+            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get());
         }
 
-        return buildDigitalCourtesyMessage(code, requestId);
+        return buildDigitalCourtesyMessage(code, requestId, delay.get());
     }
 
-    private static SingleStatusUpdate buildLegalMessage(String code, String requestId) {
+    private static SingleStatusUpdate buildLegalMessage(String code, String requestId, Duration delay) {
 
         return new SingleStatusUpdate()
                 .digitalLegal(
@@ -66,12 +76,12 @@ public class EventMessageUtil {
                                 .eventCode(LegalMessageSentDetails.EventCodeEnum.fromValue(code))
                                 .requestId(requestId)
                                 .status(buildStatus(code))
-                                .eventTimestamp(OffsetDateTime.now())
+                                .eventTimestamp(OffsetDateTime.now().minus(delay))
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
     }
 
-    private static SingleStatusUpdate buildDigitalCourtesyMessage(String code, String requestId) {
+    private static SingleStatusUpdate buildDigitalCourtesyMessage(String code, String requestId, Duration delay) {
 
         return new SingleStatusUpdate()
                 .digitalCourtesy(
@@ -79,12 +89,12 @@ public class EventMessageUtil {
                                 .eventCode(CourtesyMessageProgressEvent.EventCodeEnum.fromValue(code))
                                 .requestId(requestId)
                                 .status(buildStatus(code))
-                                .eventTimestamp(OffsetDateTime.now())
+                                .eventTimestamp(OffsetDateTime.now().minus(delay))
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress) {
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay) {
         return new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
@@ -95,7 +105,7 @@ public class EventMessageUtil {
                                 .clientRequestTimeStamp(OffsetDateTime.now())
                                 .attachments(null)
                                 .statusCode(code)
-                                .statusDateTime(OffsetDateTime.now())
+                                .statusDateTime(OffsetDateTime.now().minus(delay))
                                 .statusDescription("Mock status"));
     }
 

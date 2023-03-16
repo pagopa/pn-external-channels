@@ -32,11 +32,11 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 				},
 				{
 					\"sequenceName\":\"OK_AR\",
-					\"sequence\":\"@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C\"
+					\"sequence\":\"@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C[DELAY:1s]\"
 				},
 				{
 					\"sequenceName\":\"OK_890\",
-					\"sequence\":\"@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C\"
+					\"sequence\":\"@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C[DELAY:+1s]\"
 				},
 				{
 					\"sequenceName\":\"FAIL_890\",
