@@ -25,7 +25,7 @@
   },
   {
     "sequenceName":"OK_890",
-    "sequence":"@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C[DELAY:+1s]"
+    "sequence":"@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L;DELAYDOC:1s].5s-RECAG001C[DELAY:1s]"
   },
   {
     "sequenceName":"FAIL_890",

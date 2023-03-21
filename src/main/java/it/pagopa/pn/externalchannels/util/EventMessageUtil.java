@@ -2,14 +2,34 @@ package it.pagopa.pn.externalchannels.util;
 
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
+import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
+import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
+import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
+import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.model.*;
+import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -18,10 +38,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
+
 @Slf4j
 public class EventMessageUtil {
 
     private EventMessageUtil() {}
+
+    public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
+    public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
+    public static final String SAVED = "SAVED";
 
     private static final String MOCK_PREFIX = "mock-";
 
@@ -34,7 +60,7 @@ public class EventMessageUtil {
 
     private static final String OK_CODE = "C003";
 
-    public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress) {
+    public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
         log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
@@ -44,15 +70,23 @@ public class EventMessageUtil {
         String channel = notificationProgress.getChannel();
         DiscoveredAddress discoveredAddress = null;
         AtomicReference<Duration> delay = new AtomicReference<>(Duration.ZERO);
+        AtomicReference<Duration> delaydoc = new AtomicReference<>(Duration.ZERO);
 
         if (codeTimeToSend.getAdditionalActions() != null) {
             Optional<AdditionalAction> additionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAY).findFirst();
             additionalAction.ifPresent(x -> delay.set(org.springframework.boot.convert.DurationStyle.detectAndParse(x.getInfo().replace("+","-"))));
             log.info("found code with DELAY, using delay={}", delay);
+            delaydoc.set(delay.get());
+
+            Optional<AdditionalAction> additionalActionDOC = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAYDOC).findFirst();
+            additionalActionDOC.ifPresent(x -> delaydoc.set(org.springframework.boot.convert.DurationStyle.detectAndParse(x.getInfo().replace("+","-"))));
+            log.info("found code with DELAYDOC, using delay={}", delaydoc);
         }
 
+
+
         if (LEGAL_CHANNELS.contains(channel)) {
-            return buildLegalMessage(code, requestId, delay.get());
+            return buildLegalMessage(code, requestId, delay.get(), notificationProgress.getIun(), safeStorageService);
         } else if (PAPER_CHANNELS.contains(channel)) {
 
             if (codeTimeToSend.getAdditionalActions() != null
@@ -62,15 +96,15 @@ public class EventMessageUtil {
                 log.info("found code with discovery enabled, using discovered={}", discoveredAddress.getAddress());
             }
 
-            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get());
+            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), notificationProgress, eventCodeDocumentsDao, safeStorageService);
         }
 
         return buildDigitalCourtesyMessage(code, requestId, delay.get());
     }
 
-    private static SingleStatusUpdate buildLegalMessage(String code, String requestId, Duration delay) {
+    private static SingleStatusUpdate buildLegalMessage(String code, String requestId, Duration delay, String iun, SafeStorageService safeStorageService) {
 
-        return new SingleStatusUpdate()
+        SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
                 .digitalLegal(
                         new LegalMessageSentDetails()
                                 .eventCode(LegalMessageSentDetails.EventCodeEnum.fromValue(code))
@@ -79,6 +113,60 @@ public class EventMessageUtil {
                                 .eventTimestamp(OffsetDateTime.now().minus(delay))
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
+
+        enrichWithLocation(singleStatusUpdate, iun, safeStorageService);
+        return singleStatusUpdate;
+    }
+
+
+    private static void enrichWithLocation(SingleStatusUpdate eventMessage, String iun, SafeStorageService safeStorageService) {
+        String code = eventMessage.getDigitalLegal().getEventCode().name();
+        if (EventCodeIntForDigital.isWithAttachment(code)) {
+            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+            fileCreationRequest.setContentType(LEGALFACTS_MEDIATYPE_XML);
+            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
+            fileCreationRequest.setStatus(SAVED);
+            fileCreationRequest.setContent(buildXml(eventMessage.getDigitalLegal().getRequestId(), code));
+            log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
+            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
+            log.info("[{}] Message sent to Safe Storage", iun);
+            eventMessage.getDigitalLegal().getGeneratedMessage().setLocation("safestorage://" + response.getKey());
+        }
+    }
+
+    private static byte[] buildXml(String requestId, String code) {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder;
+
+        try {
+            dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.newDocument();
+            // add elements to Document
+            Element rootElement = doc.createElement("Notifica");
+            rootElement.setAttribute("status", EventCodeIntForDigital.getValueFromEnumString(code));
+            rootElement.setAttribute("requestId", requestId);
+            // append root element to document
+            doc.appendChild(rootElement);
+
+
+            // for output to bytearray-output
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            // to be compliant, prohibit the use of all protocols by external entities:
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            StreamResult result = new StreamResult(bos);
+            transformer.transform(source, result);
+            byte[] array = bos.toByteArray();
+            log.info("XML creating:\n {}", new String(array));
+            return array;
+        } catch (Exception e) {
+            throw new ExternalChannelsMockException("Error generating XML", e);
+        }
     }
 
     private static SingleStatusUpdate buildDigitalCourtesyMessage(String code, String requestId, Duration delay) {
@@ -94,8 +182,8 @@ public class EventMessageUtil {
                 );
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay) {
-        return new SingleStatusUpdate()
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
+        SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
                                 .iun(iun)
@@ -107,7 +195,16 @@ public class EventMessageUtil {
                                 .statusCode(code)
                                 .statusDateTime(OffsetDateTime.now().minus(delay))
                                 .statusDescription("Mock status"));
+
+        EventCodeMapKey eventCodeMapKey = EventCodeMapKey.builder()
+                .iun(iun)
+                .recipient(notificationProgress.getDestinationAddress())
+                .code(singleStatusUpdate.getAnalogMail().getStatusCode()).build();
+        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, safeStorageService);
+
+        return singleStatusUpdate;
     }
+
 
     private static ProgressEventCategory buildStatus(String code) {
         if (code.equals(OK_CODE)) {
@@ -144,5 +241,44 @@ public class EventMessageUtil {
                 .payload(event)
                 .build();
     }
+
+
+
+    private static void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey, Duration delaydoc, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
+        Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
+        log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
+        if(eventCodeList.isPresent()) {
+            int id = 1;
+            for(String documentType: eventCodeList.get()){
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, safeStorageService));
+            }
+            eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
+        }
+    }
+
+
+
+    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, SafeStorageService safeStorageService) {
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("test.pdf");
+            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+            fileCreationRequest.setContentType("application/pdf");
+            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
+            fileCreationRequest.setStatus(SAVED);
+            fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+            log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
+            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
+            log.info("[{}] Message sent to Safe Storage", iun);
+            return new AttachmentDetails()
+                    .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
+                    .id(iun + "DOCMock_"+id)
+                    .documentType(documentType)
+                    .date(OffsetDateTime.now().minus(delaydoc));
+        } catch (IOException e) {
+            log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
+            return null;
+        }
+    }
+
 
 }

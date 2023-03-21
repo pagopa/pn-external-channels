@@ -14,7 +14,8 @@ public class AdditionalAction implements Serializable  {
     public enum ADDITIONAL_ACTIONS {
         DISCOVERY,
         DOC,
-        DELAY
+        DELAY,
+        DELAYDOC
     }
 
     private ADDITIONAL_ACTIONS action;

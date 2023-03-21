@@ -63,9 +63,12 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
    1. **@sequence.5s-<codice>[comandi].10s-<codice>[comandi].20s-<codice>[comandi]** : 
       1. 5s: durata di attesa prima di invio del codice
       2. <codice>: il codice da spedire, esempio RECAG003D, senza < e >
-      3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY,DOC:< doctype >,DELAY:< duration >. DISCOVERY invia 
-         l'eventuale indirizzo di discovery specificato in @discovered. DOC invia un allegato con documentType=< doctype >. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
-   2. se contiene anche la stringa **discovered**, il suo valore viene inviato come indirizzo nel codice con azione DISCOVERY 
+      3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY,DOC:< doctype >,DELAY:< duration >. 
+         1. DISCOVERY invia l'eventuale indirizzo di discovery specificato in @discovered. 
+         2. DOC invia un allegato con documentType=< doctype >. 
+         3. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
+         4. DELAYDOC aggiunge al timestamp dei DOCUMENTI dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
+   2. se contiene anche la stringa **@discovered**, il suo valore viene inviato come indirizzo nel codice con azione DISCOVERY 
 2. Se il campo receiverAddress contiene la stringa **@fail** o **@ok**, cerca nel parameter store MapExternalChannelMockSequence la 
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
 3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
@@ -98,7 +101,7 @@ La risoluzione di che endpoint è, avviente tramite la ricerca di un simple para
 
 Risolto l'endpoint, nell'invocazione del webhook verrà usato il serviceid specificato e (opzionalmente) una api-key.
 L'api-key viene letta da
-**arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey**
+`**arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey**`
 e deve avere il formato json:
 
 `[{"serviceId": "pn-cons-000", "apiKey":"1234567"}, {"serviceId": "pn-cons-001", "apiKey":"98765432"}]`
