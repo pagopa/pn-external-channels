@@ -32,7 +32,7 @@ public class ConsolidatoreController implements PiattaformaNotificheIngressApi {
 
         return paperEngageRequest
                 .doOnNext(request -> log.info("Received CONSOLIDATORE request with requestBody: {}, headers: {}", request, exchange.getRequest().getHeaders()))
-                .doOnNext(request -> externalChannelsService.sendPaperEngageRequest(ConsolidatoreEngageRequestToEngageRequestMapper.map(request), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL))
+                .doOnNext(request -> externalChannelsService.sendPaperEngageRequest(ConsolidatoreEngageRequestToEngageRequestMapper.map(request), xPagopaExtchServiceId))
                 .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
                 .log(this.getClass().getName())
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.ok(returnOk())));

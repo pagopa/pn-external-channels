@@ -33,7 +33,7 @@ public class ExternalChannelsController implements ExternalChannelsApi {
 
         return paperEngageRequest
                 .doOnNext(request -> log.info("Received request with requestBody: {}, headers: {}", request, exchange.getRequest().getHeaders()))
-                .doOnNext(request -> externalChannelsService.sendPaperEngageRequest(request, NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_PAPER_CHANNEL))
+                .doOnNext(request -> externalChannelsService.sendPaperEngageRequest(request, null))
                 .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
                 .log(this.getClass().getName())
                 .onErrorResume(Mono::error).then(Mono.just(ResponseEntity.noContent().build()));
