@@ -1,7 +1,7 @@
 #!/usr/bin/env bash -e
 
 if ( [ $# -ne 4 ] ) then
-  echo "Usage: $0 <aws-accountid> <aws-userprofile> <aws-region>"
+  echo "Usage: $0 <aws-userprofile> <aws-region> <aws-bucketname> <target-env>"
   echo "<aws-userprofile>: AWS connection profile to the target AccountId"
   echo "<aws-region>: AWS region to deploy the stacks"
   echo "<aws-bucketname>: AWS Target Bucket for stack"
@@ -23,8 +23,6 @@ _BUCKETPATH="mockconsolidatore"
 _STACK="mockconsolidatore"
 _WORKDIR="$PWD/out"
 _PARAMSFILE="$_WORKDIR/$_STACK-params.yaml"
-
-
 
 _AWSCLI_CMD_PREFIX="--profile $_AWS_USERPROFILE  --region $_AWS_REGION"
 
