@@ -301,7 +301,6 @@ public class ExternalChannelsService {
         if(receiverAddress.contains("@fail")){
             log.info("Enter in fail");
             String search = receiverAddress.substring(receiverAddress.lastIndexOf("fail")).trim();
-            log.info("Search sequence {}",search);
             search = search.contains(" ")? search.substring(0,search.indexOf(" ")) : search;
             log.info("Search sequence {}",search);
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("fail")? search + "_" + producType : search);
@@ -310,7 +309,6 @@ public class ExternalChannelsService {
         }else if(receiverAddress.contains("@ok") || !receiverAddress.contains("@")){
             log.info("Enter in ok");
             String search = (receiverAddress.contains("@ok")? receiverAddress.substring(receiverAddress.lastIndexOf("ok")) : "ok").trim();
-            log.info("Search sequence {}",search);
             search = search.contains(" ")? search.substring(0,search.indexOf(" ")) : search;
             log.info("Search sequence {}",search);
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("ok")? search + "_" + producType : search);
