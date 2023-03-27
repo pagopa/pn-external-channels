@@ -20,5 +20,5 @@
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-central-1.amazonaws.com/pn-external-channels@sha256:f6ad6df51783af7678dcc81b2bb519a71f528c200a3deca8d571dccf3227a7ab"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-central-1.amazonaws.com/pn-external-channels@sha256:22804ce3d365de290641d445b4800082011b8f7ce1d47af3d6d7a62fd52545a7"
 }
