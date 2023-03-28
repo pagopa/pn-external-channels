@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "SandboxSafeStorageBaseUrl": "http://alb.confidential.pn.internal:8080",
+    "SandboxSafeStorageBaseUrl": "http://alb.confidential.pn.internal:8080/",
     "CacheExpireDays": "90",
     "CacheMaxSize": "100000",
     "JobCronExpression": "*/5 * * * * *"
