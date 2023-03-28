@@ -29,6 +29,8 @@ components:
       properties:
         iun: 
           type: string
+          minLength: 10 
+          maxLength: 50
           example: 'ABCD-HILM-YKWX-202202-1'
           description: >-
             Identificativo Unico della Notifica. Può essere usato per migliorare il servizio 
@@ -36,11 +38,15 @@ components:
             Pubbliche Amministrazioni di ricercare anche per Identificativo Univoco Notifica.
         requestId:
           type: string
+          minLength: 30
+          maxLength: 250
           example: 'ABCD-HILM-YKWX-202202-1_rec0_try1'
           description: >-
             Identificativo della richiesta.
         requestPaId:
           type: string
+          minLength: 1
+          maxLength: 80
           example: '00414580183'
           description: >-
             Identificativo della PA che ha richiesto il recapito. Utile per autorizzare il
@@ -52,13 +58,15 @@ components:
             Timestamp della richiesta in UTC specificando la timezone 'Z'
         productType:
           description: >-
-            Tipo prodotto di cui viene chiesto il recapito: <br/>
-            - __AR__: Raccomandata Andata e Ritorno, <br/>
-            - __890__: Recapito a norma della legge 890/1982, <br/>
-            - __RI__: Raccomandata Internazionale, <br/>
-            - __RS__: Raccomandata Semplice (per Avviso di mancato Recapito). <br/>
-            - ... ulteriori prodotti 
+            Tipo prodotto di cui viene chiesto il recapito:  <br/>
+            - __AR__: Raccomandata Andata e Ritorno nazionale,  <br/>
+            - __890__: Recapito a norma della legge 890/1982,  <br/>
+            - __RS__: Raccomandata Semplice nazionale (per Avviso di mancato Recapito). <br/>
+            - __RIS__: Raccomandata Internazionale Semplice,  <br/>
+            - __RIR__: Raccomandata Internazionale con AR.  <br/>
           type: string
+          minLength: 2
+          maxLength: 3
           example: 'AR'
         attachments:
           type: array
@@ -95,6 +103,10 @@ components:
                   sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
                 minLength: 40
                 maxLength: 50
+          description: >-
+            Coordinate per l'accesso ai documenti PDF da inviare. <br/>
+          minItems: 0
+          maxItems: 200
         printType:
           type: string
           description: >-
@@ -102,6 +114,8 @@ components:
             - __BN_FRONTE__: bianco e nero solo fronte <br/>
             - __BN_FRONTE_RETRO__: bianco e nero fronte e retro <br/>
             - ... ulteriori modalità previste dal contratto
+          minLength: 5
+          maxLength: 30
           example: 'BN_FRONTE_RETRO'
         receiverName:
           type: string
