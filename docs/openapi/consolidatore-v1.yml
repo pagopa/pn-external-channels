@@ -978,6 +978,8 @@ components:
                 type: string
                 description: >-
                   Codice postale dell'oggetto di ritorno
+                minLength: 0
+                maxLength: 20
               documentType:
                 type: string
                 minLength: 2
