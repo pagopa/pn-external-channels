@@ -1,0 +1,25 @@
+{
+    "version": "0",
+    "id": "937d0dda-dd79-1bfa-ad59-d52a667c4383",
+    "detail-type": "ExternalChannelOutcomeEvent",
+    "source": "pnexternalchannelsvil-outcome-function",
+    "account": "123937545396",
+    "time": "2023-03-24T08:11:00Z",
+    "region": "eu-south-1",
+    "resources": [
+        "sqs"
+    ],
+    "detail": {
+        "analogMail": {
+            "requestId": "PREPARE_ANALOG_DOMICILE.IUN_MTWG-UWUG-PETX-202303-Q-1.RECINDEX_0.SENTATTEMPTMADE_0.PCRETRY_0",
+            "statusCode": "000",
+            "statusDescription": "Preso in carico",
+            "statusDateTime": "2023-03-24T08:10:58.943836Z",
+            "productType": "AR",
+            "clientRequestTimeStamp": "2023-03-24T08:10:49.879Z",
+            "iun": null
+        },
+        "clientId": "pn-cons-000",
+        "eventTimestamp": "2023-03-24T08:11:00.568046Z"
+    }
+}
