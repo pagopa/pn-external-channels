@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.commons.conf.SharedAutoConfiguration;
 import it.pagopa.pn.commons.log.PnAuditLogBuilder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Configuration
 @ConfigurationProperties(prefix = "pn.external-channels")
 @Import({SharedAutoConfiguration.class, PnAuditLogBuilder.class})
@@ -56,10 +58,12 @@ public class PnExternalChannelsProperties {
 
     private List<WebhookApikeys>  parsedApiKeys = new ArrayList<>();
     public Optional<WebhookApikeys> findExtchannelwebhookApiKey(String serviceId) throws JsonProcessingException {
+        log.info("extchannelwebhookApiKey={}",  extchannelwebhookApiKey);
         if (parsedApiKeys.isEmpty() && StringUtils.hasText(extchannelwebhookApiKey)) {
             ObjectMapper objectMapper = new ObjectMapper();
             parsedApiKeys = objectMapper.readValue(extchannelwebhookApiKey, new TypeReference<List<WebhookApikeys>>() {
             });
+            log.info("parsed {}", parsedApiKeys);
         }
 
         return parsedApiKeys.stream().filter(x -> x.serviceId.equals(serviceId)).findFirst();
