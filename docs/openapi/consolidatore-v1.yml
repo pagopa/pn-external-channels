@@ -685,6 +685,8 @@ components:
           type: string
           description: >-
             Indirizzo PEC del mittente.
+          minLength: 0
+          maxLength: 254
         arName:
           type: string
           description: >-

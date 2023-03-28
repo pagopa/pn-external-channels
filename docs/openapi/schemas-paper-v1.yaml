@@ -121,67 +121,95 @@ components:
           type: string
           description: >-
             Cognome e nome o ragione sociale del destinatario
+          minLength: 0
+          maxLength: 44
           example: 'Mario Rossi'
         receiverNameRow2:
           type: string
           description: >-
             Seconda riga sulla busta.
           example: 'c/o famiglia Bianchi'
+          minLength: 0
+          maxLength: 44
         receiverAddress:
           type: string
           description: >-
             Indirizzo del destinatario.
           example: 'via senza nome 610106'
+          minLength: 0
+          maxLength: 44
         receiverAddressRow2:
           type: string
           description: >-
             Specifica dell’indirizzo di residenza del destinatario (seconda riga indirizzo sulla busta).
           example: 'scala Z interno 400'
+          minLength: 0
+          maxLength: 44
         receiverCap:
           type: string
           description: >-
             Cap del destinatario; in caso di invio estero diventa facoltativo.
           example: '40050'
+          minLength: 0
+          maxLength: 5
         receiverCity:
           type: string
           description: >-
             Comune del destinatario.
           example: Argelato
+          minLength: 0
+          maxLength: 37
         receiverCity2:
           type: string
           description: >-
             Frazione del destinatario. Potrebbe essere utile se il chiamante non fornisce il cap.
           example: 'fraz. malacappa'
+          minLength: 0
+          maxLength: 37
         receiverPr:
           type: string
           description: >-
             Provincia del destinatario; in caso di invio estero diventa facoltativo.
           example: 'BO'
+          minLength: 0
+          maxLength: 2
         receiverCountry:
           type: string
           description: >-
             In caso di destinatario estero, diventa obbligatoria l’indicazione della nazione di destinazione, 
             in standard UPU o altro standard condiviso.
+          minLength: 0
+          maxLength: 44
         receiverFiscalCode:
           type: string
           description: >-
             Potrebbe servire ai recapitisti in caso di offerte migliorative per i destinatari (servizi a valore aggiunto basati su cf).
+          minLength: 0
+          maxLength: 16
         senderName:
           type: string
           description: >-
             Ragione sociale del mittente (PagoPA).
+          minLength: 0
+          maxLength: 30
         senderAddress:
           type: string
           description: >-
             Indirizzo del mittente.
+          minLength: 0
+          maxLength: 30
         senderCity:
           type: string
           description: >-
             Città del mittente
+          minLength: 0
+          maxLength: 28
         senderPr:
           type: string
           description: >-
             Provincia del mittente.
+          minLength: 0
+          maxLength: 2
         senderDigitalAddress:
           type: string
           description: >-
@@ -190,18 +218,26 @@ components:
           type: string
           description: >-
             Nominativo di riferimento per l’Avviso di Ritorno.
+          minLength: 0
+          maxLength: 30
         arAddress:
           type: string
           description: >-
             Indirizzo per AR.
+          minLength: 0
+          maxLength: 30
         arCap:
           type: string
           description: >-
             CAP AR.
+          minLength: 0
+          maxLength: 5
         arCity:
           type: string
           description: >-
             Città per AR.
+          minLength: 0
+          maxLength: 28
         vas:
           type: object
           additionalProperties:
