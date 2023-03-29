@@ -24,7 +24,7 @@ servers:
     description: Server url
 paths:  
   /consolidatore-ingress/v1/push-progress-events:
-    post:
+    put:
       operationId: sendPaperProgressStatusRequest
       summary: Webhook con cui PN riceve progressi postalizzazioni
       parameters:
