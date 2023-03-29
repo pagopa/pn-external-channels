@@ -113,7 +113,8 @@ Resources:
         ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
         ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
         ContainerEnvEntry8: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
-        ContainerSecret1: !Sub 'PN_EXTERNALREGISTRY_EXTCHANNELWEBHOOK_API_KEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
+        ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
+        MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
