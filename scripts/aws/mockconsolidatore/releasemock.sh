@@ -21,7 +21,7 @@ _BUCKETNAME=$3
 _ENV=$4
 _BUCKETPATH="mockconsolidatore"
 _STACK="mockconsolidatore"
-_WORKDIR="$PWD/out"
+_WORKDIR="$PWD/target"
 _PARAMSFILE="$_WORKDIR/$_STACK-params.yaml"
 
 _AWSCLI_CMD_PREFIX="--profile $_AWS_USERPROFILE  --region $_AWS_REGION"
