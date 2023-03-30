@@ -248,7 +248,7 @@ public class EventMessageUtil {
         Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
         log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
         if(eventCodeList.isPresent()) {
-            int id = 1;
+            int id = 0;
             for(String documentType: eventCodeList.get()){
                 eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, safeStorageService));
             }
@@ -271,7 +271,7 @@ public class EventMessageUtil {
             log.info("[{}] Message sent to Safe Storage", iun);
             return new AttachmentDetails()
                     .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
-                    .id(iun + "DOCMock_"+id + "|" + response.getSha256())
+                    .id(id)
                     .documentType(documentType)
                     .date(OffsetDateTime.now().minus(delaydoc));
         } catch (IOException e) {
