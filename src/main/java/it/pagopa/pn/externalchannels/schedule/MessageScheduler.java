@@ -4,6 +4,7 @@ import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebhookClient;
@@ -95,8 +96,7 @@ public class MessageScheduler {
 
         if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
         {
-            extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress,
-                    PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
+            extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress, PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
         }
         else
         {
