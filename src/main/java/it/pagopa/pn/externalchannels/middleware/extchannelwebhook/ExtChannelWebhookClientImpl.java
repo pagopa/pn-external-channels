@@ -33,7 +33,7 @@ public class ExtChannelWebhookClientImpl implements ExtChannelWebhookClient {
             DefaultApi defaultApi = new DefaultApi( newApiClient );
 
             log.info("Start call sendPaperProgressStatusRequest - requestId={} statusCode={} endoint={} serviceid={} apikey={}", event.getRequestId(), event.getStatusCode(), notificationProgress.getOutputEndpoint(), notificationProgress.getOutputServiceId(), LogUtils.maskGeneric(notificationProgress.getOutputApiKey()));
-
+            log.info("sendPaperProgressStatusRequest - event={}", event);
             OperationResultCodeResponse operationResultCodeResponse = defaultApi.sendPaperProgressStatusRequest(
                     notificationProgress.getOutputServiceId(), notificationProgress.getOutputApiKey(), List.of(event) );
 
