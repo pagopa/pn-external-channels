@@ -271,7 +271,7 @@ public class EventMessageUtil {
             log.info("[{}] Message sent to Safe Storage", iun);
             return new AttachmentDetails()
                     .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
-                    .id(iun + "DOCMock_"+id)
+                    .id(iun + "DOCMock_"+id + "|" + response.getSha256())
                     .documentType(documentType)
                     .date(OffsetDateTime.now().minus(delaydoc));
         } catch (IOException e) {

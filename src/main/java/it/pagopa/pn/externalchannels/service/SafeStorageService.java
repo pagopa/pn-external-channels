@@ -63,6 +63,7 @@ public class SafeStorageService {
 
             FileCreationResponseInt fileCreationResponseInt = FileCreationResponseInt.builder()
                     .key(fileCreationResponse.getKey())
+                    .sha256(sha256)
                     .build();
 
             log.info("createAndUploadContent file uploaded successfully key={} sha256={}", fileCreationResponseInt.getKey(), sha256);
