@@ -64,3 +64,5 @@ hs_err_pid*
 *.swp
 **/.txt
 *.log
+
+**/.DS_Store
