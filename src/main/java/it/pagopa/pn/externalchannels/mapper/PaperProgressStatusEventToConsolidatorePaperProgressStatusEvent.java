@@ -19,11 +19,12 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
         if (input.getAttachments() != null)
         {
             List<PaperProgressStatusEventAttachments> attachments = new ArrayList<>();
+            int docId = 0;
             for (AttachmentDetails detail: input.getAttachments()) {
                 PaperProgressStatusEventAttachments paperProgressStatusEventAttachments = new PaperProgressStatusEventAttachments();
                 paperProgressStatusEventAttachments.setDate(detail.getDate().toInstant());
                 paperProgressStatusEventAttachments.setDocumentType(detail.getDocumentType());
-                paperProgressStatusEventAttachments.setId(detail.getId());
+                paperProgressStatusEventAttachments.setId(Integer.toString(docId++));
                 paperProgressStatusEventAttachments.setUri(detail.getUrl());
                 paperProgressStatusEventAttachments.setSha256(detail.getId().split("\\|")[1]);
                 attachments.add(paperProgressStatusEventAttachments);
