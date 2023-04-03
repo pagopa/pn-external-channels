@@ -298,6 +298,7 @@ public class ExternalChannelsService {
         EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
         EventCodeSequenceDTO eventCodeSequenceDTO = null;
         log.info("Search for receiverAddress {}",receiverAddress);
+        receiverAddress = receiverAddress.toLowerCase();
         if(receiverAddress.contains("@fail")){
             log.info("Enter in fail");
             String search = receiverAddress.substring(receiverAddress.lastIndexOf("fail")).trim();
