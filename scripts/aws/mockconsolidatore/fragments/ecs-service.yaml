@@ -54,12 +54,13 @@ Parameters:
   ContainerImageOtelURI:
     Type: String
     Description: Container image URI for Open telemetry
-    Default: 911845998067.dkr.ecr.eu-central-1.amazonaws.com/aws-otel-collector:v0.23.0
+    Default: 911845998067.dkr.ecr.eu-south-1.amazonaws.com/aws-otel-collector:v0.23.0
 
   ContainerImageInjectorURI:
     Type: String
     Description: Container image URI for Open telemetry
-    Default: 911845998067.dkr.ecr.eu-central-1.amazonaws.com/alpine:3.14
+    #Default: 911845998067.dkr.ecr.eu-south-1.amazonaws.com/alpine:3.14
+    Default: 911845998067.dkr.ecr.eu-south-1.amazonaws.com/aws-otel-agent-injector:v1.19.2_1
 
 # The AWS collector comes with two configs baked in for ECS:
 #
@@ -181,6 +182,11 @@ Parameters:
     Type: String
     Default: ''
     Description: Application load balancer seecurity group
+
+  EcsLogGroup:
+    Type: String
+    Default: '-'
+    Description: ECS Log group
 
   # Technical parameters
   VpcId:
@@ -384,6 +390,18 @@ Parameters:
     Description: 46th container environment entry in the form key=value
     Type: String
     Default: ''
+  ContainerEnvEntry47:
+    Description: 47th container environment entry in the form key=value
+    Type: String
+    Default: ''
+  ContainerEnvEntry48:
+    Description: 48th container environment entry in the form key=value
+    Type: String
+    Default: ''
+  ContainerEnvEntry49:
+    Description: 48th container environment entry in the form key=value
+    Type: String
+    Default: ''
 
   # Secrets
   ContainerSecret1:
@@ -420,6 +438,16 @@ Parameters:
     Type: String
     Default: ''
     
+  # Alarm
+  LogAlarmStrategyV1: # updated parameter name to allow a new default value, will be restored with task PN-4855 
+    Description: Log alarm strategy, one of "-", "FATAL" or "ERROR_FATAL"
+    Default: 'ERROR_FATAL'
+    AllowedValues:
+      - "-"
+      - "FATAL"
+      - "ERROR_FATAL"
+    Type: String
+
 Mappings:
   ContainerMemory:
     2GB:
@@ -444,6 +472,10 @@ Conditions:
   HasDefaultSecurityGroup: !Not [ !Equals [ !Ref EcsDefaultSecurityGroup, '' ] ]
   HasAlbSecurityGroup: !Not [ !Equals [ !Ref AlbSecurityGroup, '' ] ]
 
+  LogAlarmErrorFatal: !Equals [ !Ref LogAlarmStrategyV1, 'ERROR_FATAL' ]
+  LogAlarmNotNone: !Not [ !Equals [ !Ref LogAlarmStrategyV1, '-' ] ]
+  HasLogAlarm: !And [ !Condition HasAlarmTopic, !Condition LogAlarmNotNone ]
+
   AutoscalingByRestApi: !Equals [ !Ref AutoscalingStrategy, REST-API]
   AutoscalingBySQS: !Equals [ !Ref AutoscalingStrategy, SQS]
   AutoscalingEnabled:
@@ -455,8 +487,10 @@ Conditions:
   
   HasJavaToolOptions: !Not [ !Equals [ !Ref JavaToolOptions, '' ] ]
 
-  SendLogToKinesis: !Not [ !Equals [ !Ref CloudwatchLogKinesisStreamArn, '' ] ]
-
+  HasKinesisStreamArn: !Not [ !Equals [ !Ref CloudwatchLogKinesisStreamArn, '' ] ]
+  RequiresLogGroupCreation: !Equals [ !Ref EcsLogGroup, '-' ]
+  SendLogToKinesis: !And [ !Condition HasKinesisStreamArn, !Condition RequiresLogGroupCreation ]
+  
   HasTaskRoleManagedPolicyArn: !Not [ !Equals [ !Ref TaskRoleManagedPolicyArn, '' ] ] 
 
   Env1Exist: !Not [ !Equals [!Ref ContainerEnvEntry1, '']]
@@ -505,6 +539,9 @@ Conditions:
   Env44Exist: !Not [ !Equals [ !Ref ContainerEnvEntry44, '' ] ]
   Env45Exist: !Not [ !Equals [ !Ref ContainerEnvEntry45, '' ] ]
   Env46Exist: !Not [ !Equals [ !Ref ContainerEnvEntry46, '' ] ]
+  Env47Exist: !Not [ !Equals [ !Ref ContainerEnvEntry47, '' ] ]
+  Env48Exist: !Not [ !Equals [ !Ref ContainerEnvEntry48, '' ] ]
+  Env49Exist: !Not [ !Equals [ !Ref ContainerEnvEntry49, '' ] ]
 
   Secret1Exist: !Not [ !Equals [ !Ref ContainerSecret1, '' ] ]
   Secret2Exist: !Not [ !Equals [ !Ref ContainerSecret2, '' ] ]
@@ -516,6 +553,98 @@ Conditions:
 
   HasSecrets: !Or [ !Condition Secret1Exist, !Condition Secret2Exist, !Condition Secret3Exist, !Condition Secret4Exist, !Condition Secret5Exist, !Condition Secret6Exist ]
 Resources:
+  
+  ## Fallback log group
+  # Microservice Log group
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: RequiresLogGroupCreation
+    Properties:
+      LogGroupName: !Sub '/ecs/${MicroServiceUniqueName}'
+      RetentionInDays: 14
+      KmsKeyId:
+        Fn::GetAtt:
+          - LogGroupKmsKey
+          - Arn
+
+  # KMS Key for Encrypt log data in CloudWatch Logs
+  LogGroupKmsKey:
+    Type: AWS::KMS::Key
+    Condition: RequiresLogGroupCreation
+    Properties:
+      KeyPolicy:
+        Statement:
+          - Action: kms:*
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":iam::"
+                    - Ref: AWS::AccountId
+                    - :root
+            Resource: "*"
+          - Action:
+              - kms:Encrypt*
+              - kms:Decrypt*
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:Describe*
+            Effect: Allow      
+            Principal:
+                Service: !Sub logs.${AWS::Region}.amazonaws.com
+            Resource: '*'
+            Condition:
+                ArnLike:
+                    'kms:EncryptionContext:aws:logs:arn': !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*' 
+        Version: "2012-10-17"
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain    
+
+  ### Subscription filters with Kinesis  https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample
+  SubscriptionFilter:
+    Condition: SendLogToKinesis
+    Type: AWS::Logs::SubscriptionFilter
+    Properties:
+      RoleArn:
+        Fn::GetAtt:
+          - "SubscriptionFilterServiceRole"
+          - "Arn"
+      LogGroupName: !Ref LogGroup
+      FilterPattern: !Ref CloudwatchFilterPattern
+      DestinationArn: !Ref CloudwatchLogKinesisStreamArn
+
+  ### IAM Role used by Subscription filters to allow read logs from Cloudwatch and send logs to Kinesis Firehose
+  SubscriptionFilterServiceRole:
+    Condition: SendLogToKinesis
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: logs.amazonaws.com
+        Version: "2012-10-17"
+      Path: /
+      Policies:
+        -
+          PolicyName: !Sub '${MicroServiceUniqueName}-ecs-logs-subscription-role'
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - kinesis:PutRecord
+                Effect: Allow
+                Resource: "*"
+              - Action:
+                - "kms:Encrypt"
+                - "kms:GenerateDataKey"
+                - "kms:Decrypt"
+                Effect: Allow
+                Resource: "*"
 
   # ECS Service
   ECSService:
@@ -899,6 +1028,21 @@ Resources:
                 - Name: !Select [ 0, !Split [ "=", !Ref ContainerEnvEntry46 ] ]
                   Value: !Select [ 1, !Split [ "=", !Ref ContainerEnvEntry46 ] ]
                 - !Ref "AWS::NoValue"
+            - 'Fn::If':
+                - Env47Exist
+                - Name: !Select [ 0, !Split [ "=", !Ref ContainerEnvEntry47 ] ]
+                  Value: !Select [ 1, !Split [ "=", !Ref ContainerEnvEntry47 ] ]
+                - !Ref "AWS::NoValue"
+            - 'Fn::If':
+                - Env48Exist
+                - Name: !Select [ 0, !Split [ "=", !Ref ContainerEnvEntry48 ] ]
+                  Value: !Select [ 1, !Split [ "=", !Ref ContainerEnvEntry48 ] ]
+                - !Ref "AWS::NoValue"
+            - 'Fn::If':
+                - Env49Exist
+                - Name: !Select [ 0, !Split [ "=", !Ref ContainerEnvEntry49 ] ]
+                  Value: !Select [ 1, !Split [ "=", !Ref ContainerEnvEntry49 ] ]
+                - !Ref "AWS::NoValue"
           PortMappings:
             - ContainerPort: 8080
           LinuxParameters:
@@ -908,7 +1052,7 @@ Resources:
             LogDriver: awslogs
             Options:
               awslogs-region: !Ref AWS::Region
-              awslogs-group: !Ref LogGroup
+              awslogs-group: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
               awslogs-stream-prefix: ecs
         - 'Fn::If':
           - ShouldEnableOtelXRay
@@ -921,7 +1065,7 @@ Resources:
               LogDriver: awslogs
               Options:
                 awslogs-create-group: 'True'
-                awslogs-group: !Ref LogGroup
+                awslogs-group: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
                 awslogs-region: !Ref 'AWS::Region'
                 awslogs-stream-prefix: ecs
           - !Ref "AWS::NoValue"
@@ -929,8 +1073,8 @@ Resources:
           - ShouldEnableOtelXRay
           - Name: sidecar-injector
             Image: !Ref ContainerImageInjectorURI
-            Command: !Ref CommandSidecarInjector
-            EntryPoint: [!Ref EntrypointSidecarInjector]
+            #Command: !Ref CommandSidecarInjector
+            #EntryPoint: [!Ref EntrypointSidecarInjector]
             Essential: false
             MountPoints:
               - SourceVolume: "my-vol"
@@ -941,59 +1085,12 @@ Resources:
               LogDriver: awslogs
               Options:
                 awslogs-create-group: 'True'
-                awslogs-group: !Ref LogGroup
+                awslogs-group: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
                 awslogs-region: !Ref 'AWS::Region'
                 awslogs-stream-prefix: ecs
           - !Ref "AWS::NoValue"
       Volumes:
         - Name: "my-vol"
-
-
-  # Microservice Log group
-  LogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/ecs/${MicroServiceUniqueName}'
-      RetentionInDays: 14
-      KmsKeyId:
-        Fn::GetAtt:
-          - LogGroupKmsKey
-          - Arn
-
-  # KMS Key for Encrypt log data in CloudWatch Logs
-  LogGroupKmsKey:
-    Type: AWS::KMS::Key
-    Properties:
-      KeyPolicy:
-        Statement:
-          - Action: kms:*
-            Effect: Allow
-            Principal:
-              AWS:
-                Fn::Join:
-                  - ""
-                  - - "arn:"
-                    - Ref: AWS::Partition
-                    - ":iam::"
-                    - Ref: AWS::AccountId
-                    - :root
-            Resource: "*"
-          - Action:
-              - kms:Encrypt*
-              - kms:Decrypt*
-              - kms:ReEncrypt*
-              - kms:GenerateDataKey*
-              - kms:Describe*
-            Effect: Allow      
-            Principal:
-                Service: !Sub logs.${AWS::Region}.amazonaws.com
-            Resource: '*'
-            Condition:
-                ArnLike:
-                    'kms:EncryptionContext:aws:logs:arn': !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*' 
-        Version: "2012-10-17"
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain    
 
   # A role needed by ECS
   ExecutionRole:
@@ -1122,11 +1219,11 @@ Resources:
 
   # CloudWatch metric to filer ERROR - FATAL lines, in Log group
   ErrorFatalLogsMetricFilter: 
-    Condition: HasAlarmTopic
+    Condition: HasLogAlarm
     Type: AWS::Logs::MetricFilter
     Properties: 
-      LogGroupName: !Ref LogGroup
-      FilterPattern: '{ $.level = "ERROR" }'
+      LogGroupName: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
+      FilterPattern: !If [ LogAlarmErrorFatal, '{ $.level = "ERROR" || $.message = *FATAL* }', '{ $.message = *FATAL* }']
       MetricTransformations: 
         - MetricValue: 1
           MetricNamespace: "ErrorFatalLogs"
@@ -1135,7 +1232,7 @@ Resources:
   # Create alarm
   ErrorFatalLogsMetricAlarm:
     Type: AWS::CloudWatch::Alarm
-    Condition: HasAlarmTopic
+    Condition: HasLogAlarm
     DependsOn: ErrorFatalLogsMetricFilter
     Properties:
       AlarmName: !Sub "${MicroServiceUniqueName}-ErrorFatalLogs-Alarm"
@@ -1271,50 +1368,6 @@ Resources:
         - !Ref ScaleUpPolicy
       OKActions:
         - !Ref ScaleDownPolicy
-        
-
-  ### Subscription filters with Kinesis  https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html#DestinationKinesisExample
-  SubscriptionFilter:
-    Condition: SendLogToKinesis
-    Type: AWS::Logs::SubscriptionFilter
-    Properties:
-      RoleArn:
-        Fn::GetAtt:
-          - "SubscriptionFilterServiceRole"
-          - "Arn"
-      LogGroupName: !Ref LogGroup
-      FilterPattern: !Ref CloudwatchFilterPattern
-      DestinationArn: !Ref CloudwatchLogKinesisStreamArn
-
-  ### IAM Role used by Subscription filters to allow read logs from Cloudwatch and send logs to Kinesis Firehose
-  SubscriptionFilterServiceRole:
-    Condition: SendLogToKinesis
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service: logs.amazonaws.com
-        Version: "2012-10-17"
-      Path: /
-      Policies:
-        -
-          PolicyName: !Sub '${MicroServiceUniqueName}-ecs-logs-subscription-role'
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Action:
-                  - kinesis:PutRecord
-                Effect: Allow
-                Resource: "*"
-              - Action:
-                - "kms:Encrypt"
-                - "kms:GenerateDataKey"
-                - "kms:Decrypt"
-                Effect: Allow
-                Resource: "*"
 
 Outputs:
   ServiceName:
@@ -1330,7 +1383,7 @@ Outputs:
     Description: ARN of the fatal logs alarm
     Value:
       !If
-        - HasAlarmTopic
+        - HasLogAlarm
         - !GetAtt ErrorFatalLogsMetricAlarm.Arn
         - ''
   AutoScalingAlarmArn:
