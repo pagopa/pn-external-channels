@@ -28,14 +28,6 @@ Parameters:
      Type: String
      Description: 'Url to the SafeStorage microservice'
 
-  ExtChannelWebhookBaseUrl:
-     Type: String
-     Description: 'Url to the ExtChannelWebhookBaseUrl microservice'
-
-  xPagopaExtchServiceId:
-     Type: String
-     Description: 'xPagopaExtchServiceId'
-
   ECSClusterName:
     Type: String
     Description: 'The name of the ECS cluster where the microservice is going to be deployed'
