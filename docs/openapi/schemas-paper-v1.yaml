@@ -151,21 +151,21 @@ components:
             Cap del destinatario; in caso di invio estero diventa facoltativo.
           example: '40050'
           minLength: 0
-          maxLength: 5
+          maxLength: 15
         receiverCity:
           type: string
           description: >-
             Comune del destinatario.
           example: Argelato
           minLength: 0
-          maxLength: 37
+          maxLength: 44
         receiverCity2:
           type: string
           description: >-
             Frazione del destinatario. Potrebbe essere utile se il chiamante non fornisce il cap.
           example: 'fraz. malacappa'
           minLength: 0
-          maxLength: 37
+          maxLength: 44
         receiverPr:
           type: string
           description: >-
