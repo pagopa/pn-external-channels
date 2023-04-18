@@ -18,6 +18,8 @@ public class ProducerHandler {
 
     private final PaperChannelSendClient paperChannelSendClient;
 
+    private final UserAttributesSendClient userAttributesSendClient;
+
 
     public void sendToQueue(NotificationProgress notificationProgress, SingleStatusUpdate eventMessage) {
         if(notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_PAPER_CHANNEL) {
@@ -25,6 +27,11 @@ public class ProducerHandler {
             log.info("[{}] Message to send to paper-channel: {}", notificationProgress.getIun(), event);
             paperChannelSendClient.sendNotification(event);
             log.debug("[{}] Message sent to paper-channel", notificationProgress.getIun());
+        } else if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES) { // per user attributes
+            PnDeliveryPushEvent event = EventMessageUtil.buildDeliveryPushEvent(eventMessage, notificationProgress.getIun());
+            log.info("[{}] Message to send to user-attributes: {}", notificationProgress.getIun(), event);
+            userAttributesSendClient.sendNotification(event);
+            log.debug("[{}] Message sent to user-attributes", notificationProgress.getIun());
         }
         else { //di default scrivo sulla coda di delivery-push
             PnDeliveryPushEvent event = EventMessageUtil.buildDeliveryPushEvent(eventMessage, notificationProgress.getIun());

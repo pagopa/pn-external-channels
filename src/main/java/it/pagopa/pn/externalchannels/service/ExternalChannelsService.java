@@ -58,7 +58,7 @@ public class ExternalChannelsService {
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                digitalNotificationRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME));
@@ -73,7 +73,7 @@ public class ExternalChannelsService {
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
 
@@ -87,7 +87,7 @@ public class ExternalChannelsService {
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
-                digitalCourtesySmsRequest.getReceiverDigitalAddress(), NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH,
+                digitalCourtesySmsRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
 
@@ -331,6 +331,19 @@ public class ExternalChannelsService {
                 .country("Italy")
                 .cap("20121")
                 .pr("MI");
+    }
+
+    private NotificationProgress.PROGRESS_OUTPUT_CHANNEL getOutputQueueFromSource(String source) {
+        if (source == null)
+            return NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH;
+
+        if (source.equals(pnExternalChannelsProperties.getCxIdDeliveryPush()))
+            return NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH;
+
+        if (source.equals(pnExternalChannelsProperties.getCxIdUserAttributes()))
+            return NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
+
+        return NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_DELIVERY_PUSH;
     }
 
 

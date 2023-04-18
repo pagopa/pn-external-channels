@@ -22,6 +22,7 @@ public class NotificationProgress {
 
     public enum PROGRESS_OUTPUT_CHANNEL{
         QUEUE_DELIVERY_PUSH,
+        QUEUE_USER_ATTRIBUTES,
         QUEUE_PAPER_CHANNEL,
         WEBHOOK_EXT_CHANNEL
     }

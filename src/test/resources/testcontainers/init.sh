@@ -1,5 +1,5 @@
 echo "### CREATE QUEUES ###"
-queues="local-ext-channels-to-paper-outputs"
+queues="local-ext-channels-to-paper-outputs local-ext-channels-to-user-attributes-outputs"
 for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo creating queue $qn ...
 
@@ -72,7 +72,12 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
   secretsmanager create-secret \
   --name pn-ExternalChannels-Secrets \
-  --secret-string '[{"ExternalChannelApiKey":"[{\"serviceId\": \"pn-cons-000\", \"apiKey\":\"1234567\"}, {\"serviceId\": \"pn-cons-001\", \"apiKey\":\"98765432\"}]"}]'
+  --secret-string '{"ExternalChannelApiKey":"[{\"serviceId\": \"pn-cons-000\", \"apiKey\":\"1234567\"}, {\"serviceId\": \"pn-cons-001\", \"apiKey\":\"98765432\"}]"}'
+
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+  secretsmanager update-secret \
+  --secret-id  "arn:aws:secretsmanager:us-east-1:000000000000:secret:pn-ExternalChannels-Secrets-HGesrW" \
+  --secret-string '{"ExternalChannelApiKey":"[{\"serviceId\": \"pn-cons-000\", \"apiKey\":\"1234567\"}, {\"serviceId\": \"pn-cons-001\", \"apiKey\":\"98765432\"}]"}'
 
 
 
