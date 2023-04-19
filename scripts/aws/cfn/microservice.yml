@@ -28,14 +28,6 @@ Parameters:
      Type: String
      Description: 'Url to the SafeStorage microservice'
 
-  ExtChannelWebhookBaseUrl:
-     Type: String
-     Description: 'Url to the ExtChannelWebhookBaseUrl microservice'
-
-  xPagopaExtchServiceId:
-     Type: String
-     Description: 'xPagopaExtchServiceId'
-
   ECSClusterName:
     Type: String
     Description: 'The name of the ECS cluster where the microservice is going to be deployed'
@@ -43,6 +35,10 @@ Parameters:
   SubnetsIds:
     Type: String
     Description: 'subnets ids comma separated list. Where to deploy the microservice'
+
+  VpcEgressSubnetsIds:
+    Type: String
+    Description: subnets where to install PN-CORE
 
   VpcId:
     Type: String
@@ -117,7 +113,7 @@ Resources:
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref SubnetsIds
+        Subnets: !Ref VpcEgressSubnetsIds
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
