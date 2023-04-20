@@ -71,6 +71,8 @@ public class EventMessageUtil {
         DiscoveredAddress discoveredAddress = null;
         AtomicReference<Duration> delay = new AtomicReference<>(Duration.ZERO);
         AtomicReference<Duration> delaydoc = new AtomicReference<>(Duration.ZERO);
+        AtomicReference<String> failcause = new AtomicReference<>(null);
+
 
         if (codeTimeToSend.getAdditionalActions() != null) {
             Optional<AdditionalAction> additionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAY).findFirst();
@@ -81,6 +83,11 @@ public class EventMessageUtil {
             Optional<AdditionalAction> additionalActionDOC = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAYDOC).findFirst();
             additionalActionDOC.ifPresent(x -> delaydoc.set(org.springframework.boot.convert.DurationStyle.detectAndParse(x.getInfo().replace("+","-"))));
             log.info("found code with DELAYDOC, using delay={}", delaydoc);
+
+
+            Optional<AdditionalAction> failCauseAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.FAILCAUSE).findFirst();
+            failCauseAction.ifPresent(x -> failcause.set(x.getInfo()));
+            log.info("found code with FAILCAUSE, using fail={}", failcause);
         }
 
 
@@ -96,7 +103,8 @@ public class EventMessageUtil {
                 log.info("found code with discovery enabled, using discovered={}", discoveredAddress.getAddress());
             }
 
-            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), notificationProgress, eventCodeDocumentsDao, safeStorageService);
+            return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), failcause.get(),
+                    notificationProgress, eventCodeDocumentsDao, safeStorageService);
         }
 
         return buildDigitalCourtesyMessage(code, requestId, delay.get());
@@ -182,7 +190,7 @@ public class EventMessageUtil {
                 );
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
         SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
@@ -192,6 +200,7 @@ public class EventMessageUtil {
                                 .productType(productType)
                                 .clientRequestTimeStamp(OffsetDateTime.now())
                                 .attachments(null)
+                                .deliveryFailureCause(failureCause)
                                 .statusCode(code)
                                 .statusDateTime(OffsetDateTime.now().minus(delay))
                                 .statusDescription("Mock status"));
