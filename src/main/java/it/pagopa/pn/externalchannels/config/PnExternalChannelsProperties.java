@@ -38,12 +38,18 @@ public class PnExternalChannelsProperties {
 
     private int cacheMaxSize;
 
+    private String cxIdUserAttributes;
+
+    private String cxIdDeliveryPush;
+
     @Data
     public static class Topics {
 
         private String toDeliveryPush;
 
         private String toPaperChannel;
+
+        private String toUserAttributes;
 
     }
 

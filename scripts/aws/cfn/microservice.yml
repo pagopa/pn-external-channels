@@ -68,6 +68,15 @@ Parameters:
     Type: String
     Description: 'Push external-channel messages from this Queue'
 
+  ExternalChannels2UserAttributesQueueName:
+      Type: String
+      Description: 'external channels to user attributes queue name'
+
+  ExternalChannels2UserAttributesQueueARN:
+    Type: String
+    Description: 'external channels to user attributes queue ARN'
+
+
   ExternalChannels2PaperChannelQueueName:
     Type: String
     Description: 'Push external-channel messages from this Queue to paper channel'
@@ -104,11 +113,12 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
         ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSH=${ExternalChannelsOutputsQueueName}'
-        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
-        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
-        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
-        ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
-        ContainerEnvEntry8: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
+        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOUSERATTRIBUTES=${ExternalChannels2UserAttributesQueueName}'
+        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
+        ContainerEnvEntry7: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
+        ContainerEnvEntry8: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        ContainerEnvEntry9: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
@@ -142,6 +152,7 @@ Resources:
             Resource:
               - !Ref ExternalChannelsOutputsQueueARN
               - !Ref ExternalChannels2PaperChannelQueueARN
+              - !Ref ExternalChannels2UserAttributesQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter
