@@ -40,6 +40,8 @@ nel seguente modo:
   “attempt_1”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
   “attempt_2”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
 
+PS: essendo state modificate le regexp che necessitano di un suffisso corto, le sequence supportano SOLO il suffisso ".it", quindi ad esempio:
+- **@sequence.5s-C000.5s-C001.5s-C005.5s-C003.it** => equivale all’invio ok
 
 ## Come utilizzare il Mock per le notifiche digitali di cortesia via SMS
 Il campo che viene preso in considerazione per l'invio di notifiche di cortesia tramite SMS
