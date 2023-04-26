@@ -27,6 +27,8 @@ public class NotificationProgress {
         WEBHOOK_EXT_CHANNEL
     }
 
+    private String registeredLetterCode;    // usato negli eventi cartacei
+
     private PROGRESS_OUTPUT_CHANNEL output;
 
     private String outputEndpoint;

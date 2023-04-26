@@ -15,6 +15,7 @@ import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.model.*;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -122,12 +123,12 @@ public class EventMessageUtil {
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
                 );
 
-        enrichWithLocation(singleStatusUpdate, iun, safeStorageService);
+        enrichWithLocation(singleStatusUpdate, iun, null, safeStorageService);
         return singleStatusUpdate;
     }
 
 
-    private static void enrichWithLocation(SingleStatusUpdate eventMessage, String iun, SafeStorageService safeStorageService) {
+    private static void enrichWithLocation(SingleStatusUpdate eventMessage, String iun, NotificationProgress notificationProgress, SafeStorageService safeStorageService) {
         String code = eventMessage.getDigitalLegal().getEventCode().name();
         if (EventCodeIntForDigital.isWithAttachment(code)) {
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
@@ -136,7 +137,7 @@ public class EventMessageUtil {
             fileCreationRequest.setStatus(SAVED);
             fileCreationRequest.setContent(buildXml(eventMessage.getDigitalLegal().getRequestId(), code));
             log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
-            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
+            FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
             eventMessage.getDigitalLegal().getGeneratedMessage().setLocation("safestorage://" + response.getKey());
         }
@@ -195,6 +196,7 @@ public class EventMessageUtil {
                 .analogMail(
                         new PaperProgressStatusEvent()
                                 .iun(iun)
+                                .registeredLetterCode(notificationProgress.getRegisteredLetterCode())
                                 .discoveredAddress(discoveredAddress)
                                 .requestId(requestId)
                                 .productType(productType)
@@ -209,7 +211,7 @@ public class EventMessageUtil {
                 .iun(iun)
                 .recipient(notificationProgress.getDestinationAddress())
                 .code(singleStatusUpdate.getAnalogMail().getStatusCode()).build();
-        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, safeStorageService);
+        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, notificationProgress, safeStorageService);
 
         return singleStatusUpdate;
     }
@@ -253,13 +255,17 @@ public class EventMessageUtil {
 
 
 
-    private static void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun, EventCodeMapKey eventCodeMapKey, Duration delaydoc, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
+    private static void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun,
+                                                   EventCodeMapKey eventCodeMapKey, Duration delaydoc,
+                                                   EventCodeDocumentsDao eventCodeDocumentsDao,
+                                                   NotificationProgress notificationProgress,
+                                                   SafeStorageService safeStorageService) {
         Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
         log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
         if(eventCodeList.isPresent()) {
             int id = 1;
             for(String documentType: eventCodeList.get()){
-                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, safeStorageService));
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, notificationProgress, safeStorageService));
             }
             eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
         }
@@ -267,7 +273,7 @@ public class EventMessageUtil {
 
 
 
-    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, SafeStorageService safeStorageService) {
+    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService) {
         try {
             ClassPathResource classPathResource = new ClassPathResource("test.pdf");
             FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
@@ -276,7 +282,7 @@ public class EventMessageUtil {
             fileCreationRequest.setStatus(SAVED);
             fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
-            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
+            FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
             return new AttachmentDetails()
                     .url(SAFE_STORAGE_URL_PREFIX + response.getKey())

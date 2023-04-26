@@ -172,6 +172,7 @@ public class ExternalChannelsService {
         notificationProgress.setOutputEndpoint(outputEndpoint);
         notificationProgress.setOutputServiceId(outputServiceId);
         notificationProgress.setOutputApiKey(outputApikey);
+        notificationProgress.setRegisteredLetterCode(UUID.randomUUID().toString().replace("-",""));
 
         return notificationProgress;
 
