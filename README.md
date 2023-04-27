@@ -40,6 +40,8 @@ nel seguente modo:
   “attempt_1”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
   “attempt_2”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
 
+PS: essendo state modificate le regexp che necessitano di un suffisso corto, le sequence supportano SOLO il suffisso ".it", quindi ad esempio:
+- **@sequence.5s-C000.5s-C001.5s-C005.5s-C003.it** => equivale all’invio ok
 
 ## Come utilizzare il Mock per le notifiche digitali di cortesia via SMS
 Il campo che viene preso in considerazione per l'invio di notifiche di cortesia tramite SMS
@@ -65,9 +67,10 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
       2. <codice>: il codice da spedire, esempio RECAG003D, senza < e >
       3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY,DOC:< doctype >,DELAY:< duration >. 
          1. DISCOVERY invia l'eventuale indirizzo di discovery specificato in @discovered. 
-         2. DOC invia un allegato con documentType=< doctype >. 
-         3. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
-         4. DELAYDOC aggiunge al timestamp dei DOCUMENTI dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
+         2. DOC invia un allegato con documentType=< doctype >.
+         3. FAILCAUSE invia una deliveryFailureCause popolata con il valore specificato
+         4. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
+         5. DELAYDOC aggiunge al timestamp dei DOCUMENTI dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
    2. se contiene anche la stringa **@discovered**, il suo valore viene inviato come indirizzo nel codice con azione DISCOVERY 
 2. Se il campo receiverAddress contiene la stringa **@fail** o **@ok**, cerca nel parameter store MapExternalChannelMockSequence la 
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)

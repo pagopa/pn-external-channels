@@ -40,7 +40,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 				},
 				{
 					\"sequenceName\":\"FAIL_890\",
-					\"sequence\":\"@sequence.5s-CON080.5s-RECAG003A.5s-RECAG003B[DOC:23L;DOC:CAN].5s-RECAG003C\"
+					\"sequence\":\"@sequence.5s-CON080.5s-RECAG003A.5s-RECAG003B[DOC:23L;DOC:CAN].5s-RECAG003C[FAILCAUSE:01]\"
 				},
 				{
            \"sequenceName\":\"FAIL-Discovery_890\",

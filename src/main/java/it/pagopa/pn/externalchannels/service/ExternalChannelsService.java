@@ -172,6 +172,7 @@ public class ExternalChannelsService {
         notificationProgress.setOutputEndpoint(outputEndpoint);
         notificationProgress.setOutputServiceId(outputServiceId);
         notificationProgress.setOutputApiKey(outputApikey);
+        notificationProgress.setRegisteredLetterCode(UUID.randomUUID().toString().replace("-",""));
 
         return notificationProgress;
 
@@ -193,6 +194,10 @@ public class ExternalChannelsService {
 
         String receiverClean = receiverDigitalAddress
                 .replaceFirst(SEQUENCE_REGEXP, "");
+
+        // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
+        if (receiverClean.endsWith(".it"))
+            receiverClean = receiverClean.substring(0, receiverClean.length()-3);
 
         if (receiverClean.contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);

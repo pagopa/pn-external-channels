@@ -4,8 +4,7 @@ import it.pagopa.pn.commons.utils.LogUtils;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.ApiClient;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.api.DefaultApi;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.OperationResultCodeResponse;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
+import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.EnableRetry;
@@ -42,6 +41,36 @@ public class ExtChannelWebhookClientImpl implements ExtChannelWebhookClient {
             return operationResultCodeResponse;
         } catch (Exception e) {
             log.error("Exception invoking sendPaperProgressStatusRequest", e);
+            return null;
+        }
+    }
+
+
+
+    @Override
+    public PreLoadResponse presignedUploadRequest(NotificationProgress notificationProgress, PreLoadRequest preloadRequest){
+        try {
+            ApiClient newApiClient = new ApiClient( restTemplate );
+            newApiClient.setBasePath( notificationProgress.getOutputEndpoint());
+
+            DefaultApi defaultApi = new DefaultApi( newApiClient );
+
+            log.info("Start call presignedUploadRequest - preloadIdx={} endoint={} serviceid={} apikey={}", preloadRequest.getPreloadIdx(),
+                     notificationProgress.getOutputEndpoint(), notificationProgress.getOutputServiceId(), LogUtils.maskGeneric(notificationProgress.getOutputApiKey()));
+            log.info("presignedUploadRequest - preloadRequest={}", preloadRequest);
+
+            InlineObject preloadRequests = new InlineObject();
+            preloadRequests.setPreloads(List.of(preloadRequest));
+
+            InlineResponse200 response200 = defaultApi.presignedUploadRequest(preloadRequests);
+
+            PreLoadResponse preLoadResponse = response200.getPreloads().get(0);
+
+            log.debug("End call presignedUploadRequest preloadIdx={} res={}", preloadRequest.getPreloadIdx(), preLoadResponse.getKey());
+
+            return preLoadResponse;
+        } catch (Exception e) {
+            log.error("Exception invoking presignedUploadRequest", e);
             return null;
         }
     }
