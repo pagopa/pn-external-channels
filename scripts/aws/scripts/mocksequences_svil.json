@@ -1,0 +1,106 @@
+[
+  {
+      "sequenceName": "OK_RS",
+      "sequence": "@sequence.5s-CON080.5s-RECRS001C"
+  },
+  {
+      "sequenceName": "FAIL_RS",
+      "sequence": "@sequence.5s-CON080.5s-RECRS002A[FAILCAUSE:M07].5s-RECRS002B[DOC:Plico].5s-RECRS002C"
+  },
+  {
+      "sequenceName": "OK-Retry_RS",
+      "sequence": "@sequence.5s-CON080.5s-RECRS006[FAILCAUSE:F03]@retry.5s-CON080.5s-RECRS001C"
+  },
+  {
+      "sequenceName": "OK_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+  },
+  {
+      "sequenceName": "FAIL_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M05].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+  },
+  {
+      "sequenceName": "FAIL-Discovery_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+  },
+  {
+      "sequenceName": "OK-Giacenza_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
+  },
+  {
+      "sequenceName": "FAIL-Giacenza_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN004A.5s-RECRN004B[DOC:Plico].5s-RECRN004C"
+  },
+  {
+      "sequenceName": "FAIL-CompiutaGiacenza_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
+  },
+  {
+      "sequenceName": "OK-Retry_AR",
+      "sequence": "@sequence.5s-CON080.5s-RECRN006[FAILCAUSE:F01]@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+  },
+  {
+      "sequenceName": "OK_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+  },
+  {
+      "sequenceName": "OK-PersonaAbilitata_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG002A.5s-RECAG002B[DOC:23L].5s-RECAG002C"
+  },
+  {
+      "sequenceName": "FAIL_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+  },
+  {
+      "sequenceName": "FAIL-Discovery_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+  },
+  {
+      "sequenceName": "OK-Retry_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG004[FAILCAUSE:F02]@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+  },
+  {
+      "sequenceName": "OK-Giacenza-lte10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD;DOC:23L].5s-RECAG005C"
+  },
+  {
+      "sequenceName": "OK-Giacenza-gt10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG005A.5s-RECAG005C"
+  },
+  {
+      "sequenceName": "OK-GiacenzaDelegato-lte10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG006A.5s-RECAG006B[DOC:ARCAD;DOC:23L].5s-RECAG006C"
+  },
+  {
+      "sequenceName": "OK-GiacenzaDelegato-gt10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG006A.5s-RECAG006C"
+  },
+  {
+      "sequenceName": "FAIL-Giacenza-lte10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG007A.5s-RECAG007B[DOC:ARCAD;DOC:Plico].5s-RECAG007C"
+  },
+  {
+      "sequenceName": "FAIL-Giacenza-gt10_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG007A.5s-RECAG007B[DOC:Plico].5s-RECAG007C"
+  },
+  {
+      "sequenceName": "OK-CompiutaGiacenza_890",
+      "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG008A.5s-RECAG008B[DOC:Plico].5s-RECAG008C"
+  },
+  {
+      "sequenceName": "OK_RIS",
+      "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003"
+  },
+  {
+      "sequenceName": "FAIL_RIS",
+      "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI004A.5s-RECRSI004B[DOC:Plico].5s-RECRSI004C"
+  },
+  {
+      "sequenceName": "OK_RIR",
+      "sequence": "@sequence.5s-CON080.5s-RECRI001.5s-RECRI002.5s-RECRI003A.5s-RECRI003B[DOC:AR].5s-RECRI003C"
+  },
+  {
+      "sequenceName": "FAIL_RIR",
+      "sequence": "@sequence.5s-CON080.5s-RECRI001.5s-RECRI002.5s-RECRI004A.5s-RECRI004B[DOC:Plico].5s-RECRI004C"
+  }
+]
