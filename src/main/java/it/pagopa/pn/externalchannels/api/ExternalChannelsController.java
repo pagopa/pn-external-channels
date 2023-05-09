@@ -1,6 +1,5 @@
 package it.pagopa.pn.externalchannels.api;
 
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
@@ -48,6 +47,7 @@ public class ExternalChannelsController implements ExternalChannelsApi {
         String appSourceName = getAppSourceName(exchange);
 
         return digitalNotificationRequest
+                .doOnNext(request -> log.info("Received PEC request with requestBody: {}, headers: {}", request, exchange.getRequest().getHeaders()))
                 .doOnNext(request -> externalChannelsService.sendDigitalLegalMessage(request, appSourceName))
                 .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
                 .log(this.getClass().getName())
@@ -62,6 +62,7 @@ public class ExternalChannelsController implements ExternalChannelsApi {
         String appSourceName = getAppSourceName(exchange);
 
         return digitalCourtesyMailRequest
+                .doOnNext(request -> log.info("Received EMAIL request with requestBody: {}, headers: {}", request, exchange.getRequest().getHeaders()))
                 .doOnNext(request -> externalChannelsService.sendDigitalCourtesyMessage(request, appSourceName))
                 .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
                 .log(this.getClass().getName())
@@ -76,6 +77,7 @@ public class ExternalChannelsController implements ExternalChannelsApi {
         String appSourceName = getAppSourceName(exchange);
 
         return digitalCourtesySmsRequest
+                .doOnNext(request -> log.info("Received SMS request with requestBody: {}, headers: {}", request, exchange.getRequest().getHeaders()))
                 .doOnNext(request -> externalChannelsService.sendCourtesyShortMessage(request, appSourceName))
                 .map(notificationRequest -> Mono.just(ResponseEntity.noContent().build()))
                 .log()
