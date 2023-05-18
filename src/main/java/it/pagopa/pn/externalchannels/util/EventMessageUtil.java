@@ -121,7 +121,8 @@ public class EventMessageUtil {
                                 .status(buildStatus(code))
                                 .eventTimestamp(OffsetDateTime.now().minus(delay))
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
-                );
+                )
+                .eventTimestamp(OffsetDateTime.now());
 
         enrichWithLocation(singleStatusUpdate, iun, null, safeStorageService);
         return singleStatusUpdate;
@@ -188,7 +189,8 @@ public class EventMessageUtil {
                                 .status(buildStatus(code))
                                 .eventTimestamp(OffsetDateTime.now().minus(delay))
                                 .generatedMessage(new DigitalMessageReference().system("mock-system").id(MOCK_PREFIX + UUID.randomUUID()))
-                );
+                )
+                .eventTimestamp(OffsetDateTime.now());
     }
 
     private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
@@ -205,7 +207,8 @@ public class EventMessageUtil {
                                 .deliveryFailureCause(failureCause)
                                 .statusCode(code)
                                 .statusDateTime(OffsetDateTime.now().minus(delay))
-                                .statusDescription("Mock status"));
+                                .statusDescription("Mock status"))
+                .eventTimestamp(OffsetDateTime.now());
 
         EventCodeMapKey eventCodeMapKey = EventCodeMapKey.builder()
                 .iun(iun)
@@ -285,8 +288,9 @@ public class EventMessageUtil {
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
             return new AttachmentDetails()
-                    .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
-                    .id(iun + "DOCMock_"+id + "|" + response.getSha256())
+                    .uri(SAFE_STORAGE_URL_PREFIX + response.getKey())
+                    .id(iun + "DOCMock_"+id)
+                    .sha256(response.getSha256())
                     .documentType(documentType)
                     .date(OffsetDateTime.now().minus(delaydoc));
         } catch (IOException e) {

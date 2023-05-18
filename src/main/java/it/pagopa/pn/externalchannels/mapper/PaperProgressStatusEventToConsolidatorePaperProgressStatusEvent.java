@@ -25,8 +25,8 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
                 paperProgressStatusEventAttachments.setDate(detail.getDate().toInstant());
                 paperProgressStatusEventAttachments.setDocumentType(detail.getDocumentType());
                 paperProgressStatusEventAttachments.setId(Integer.toString(docId++));
-                paperProgressStatusEventAttachments.setUri(detail.getUrl());
-                paperProgressStatusEventAttachments.setSha256(detail.getId().split("\\|")[1]);
+                paperProgressStatusEventAttachments.setUri(detail.getUri());
+                paperProgressStatusEventAttachments.setSha256(detail.getSha256());
                 attachments.add(paperProgressStatusEventAttachments);
             }
             output.setAttachments(attachments);
