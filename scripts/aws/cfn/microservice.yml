@@ -129,7 +129,7 @@ Resources:
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         TaskRoleManagedPolicyArn: !Ref ExternalChannelsMicroserviceTaskManagedPolicy
-        LogAlarmStrategyV1: "-"
+        LogAlarmStrategy: "-"
 
 
   ExternalChannelsMicroserviceTaskManagedPolicy:
