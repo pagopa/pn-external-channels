@@ -153,13 +153,13 @@ public class ExternalChannelsService {
 
         if(requestSearched.isPresent()){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
-        }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failAddress")))
+        }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failalways")))
                 || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
             if(receiverDigitalAddress.contains("discovered")) {
                 notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(""));
             }
-        } else if (receiverDigitalAddress.contains("@sequence")) { //si presuppone che per gli sms non ci sia il caso sequence
+        } else if (receiverDigitalAddress.contains("@sequence")  && (output != userAttributesChannel)) { //si presuppone che per gli sms non ci sia il caso sequence
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId,receiverDigitalAddress);
         } else {
             notificationProgress = buildNotification(okRequests);
