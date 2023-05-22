@@ -17,7 +17,10 @@ nel seguente modo:
 
 1. Per un dominio **@fail.xxxx** viene trattato l’invio come fallimento generico, con sequenza e tempistiche predefinite.
    In particolare, viene inviato il seguente flusso: \
-   `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C007 → dopo 5s invio del C004`.
+   `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C007 → dopo 5s invio del C004`.\
+   un dominio **@fail.xxxx** inserito come pec di piattaforma (pec inserita su userAttributes) non comporterà il fallimento
+   dell'inserimento (sarà valutato come **@ok.xxxx**), il **@fail.xxxx** verrà valutato solo in fase d'invio della notifica, 
+   per testare il fallimento nell'inserimento della pec utilizzare **@failalways.xxxx**
 2. Per un dominio **@xxxx** viene trattato l’invio come successo generico, con sequenza e tempistiche predefinite: \
    `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C005 → dopo 5s invio del C003`.
 3. Per un dominio **@sequence.xxxx** viene trattato l’invio secondo le tempistiche “programmate” dal dominio stesso

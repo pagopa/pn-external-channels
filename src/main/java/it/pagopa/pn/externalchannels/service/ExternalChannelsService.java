@@ -61,7 +61,7 @@ public class ExternalChannelsService {
                 digitalNotificationRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
-                selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME));
+                selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -128,7 +128,7 @@ public class ExternalChannelsService {
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
-                selectSequenceInParameter(address,paperEngageRequest.getProductType(),SEQUENCE_PARAMETER_NAME));
+                selectSequenceInParameter(address,paperEngageRequest.getProductType(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSource)));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -145,6 +145,7 @@ public class ExternalChannelsService {
                                                            String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
         NotificationProgress notificationProgress;
         String iun = requestId;
+        NotificationProgress.PROGRESS_OUTPUT_CHANNEL userAttributesChannel = NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
         if (requestId.contains(".")) {
             iun = requestId.split("\\.")[1];
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
@@ -152,12 +153,13 @@ public class ExternalChannelsService {
 
         if(requestSearched.isPresent()){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
-        }else if (receiverDigitalAddress.contains("@fail") || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
+        }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failalways")))
+                || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
             if(receiverDigitalAddress.contains("discovered")) {
                 notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(""));
             }
-        } else if (receiverDigitalAddress.contains("@sequence")) { //si presuppone che per gli sms non ci sia il caso sequence
+        } else if (receiverDigitalAddress.contains("@sequence")  && (output != userAttributesChannel)) { //si presuppone che per gli sms non ci sia il caso sequence
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId,receiverDigitalAddress);
         } else {
             notificationProgress = buildNotification(okRequests);
@@ -297,14 +299,14 @@ public class ExternalChannelsService {
         return result.charAt(0) == '.' ? result.substring(1) : result;
     }
 
-    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName){
+    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
         Optional<EventCodeSequenceDTO[]> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
         if(sequenceEventCode.isEmpty())return Optional.empty();
         EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
         EventCodeSequenceDTO eventCodeSequenceDTO = null;
         log.info("Search for receiverAddress {}",receiverAddress);
         receiverAddress = receiverAddress.toLowerCase();
-        if(receiverAddress.contains("@fail")){
+        if(receiverAddress.contains("@fail") && (source != NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES )){
             log.info("Enter in fail");
             String search = receiverAddress.substring(receiverAddress.lastIndexOf("fail")).trim();
             search = search.contains(" ")? search.substring(0,search.indexOf(" ")) : search;
