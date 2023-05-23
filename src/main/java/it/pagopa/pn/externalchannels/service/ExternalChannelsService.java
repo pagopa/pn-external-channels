@@ -34,6 +34,14 @@ public class ExternalChannelsService {
 
     private static final List<String> FAIL_REQUEST_CODE_DIGITAL = List.of("C001", "C007", "C004");
 
+    private static final List<String> OK_REQUEST_CODE_MAIL = List.of("M003");
+
+    private static final List<String> FAIL_REQUEST_CODE_MAIL = List.of("M008");
+
+    private static final List<String> OK_REQUEST_CODE_SMS = List.of("S003");
+
+    private static final List<String> FAIL_REQUEST_CODE_SMS = List.of("S008");
+
     private static final List<String> OK_REQUEST_CODE_PAPER = List.of("CON080", "RECRN001A", "RECRN001B", "RECRN001C");
 
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
@@ -75,7 +83,7 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
                 digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
-                digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL, Optional.empty());
+                digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_MAIL, OK_REQUEST_CODE_MAIL, Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -89,7 +97,7 @@ public class ExternalChannelsService {
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
                 digitalCourtesySmsRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
-                digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,Optional.empty());
+                digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_SMS, OK_REQUEST_CODE_SMS,Optional.empty());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
