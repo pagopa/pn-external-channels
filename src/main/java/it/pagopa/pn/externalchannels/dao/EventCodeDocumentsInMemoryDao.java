@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.dao;
 
 import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@ConditionalOnProperty(name = "pn.external-channels.use-dynamodb", havingValue = "false")
 @Slf4j
 public class EventCodeDocumentsInMemoryDao implements EventCodeDocumentsDao{
 

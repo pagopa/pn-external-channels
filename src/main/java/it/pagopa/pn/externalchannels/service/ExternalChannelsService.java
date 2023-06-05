@@ -10,6 +10,7 @@ import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
+import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
@@ -338,8 +339,8 @@ public class ExternalChannelsService {
         return  Arrays.stream(eventCodeSequenceList).filter(e -> e.sequenceName().equalsIgnoreCase(searchName)).findAny().orElse(null);
     }
 
-    private DiscoveredAddress buildMockDiscoveredAddress(String sequence) {
-        return new DiscoveredAddress()
+    private DiscoveredAddressEntity buildMockDiscoveredAddress(String sequence) {
+        return new DiscoveredAddressEntity()
                 .city("Milan")
                 .address("via"+sequence)
                 .name("Milan")

@@ -19,4 +19,6 @@ public interface NotificationProgressDao {
     Integer getNumberOfAttemptsByIun(String iun, String recipient);
 
     void deleteNumberOfAttemptsByIun(String iun, String recipient);
+
+    boolean put(NotificationProgress notificationProgress);
 }

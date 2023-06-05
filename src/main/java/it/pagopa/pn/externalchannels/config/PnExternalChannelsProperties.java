@@ -42,6 +42,10 @@ public class PnExternalChannelsProperties {
 
     private String cxIdDeliveryPush;
 
+    private boolean useDynamodb;
+
+    private String tableName;
+
     @Data
     public static class Topics {
 
