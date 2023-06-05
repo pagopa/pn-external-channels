@@ -4,7 +4,6 @@ import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebhookClient;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.LinkedList;
 
 @Component
 @RequiredArgsConstructor
@@ -64,6 +64,9 @@ public class MessageScheduler {
                     dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
                     log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
                 }
+                else {
+                    dao.put(notificationProgress);
+                }
             }
         }
         catch (Exception e) {
@@ -79,7 +82,7 @@ public class MessageScheduler {
                 : notificationProgress.getLastMessageSentTimestamp();
 
         log.debug("[{}] Compare date- messageTimestamp: {}, now: {}", notificationProgress.getIun(), messageTimestamp, now);
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        CodeTimeToSend codeTimeToSend = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue()).peek();
         log.debug("[{}] CodeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
         log.debug("[{}] CodeTimeToSend time value: {}", notificationProgress.getIun(), codeTimeToSend.getTime());
@@ -112,7 +115,7 @@ public class MessageScheduler {
         log.debug("[{}] Saving historical date in cache", notificationProgress);
         String iun = notificationProgress.getIun();
         String requestId = notificationProgress.getRequestId();
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        CodeTimeToSend codeTimeToSend = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue()).peek();
         assert codeTimeToSend != null;
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }

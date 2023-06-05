@@ -85,6 +85,23 @@ Parameters:
     Type: String
     Description: 'Push external-channel messages from this Queue to paper channel'
 
+  NotificationProgressDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing Notification Progress for mock'
+    Default: 'ExtChannels'
+
+  NotificationProgressDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing Notification Progress for mock'
+
+  UseDynamodb:
+    Type: String
+    Description: 'True if you choose dynamodb as storage, false for in-memory storage'
+    AllowedValues:
+      - true
+      - false
+    Default: 'false'
+
   CacheExpireDays:
     Type: String
     Description: 'Cache expire in days'
@@ -119,6 +136,7 @@ Resources:
         ContainerEnvEntry7: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
         ContainerEnvEntry8: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
         ContainerEnvEntry9: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
+        ContainerEnvEntry10: !Sub 'PN_EXTERNALCHANNELS_USEDYNAMODB=${UseDynamodb}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
@@ -160,4 +178,14 @@ Resources:
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockServiceIdEndpoint'
+          - Effect: Allow
+            Action:
+              - 'dynamodb:GetItem'
+              - 'dynamodb:Query'
+              - 'dynamodb:PutItem'
+              - 'dynamodb:DeleteItem'
+              - 'dynamodb:UpdateItem'
+              - 'dynamodb:Scan'
+            Resource:
+              - !Sub "${NotificationProgressDynamoTableArn}"
 

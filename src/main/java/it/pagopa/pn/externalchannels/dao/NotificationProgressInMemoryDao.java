@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.dao;
 import it.pagopa.pn.externalchannels.dto.IunRecipientPair;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * dalla mappa {@link #database} (ma non dalla mappa {@link #iunNumberOfAttempts}).
  */
 @Repository
+@ConditionalOnProperty(name = "pn.external-channels.use-dynamodb", havingValue = "false")
 @Slf4j
 public class NotificationProgressInMemoryDao implements NotificationProgressDao {
 
@@ -98,6 +100,11 @@ public class NotificationProgressInMemoryDao implements NotificationProgressDao 
         var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
         iunNumberOfAttempts.remove(iunRecipientPair);
         log.info("Deleted NumberOfAttempts of iun: {} of the recipient: {}", iun, recipient);
+    }
+
+    @Override
+    public boolean put(NotificationProgress notificationProgress) {
+        return true;
     }
 
 

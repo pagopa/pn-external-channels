@@ -25,11 +25,31 @@ Conditions:
 
 # dummy (null) resource, never created
 Resources:
-  NullResource:
-    Type: Custom::Null
-    Condition: Never
+  # NotificationProgress DynamoDB Table for mock
+  NotificationProgressTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-ExtChannels'
+      AttributeDefinitions:
+        - AttributeName: "iun"
+          AttributeType: "S"
+        - AttributeName: "destinationAddress"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "iun"
+          KeyType: "HASH"
+        - AttributeName: "destinationAddress"
+          KeyType: "RANGE"
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
 Outputs:
-  Dummy:
-    Description: 'The deploy scripts need at least one Output'
-    Value: 'FooBar'
+  NotificationProgressDynamoTableName:
+    Description: Name of dynamodb table containing Notification Progress for mock
+    Value: !Ref NotificationProgressTable
+  NotificationProgressDynamoTableArn:
+    Description: ARN of dynamodb table containing Notification Progress for mock
+    Value: !Sub '${NotificationProgressTable.Arn}'

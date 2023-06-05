@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,9 +63,11 @@ public class EventMessageUtil {
     private static final String OK_CODE = "C003";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().poll();
+        LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
+        CodeTimeToSend codeTimeToSend = codeTimeToSends.poll();
         log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
+        notificationProgress.setCodeTimeToSendQueue(codeTimeToSends);
 
         String code = codeTimeToSend.getCode();
         String requestId = notificationProgress.getRequestId();
