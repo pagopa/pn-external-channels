@@ -290,12 +290,11 @@ public class ExternalChannelsService {
     //example: MOCK-SEQU-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1
     //example: NRJT-MAWM-HJXN-202209-T-1_digital_delivering_progress_0_attempt_1_sourceSPECIAL_progidx_34
     private String getSequenceOfMacroAttempts(String receiverClean, String requestId) {
-        int attemptIndex = requestId.indexOf("SENTATTEMPTMADE_");
-        String numberOfAttemptsString = requestId.substring(attemptIndex + 16, attemptIndex + 17); //prendo il carattere successivo a attempt_
-        int numberOfAttempts = Integer.parseInt(numberOfAttemptsString);
+        int attemptIndex = requestId.indexOf("ATTEMPT_") + 8;
+        int numberOfAttempts = Integer.parseInt(requestId.substring(attemptIndex, attemptIndex + 1));
 
         String[] attempts = receiverClean.split("attempt");
-        return attempts[numberOfAttempts >= attempts.length ? (attempts.length-1) : numberOfAttempts - 1];
+        return attempts[numberOfAttempts];
     }
 
     private String getSequenceOfRetry(String receiverClean, String requestId) {
