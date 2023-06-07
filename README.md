@@ -40,9 +40,14 @@ nel seguente modo:
 - **@sequence.5s-C008_5s-C008_5s-C008_5s-C000.5s-C001.5s-C005.5s-C003**  => equivale a tornare C008 per tre tentativi di invio
   distinti e poi d'inviare la sequenza dell’ok
 - **@sequence.5s-C000.5s-C001.5s-C005.5s-C008attempt5s-C000.5s-C001.5s-C005.5s-C003** => con la requestId contenente
-  “attempt_1”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
-  “attempt_2”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
+  “attempt_0”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
+  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
+  **@sequence.5s-C000.5s-C001.5s-C005.5s-C008attempt5s-C000.5s-C001.5s-C005.5s-C003attempt5s-C000.5s-C001.5s-C005.5s-C004** => con la requestId contenente
+  “attempt_0”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
+  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003 per il tentativo di repeat 
+-  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C004 per il secondo tentativo effettivo
 
+- 
 PS: essendo state modificate le regexp che necessitano di un suffisso corto, le sequence supportano SOLO il suffisso ".it", quindi ad esempio:
 - **@sequence.5s-C000.5s-C001.5s-C005.5s-C003.it** => equivale all’invio ok
 

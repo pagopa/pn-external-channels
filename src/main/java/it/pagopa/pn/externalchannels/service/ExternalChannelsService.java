@@ -159,7 +159,7 @@ public class ExternalChannelsService {
             iun = requestId.split("\\.")[1];
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
-
+        
         if(requestSearched.isPresent()){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failalways")))
@@ -289,11 +289,24 @@ public class ExternalChannelsService {
 
     //example: MOCK-SEQU-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1
     //example: NRJT-MAWM-HJXN-202209-T-1_digital_delivering_progress_0_attempt_1_sourceSPECIAL_progidx_34
+    // example: SEND_DIGITAL.IUN_TJKQ-NWHM-YQXW-202306-Z-1.RECINDEX_0.SOURCE_GENERAL.REPEAT_true.ATTEMPT_1
     private String getSequenceOfMacroAttempts(String receiverClean, String requestId) {
         int attemptIndex = requestId.indexOf("ATTEMPT_") + 8;
         int numberOfAttempts = Integer.parseInt(requestId.substring(attemptIndex, attemptIndex + 1));
 
         String[] attempts = receiverClean.split("attempt");
+        
+        if(numberOfAttempts == 1 && requestId.contains("REPEAT_false")){
+            //Se si tratta del secondo tentativo effettivo (Non ripetizione del primo)
+            try {
+                //Ed è stata definita una sequenza apposita per la repeat, ritorno la sequenza apposita (la terza)
+                return attempts[numberOfAttempts + 1];
+            } catch (IndexOutOfBoundsException ex){
+                //Se non è stata definita, andrà in IndexOutOfBoundsException e ritorno la seconda sequenza
+                return attempts[numberOfAttempts];
+            }
+        }
+        
         return attempts[numberOfAttempts];
     }
 
