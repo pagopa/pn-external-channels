@@ -159,8 +159,8 @@ public class ExternalChannelsService {
             iun = requestId.split("\\.")[1];
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
-        
-        if(requestSearched.isPresent()){
+
+        if(requestSearched.isPresent() && (output != userAttributesChannel) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failalways")))
                 || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
