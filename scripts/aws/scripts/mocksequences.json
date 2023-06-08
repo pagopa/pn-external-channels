@@ -81,11 +81,11 @@
     },
     {
         "sequenceName": "OK-Giacenza-gt10_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:+10d].5s-RECAG005A[DELAY:+20d].5s-RECAG005C[DELAY:+20d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG005A[DELAY:+20d].5s-RECAG005C[DELAY:+20d]"
     },
     {
         "sequenceName": "OK-Giacenza-gt10-23L_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DELAY:+10d].5s-RECAG005A[DELAY:+20d].5s-RECAG005B[DOC:23L;DELAY:+20d].5s-RECAG005C[DELAY:+20d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD].5s-RECAG005A[DELAY:+20d].5s-RECAG005B[DOC:23L;DELAY:+20d].5s-RECAG005C[DELAY:+20d]"
     },
     {
         "sequenceName": "OK-GiacenzaDelegato-lte10_890",
@@ -93,11 +93,11 @@
     },
     {
         "sequenceName": "OK-GiacenzaDelegato-gt10_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:+10d].5s-RECAG006A[DELAY:+25d].5s-RECAG006C[DELAY:+25d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG006A[DELAY:+25d].5s-RECAG006C[DELAY:+25d]"
     },
     {
         "sequenceName": "OK-GiacenzaDelegato-gt10-23L_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DELAY:+10d].5s-RECAG006A[DELAY:+25d].5s-RECAG006B[DOC:23L;DELAY:+25d].5s-RECAG006C[DELAY:+25d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD].5s-RECAG006A[DELAY:+25d].5s-RECAG006B[DOC:23L;DELAY:+25d].5s-RECAG006C[DELAY:+25d]"
     },
     {
         "sequenceName": "FAIL-Giacenza-lte10_890",
@@ -105,15 +105,15 @@
     },
     {
         "sequenceName": "FAIL-Giacenza-gt10_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:+10d].5s-RECAG007A[DELAY:+30d].5s-RECAG007B[DOC:Plico;DELAY:+30d].5s-RECAG007C[DELAY:+30d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG007A[DELAY:+30d].5s-RECAG007B[DOC:Plico;DELAY:+30d].5s-RECAG007C[DELAY:+30d]"
     },
     {
         "sequenceName": "FAIL-Giacenza-gt10-23L_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DELAY:+10d].5s-RECAG007A[DELAY:+30d].5s-RECAG007B[DOC:23L;DOC:Plico;DELAY:+30d].5s-RECAG007C[DELAY:+30d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD].5s-RECAG007A[DELAY:+30d].5s-RECAG007B[DOC:23L;DOC:Plico;DELAY:+30d].5s-RECAG007C[DELAY:+30d]"
     },
     {
         "sequenceName": "OK-CompiutaGiacenza_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:+10d].5s-RECAG008A[DELAY:+60d].5s-RECAG008B[DOC:Plico;DELAY:+60d].5s-RECAG008C[DELAY:+60d]"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG008A[DELAY:+60d].5s-RECAG008B[DOC:Plico;DELAY:+60d].5s-RECAG008C[DELAY:+60d]"
     },
     {
         "sequenceName": "OK-RECAG013_890",
