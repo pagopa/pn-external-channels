@@ -44,6 +44,14 @@
         "sequence": "@sequence.5s-CON080.5s-RECRN006[FAILCAUSE:F01]@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
     },
     {
+        "sequenceName": "OK-RECRN013_AR",
+        "sequence": "@sequence.5s-CON080.5s-RECRN013@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+    },
+    {
+        "sequenceName": "OK-RECRN015_AR",
+        "sequence": "@sequence.5s-CON080.5s-RECRN015.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    },
+    {
         "sequenceName": "OK_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
     },
@@ -108,6 +116,14 @@
         "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:+10d].5s-RECAG008A[DELAY:+60d].5s-RECAG008B[DOC:Plico;DELAY:+60d].5s-RECAG008C[DELAY:+60d]"
     },
     {
+        "sequenceName": "OK-RECAG013_890",
+        "sequence": "@sequence.5s-CON080.5s-RECAG013@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    },
+    {
+        "sequenceName": "OK-RECAG015_890",
+        "sequence": "@sequence.5s-CON080.5s-RECAG015.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    },
+    {
         "sequenceName": "OK_RIS",
         "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003"
     },
@@ -122,5 +138,9 @@
     {
         "sequenceName": "FAIL_RIR",
         "sequence": "@sequence.5s-CON080.5s-RECRI001.5s-RECRI002.5s-RECRI004A.5s-RECRI004B[DOC:Plico].5s-RECRI004C"
+    },
+    {
+        "sequenceName": "FAIL_Consolidatore-AR",
+        "sequence": "@sequence.5s-CON996"
     }
 ]
