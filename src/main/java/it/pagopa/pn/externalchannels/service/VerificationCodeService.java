@@ -6,6 +6,8 @@ import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class VerificationCodeService {
@@ -17,7 +19,7 @@ public class VerificationCodeService {
 
     public void saveVerificationCode(DigitalNotificationRequest request) {
         if(request.getEventType().equals("VerificationCode")){
-            String verificationCode = getVerificationCode(request.getMessageText());
+            String verificationCode = getVerificationCodeFromHtml(request.getMessageText());
             log.info("Verification code is {} for address {}",verificationCode, request.getReceiverDigitalAddress());
 
             VerificationCodeEntity verificationCodeEntity = new VerificationCodeEntity();
@@ -28,12 +30,16 @@ public class VerificationCodeService {
         }
     }
 
-    private String getVerificationCode(String messageText) {
+    private String getVerificationCodeFromHtml(String messageText) {
         final String inserisciSuSendIlCodiceString = "inserisci su SEND il codice";
         int startIndex = messageText.indexOf(inserisciSuSendIlCodiceString) + inserisciSuSendIlCodiceString.length();
         int endIndex = messageText.indexOf("</h5>");
 
         String subtext = messageText.substring(startIndex , endIndex);
         return subtext.substring(subtext.length() - 5);
+    }
+    
+    public Optional<VerificationCodeEntity> getVerificationCodeFromDb(String digitalAddress){
+        return verificationCodeDao.getVerificationCode(digitalAddress);
     }
 }
