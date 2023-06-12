@@ -51,7 +51,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub '${ProjectName}-VerificationCode'
+      TableName: !Sub '${ProjectName}-VerificationCode2'
       AttributeDefinitions:
         - AttributeName: "pk"
           AttributeType: "S"
