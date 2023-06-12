@@ -53,10 +53,10 @@ Resources:
     Properties:
       TableName: !Sub '${ProjectName}-VerificationCode'
       AttributeDefinitions:
-        - AttributeName: "verificationCode"
+        - AttributeName: "pk"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "verificationCode"
+        - AttributeName: "pk"
           KeyType: "HASH"
       BillingMode: "PAY_PER_REQUEST"
       PointInTimeRecoverySpecification:
