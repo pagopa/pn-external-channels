@@ -49,7 +49,8 @@ public class ExternalChannelsService {
 
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
 
-    private static final String SEQUENCE_REGEXP = ".*@sequence\\.";
+    // ora l'indirizzo può arrivare in maiuscolo
+    private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
 
     private static final String DISCOVERED_MARKER = "@discovered";
 
@@ -171,13 +172,13 @@ public class ExternalChannelsService {
 
         if(requestSearched.isPresent() && (output != userAttributesChannel) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
-        }else if (receiverDigitalAddress.contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.contains("@failalways")))
+        }else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@failalways")))
                 || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
             notificationProgress = buildNotification(failRequests);
-            if(receiverDigitalAddress.contains("discovered")) {
+            if(receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("discovered")) {
                 notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(""));
             }
-        } else if (receiverDigitalAddress.contains("@sequence")  && (output != userAttributesChannel)) { //si presuppone che per gli sms non ci sia il caso sequence
+        } else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@sequence")  && (output != userAttributesChannel)) { //si presuppone che per gli sms non ci sia il caso sequence
             notificationProgress = buildNotificationCustomized(receiverDigitalAddress, iun, requestId,receiverDigitalAddress);
         } else {
             notificationProgress = buildNotification(okRequests);
@@ -216,22 +217,22 @@ public class ExternalChannelsService {
                 .replaceFirst(SEQUENCE_REGEXP, "");
 
         // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
-        if (receiverClean.endsWith(".it"))
+        if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
             receiverClean = receiverClean.substring(0, receiverClean.length()-3);
 
-        if (receiverClean.contains("attempt")) {
+        if (receiverClean.toLowerCase(Locale.ROOT).contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
         }
         if (receiverClean.contains("_")) {
             receiverClean = getSequenceOfMicroAttempts(receiverClean, iun, receiverDigitalAddress);
         }
-        if(receiverClean.contains("retry")) {
+        if(receiverClean.toLowerCase(Locale.ROOT).contains("retry")) {
             receiverClean = getSequenceOfRetry(receiverClean,requestId);
         }
 
         if(receiverClean.contains(DISCOVERED_MARKER)) {
             String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
-            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence");
+            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence").replace(DISCOVERED_MARKER.toUpperCase(Locale.ROOT), "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
