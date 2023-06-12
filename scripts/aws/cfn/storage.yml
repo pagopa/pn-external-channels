@@ -45,6 +45,22 @@ Resources:
       BillingMode: "PAY_PER_REQUEST"
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+  
+  VerificationCodeTable:
+    Type: AWS::DynamoDB::Table
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub '${ProjectName}-VerificationCode'
+      AttributeDefinitions:
+        - AttributeName: "verificationCode"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "verificationCode"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
 Outputs:
   NotificationProgressDynamoTableName:
@@ -53,3 +69,9 @@ Outputs:
   NotificationProgressDynamoTableArn:
     Description: ARN of dynamodb table containing Notification Progress for mock
     Value: !Sub '${NotificationProgressTable.Arn}'
+  VerificationCodeTableDynamoTableName:
+    Description: Name of dynamodb table containing verification code for mock
+    Value: !Ref VerificationCodeTable
+  VerificationCodeTableDynamoTableArn:
+    Description: ARN of dynamodb table containing verification code for mock
+    Value: !Sub '${VerificationCodeTable.Arn}'
