@@ -147,7 +147,7 @@ Resources:
         ContainerEnvEntry9: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
         ContainerEnvEntry10: !Sub 'PN_EXTERNALCHANNELS_USEDYNAMODB=${UseDynamodb}'
         ContainerEnvEntry11: !Sub 'PN_EXTERNALCHANNELS_TABLENAME=${NotificationProgressDynamoTableName}'
-        ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_TABLENAME=${VerificationCodeTableDynamoTableName}'
+        ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_VERIFICATIONCODETABLETABLENAME=${VerificationCodeTableDynamoTableName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
@@ -199,4 +199,4 @@ Resources:
               - 'dynamodb:Scan'
             Resource:
               - !Sub "${NotificationProgressDynamoTableArn}"
-
+              - !Sub "${VerificationCodeTableDynamoTableArn}"
