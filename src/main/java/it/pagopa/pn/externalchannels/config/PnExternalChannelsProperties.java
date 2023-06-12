@@ -46,6 +46,7 @@ public class PnExternalChannelsProperties {
 
     private String tableName;
 
+    private String verificationCodeTableName;
     @Data
     public static class Topics {
 

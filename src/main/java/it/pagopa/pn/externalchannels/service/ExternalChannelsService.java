@@ -24,6 +24,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -62,12 +64,17 @@ public class ExternalChannelsService {
     private final EventCodeDocumentsDao eventCodeDocumentsDao;
 
     private final PnExternalChannelsProperties pnExternalChannelsProperties;
-
+    
+    private final VerificationCodeService verificationCodeService;
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
-
+        NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
+        if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
+            verificationCodeService.saveVerificationCode(digitalNotificationRequest);    
+        }
+        
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
-                digitalNotificationRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
+                digitalNotificationRequest.getReceiverDigitalAddress(), outputChannel,
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
@@ -78,6 +85,8 @@ public class ExternalChannelsService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
     }
+
+    
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
 
