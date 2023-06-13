@@ -20,6 +20,10 @@
         "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M05].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
     },
     {
+        "sequenceName": "FAIL-Irreperibile_AR",
+        "sequence": "@sequence.5s-CON080.5s-RECRN002D[FAILCAUSE:M04].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
+    },
+    {
         "sequenceName": "FAIL-Discovery_AR",
         "sequence": "@sequence.5s-CON080.5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
     },
@@ -44,11 +48,11 @@
         "sequence": "@sequence.5s-CON080.5s-RECRN006[FAILCAUSE:F01]@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
     },
     {
-        "sequenceName": "OK-RECRN013_AR",
+        "sequenceName": "OK-NonRendicontabile_AR",
         "sequence": "@sequence.5s-CON080.5s-RECRN013@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
     },
     {
-        "sequenceName": "OK-RECRN015_AR",
+        "sequenceName": "OK-CausaForzaMaggiore_AR",
         "sequence": "@sequence.5s-CON080.5s-RECRN015.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
     },
     {
@@ -62,6 +66,10 @@
     {
         "sequenceName": "FAIL_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+    },
+    {
+        "sequenceName": "FAIL-Irreperibile_890",
+        "sequence": "@sequence.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
     },
     {
         "sequenceName": "FAIL-Discovery_890",
@@ -116,11 +124,11 @@
         "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:+10d].5s-RECAG011B[DOC:ARCAD;DOC:23L].5s-RECAG008A[DELAY:+60d].5s-RECAG008B[DOC:Plico;DELAY:+60d].5s-RECAG008C[DELAY:+60d]"
     },
     {
-        "sequenceName": "OK-RECAG013_890",
+        "sequenceName": "OK-NonRendicontabile_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG013@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
     },
     {
-        "sequenceName": "OK-RECAG015_890",
+        "sequenceName": "OK-CausaForzaMaggiore_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG015.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
     },
     {
