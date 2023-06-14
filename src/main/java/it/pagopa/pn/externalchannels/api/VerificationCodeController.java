@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("verification-code")
+@RequestMapping("external-channels/verification-code")
 @RequiredArgsConstructor
 public class VerificationCodeController {
 
