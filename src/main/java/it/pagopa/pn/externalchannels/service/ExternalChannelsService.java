@@ -251,7 +251,8 @@ public class ExternalChannelsService {
             if(code.contains("[")) {
                 additionalActions = getAdditionalActionsFromCode(code);
                 List<String> documentList = additionalActions.stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DOC)
-                        .map(AdditionalAction::getInfo).toList();
+                        .map(AdditionalAction::getInfo)
+                        .map(this::formatDocumentCode).toList();
 
                 code = code.substring(0,code.indexOf("["));
                 if (!documentList.isEmpty())
@@ -262,6 +263,20 @@ public class ExternalChannelsService {
         }
 
         return notificationProgress;
+    }
+
+    // corregge i casi in cui il nome del documento arriva in maiuscolo
+    private String formatDocumentCode(String code) {
+        if (code == null)
+            return code;
+
+        if (code.equals("PLICO") )
+            return "Plico";
+
+        if (code.equals("INDAGINE") )
+            return "Indagine";
+
+        return code;
     }
 
     private List<AdditionalAction> getAdditionalActionsFromCode(String code) {
