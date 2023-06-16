@@ -20,6 +20,10 @@
         "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M05].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
     },
     {
+        "sequenceName": "FAIL_IndirizzoInesistenteAR",
+        "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M07].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+    },
+    {
         "sequenceName": "FAIL-Irreperibile_AR",
         "sequence": "@sequence.5s-CON080.5s-RECRN002D[FAILCAUSE:M04].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
     },
@@ -74,6 +78,10 @@
     {
         "sequenceName": "FAIL_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+    },
+    {
+        "sequenceName": "FAIL_IndirizzoInesatto890",
+        "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M06].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
     },
     {
         "sequenceName": "FAIL-Irreperibile_890",
