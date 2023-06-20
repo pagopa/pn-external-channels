@@ -17,7 +17,7 @@
     },
     {
         "sequenceName": "FAIL_AR",
-        "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M05].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+        "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
     },
     {
         "sequenceName": "FAIL_IndirizzoInesistenteAR",
@@ -109,7 +109,7 @@
     },
     {
         "sequenceName": "OK-Giacenza-gt10-23L_890",
-        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG005.5s-RECAG005B[DOC:23L].5s-RECAG005C"
+        "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG005A.5s-RECAG005B[DOC:23L].5s-RECAG005C"
     },
     {
         "sequenceName": "OK-GiacenzaDelegato-lte10_890",
