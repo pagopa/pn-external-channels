@@ -96,6 +96,10 @@
         "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
     },
     {
+        "sequenceName": "FAIL-DiscoveryIrreperibileBadCAP_890",
+        "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY:00100;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
+    },
+    {
         "sequenceName": "OK-Retry_890",
         "sequence": "@sequence.5s-CON080.5s-RECAG004[FAILCAUSE:F02]@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
     },
