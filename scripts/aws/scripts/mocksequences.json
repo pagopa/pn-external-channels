@@ -53,7 +53,7 @@
     },
     {
         "sequenceName": "FAIL-CompiutaGiacenza_AR",
-        "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
+        "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.80s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
     },
     {
         "sequenceName": "OK-Retry_AR",
