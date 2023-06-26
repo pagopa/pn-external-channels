@@ -71,7 +71,7 @@ public class ExternalChannelsService {
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
-            verificationCodeService.saveVerificationCode(digitalNotificationRequest);    
+            verificationCodeService.saveVerificationCode(digitalNotificationRequest.getEventType(), digitalNotificationRequest.getMessageText(), digitalNotificationRequest.getReceiverDigitalAddress());
         }
         
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
@@ -90,6 +90,10 @@ public class ExternalChannelsService {
     
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
+        NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
+        if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
+            verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+        }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
                 digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
