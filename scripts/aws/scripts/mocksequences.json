@@ -166,5 +166,9 @@
     {
         "sequenceName": "FAIL_Consolidatore-AR",
         "sequence": "@sequence.5s-CON996"
+    },
+    {
+        "sequenceName": "FAIL_ConsolidatoreIndirizzo-AR",
+        "sequence": "@sequence.5s-CON997"
     }
 ]
