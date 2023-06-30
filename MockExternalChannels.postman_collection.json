@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e6de02aa-cd4c-4acd-9c4a-d6edc5ca9c17",
+		"_postman_id": "6d8258db-7d2d-4697-9be2-f981ee1eb5b1",
 		"name": "MockExternalChannels",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5442830"
 	},
 	"item": [
 		{
@@ -259,7 +260,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"__AR__\",\n    \"attachmentUrl\": \"https:///mock.com\",\n    \"printType\": \"__BN_FRONTE__\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via Milano@fail\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\"\n\n}",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"AR\",\n    \"attachmentUrl\": \"https:///mock.com\",\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano@fail\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\"\n\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -289,7 +290,7 @@
 					"response": []
 				},
 				{
-					"name": "sendPaperEngageRequest",
+					"name": "FAILWITHDISCOVEREDsendPaperEngageRequest",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -301,7 +302,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"__AR__\",\n    \"attachmentUrl\": \"https:///mock.com\",\n    \"printType\": \"__BN_FRONTE__\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via Milano\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\"\n\n}",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"AR\",\n    \"attachmentUrl\": \"https:///mock.com\",\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano@faildiscovered\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\"\n\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -325,6 +326,187 @@
 									"key": "requestIdx",
 									"value": "request-mock"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OKsendPaperEngageRequest",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"AR\",\n    \"attachmentUrl\": \"https:///mock.com\",\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via Milano\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/external-channel/v1/paper-deliveries-engagements/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channel",
+								"v1",
+								"paper-deliveries-engagements",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CONSOLIDATORE REQUESTS",
+			"item": [
+				{
+					"name": "FAILsendPaperEngageRequest",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-pagopa-extch-service-id",
+								"value": "prova",
+								"type": "default"
+							},
+							{
+								"key": "x-api-key",
+								"value": "123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"890\",\n    \"attachments\": [],\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via @fail\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\",\n    \"iun\": \"VNMD-YGTD-LYTD-202303-N-1\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/external-channel/v1/paper-deliveries-engagements/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channel",
+								"v1",
+								"paper-deliveries-engagements",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FAILWITHDISCOVEREDsendPaperEngageRequest",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-pagopa-extch-service-id",
+								"value": "prova",
+								"type": "default"
+							},
+							{
+								"key": "x-api-key",
+								"value": "123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"890\",\n    \"attachments\": [],\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via @fail-discovery_890\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\",\n    \"iun\": \"VNMD-YGTD-LYTD-202303-N-1\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/external-channel/v1/paper-deliveries-engagements/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channel",
+								"v1",
+								"paper-deliveries-engagements",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OKsendPaperEngageRequest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-pagopa-extch-service-id",
+								"value": "prova",
+								"type": "default"
+							},
+							{
+								"key": "x-api-key",
+								"value": "123",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"requestSenderId\": \"mock-sender\",\n    \"requestPAId\": \"00414580183\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"eventType\": \"mockEventType\",\n    \"productType\": \"AR\",\n    \"attachments\": [],\n    \"printType\": \"BN_FRONTE\",\n    \"receiverName\": \"Rossi Mario\",\n    \"receiverAddress\": \"via Milano\",\n    \"receiverAddressRow2\": \"via Milano\",\n    \"receiverCity\": \"Milano\",\n    \"senderName\": \"Mock Sender\",\n    \"senderAddress\": \"Mock Sender Address\",\n    \"senderCity\": \"Roma\",\n    \"senderPr\": \"RM\",\n    \"iun\": \"VNMD-YGTD-LYTD-202303-N-1\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/piattaforma-notifiche-ingress/v1/paper-deliveries-engagement",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"piattaforma-notifiche-ingress",
+								"v1",
+								"paper-deliveries-engagement"
 							]
 						}
 					},

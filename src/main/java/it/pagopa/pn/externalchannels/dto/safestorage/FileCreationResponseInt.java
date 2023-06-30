@@ -9,4 +9,5 @@ import lombok.*;
 @EqualsAndHashCode
 public class FileCreationResponseInt {
     private String key;
+    private String sha256;
 }

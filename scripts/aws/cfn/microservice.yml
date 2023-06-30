@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Description: 'subnets ids comma separated list. Where to deploy the microservice'
 
+  VpcEgressSubnetsIds:
+    Type: String
+    Description: subnets where to install PN-CORE
+
   VpcId:
     Type: String
     Description: 'VpcId where the microservice is going to be deployed'
@@ -63,6 +67,49 @@ Parameters:
   ExternalChannelsOutputsQueueARN:
     Type: String
     Description: 'Push external-channel messages from this Queue'
+
+  ExternalChannels2UserAttributesQueueName:
+      Type: String
+      Description: 'external channels to user attributes queue name'
+
+  ExternalChannels2UserAttributesQueueARN:
+    Type: String
+    Description: 'external channels to user attributes queue ARN'
+
+
+  ExternalChannels2PaperChannelQueueName:
+    Type: String
+    Description: 'Push external-channel messages from this Queue to paper channel'
+
+  ExternalChannels2PaperChannelQueueARN:
+    Type: String
+    Description: 'Push external-channel messages from this Queue to paper channel'
+
+  NotificationProgressDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing Notification Progress for mock'
+    Default: 'pn-ExtChannels'
+
+  NotificationProgressDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing Notification Progress for mock'
+
+  VerificationCodeTableDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing Verification Code for mock'
+
+  VerificationCodeTableDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing Verification Code for mock'
+    Default: 'pn-VerificationCode'
+    
+  UseDynamodb:
+    Type: String
+    Description: 'True if you choose dynamodb as storage, false for in-memory storage'
+    AllowedValues:
+      - true
+      - false
+    Default: 'false'
 
   CacheExpireDays:
     Type: String
@@ -92,25 +139,31 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
         ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TODELIVERYPUSH=${ExternalChannelsOutputsQueueName}'
-        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
-        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
-        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
-        ContainerEnvEntry7: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
-        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*'
+        ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOUSERATTRIBUTES=${ExternalChannels2UserAttributesQueueName}'
+        ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
+        ContainerEnvEntry7: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'
+        ContainerEnvEntry8: !Sub 'JOB_CRON_EXPRESSION=${JobCronExpression}'
+        ContainerEnvEntry9: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOPAPERCHANNEL=${ExternalChannels2PaperChannelQueueName}'
+        ContainerEnvEntry10: !Sub 'PN_EXTERNALCHANNELS_USEDYNAMODB=${UseDynamodb}'
+        ContainerEnvEntry11: !Sub 'PN_EXTERNALCHANNELS_TABLENAME=${NotificationProgressDynamoTableName}'
+        ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_VERIFICATIONCODETABLENAME=${VerificationCodeTableDynamoTableName}'
+        ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
+        MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
+        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
         ECSClusterName: !Ref ECSClusterName
-        Subnets: !Ref SubnetsIds
+        Subnets: !Ref VpcEgressSubnetsIds
         VpcId: !Ref VpcId
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
+        TaskRoleManagedPolicyArn: !Ref ExternalChannelsMicroserviceTaskManagedPolicy
+        LogAlarmStrategyV1: "-"
 
 
-  ExternalChannelsMicroserviceTaskPolicy:
-    Type: AWS::IAM::Policy
+  ExternalChannelsMicroserviceTaskManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: !Sub '${ProjectName}-external-channels-CustomTaskPolicy'
-      Roles:
-        - !GetAtt ExternalChannelsMicroservice.Outputs.TaskRoleName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -127,4 +180,23 @@ Resources:
               - sqs:SendMessageBatch
             Resource:
               - !Ref ExternalChannelsOutputsQueueARN
-
+              - !Ref ExternalChannels2PaperChannelQueueARN
+              - !Ref ExternalChannels2UserAttributesQueueARN
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:GetParameters
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockServiceIdEndpoint'
+          - Effect: Allow
+            Action:
+              - 'dynamodb:GetItem'
+              - 'dynamodb:Query'
+              - 'dynamodb:PutItem'
+              - 'dynamodb:DeleteItem'
+              - 'dynamodb:UpdateItem'
+              - 'dynamodb:Scan'
+            Resource:
+              - !Sub "${NotificationProgressDynamoTableArn}"
+              - !Sub "${VerificationCodeTableDynamoTableArn}"

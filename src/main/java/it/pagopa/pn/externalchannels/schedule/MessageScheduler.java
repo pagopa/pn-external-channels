@@ -1,61 +1,42 @@
 package it.pagopa.pn.externalchannels.schedule;
 
+import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
-import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
-import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
-import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
-import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
-import it.pagopa.pn.externalchannels.middleware.DeliveryPushSendClient;
-import it.pagopa.pn.externalchannels.model.AttachmentDetails;
+import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
+import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
+import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebhookClient;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import it.pagopa.pn.externalchannels.service.HistoricalRequestService;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
-import it.pagopa.pn.externalchannels.util.EventCodeIntForDigital;
-import it.pagopa.pn.externalchannels.util.EventCodeIntForPaper;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Collection;
-
-import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
+import java.util.LinkedList;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class MessageScheduler {
 
-    public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
-    public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
-    public static final String SAVED = "SAVED";
 
     private final NotificationProgressDao dao;
 
-    private final DeliveryPushSendClient deliveryPushSendClient;
+    private final EventCodeDocumentsDao eventCodeDocumentsDao;
+
+    private final ProducerHandler producerHandler;
 
     private final SafeStorageService safeStorageService;
 
     private final HistoricalRequestService historicalRequestService;
+
+    private final ExtChannelWebhookClient extChannelWebhookClient;
 
 
     @Scheduled(cron = "${job.cron-expression}")
@@ -83,6 +64,9 @@ public class MessageScheduler {
                     dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
                     log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
                 }
+                else {
+                    dao.put(notificationProgress);
+                }
             }
         }
         catch (Exception e) {
@@ -98,7 +82,7 @@ public class MessageScheduler {
                 : notificationProgress.getLastMessageSentTimestamp();
 
         log.debug("[{}] Compare date- messageTimestamp: {}, now: {}", notificationProgress.getIun(), messageTimestamp, now);
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        CodeTimeToSend codeTimeToSend = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue()).peek();
         log.debug("[{}] CodeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
         log.debug("[{}] CodeTimeToSend time value: {}", notificationProgress.getIun(), codeTimeToSend.getTime());
@@ -109,110 +93,32 @@ public class MessageScheduler {
     }
 
     private void sendMessage(NotificationProgress notificationProgress) {
-        String iun = notificationProgress.getIun();
-        String channel = notificationProgress.getChannel();
 
-        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress);
-        if (EventMessageUtil.LEGAL_CHANNELS.contains(channel)) {
-            enrichWithLocation(eventMessage, iun);
+        SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress, safeStorageService, eventCodeDocumentsDao);
+
+
+        if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
+        {
+            extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress, PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
         }
-        else if(EventMessageUtil.AR.equals(channel)) {
-            enrichWithAttachmentDetail(eventMessage, iun);
+        else
+        {
+            producerHandler.sendToQueue(notificationProgress, eventMessage);
         }
-        PnDeliveryPushEvent pnDeliveryPushEvent = EventMessageUtil.buildDeliveryPushEvent(eventMessage, iun);
-        log.info("[{}] Message to send: {}", iun, pnDeliveryPushEvent);
-        deliveryPushSendClient.sendNotification(pnDeliveryPushEvent);
-        log.debug("[{}] Message sent", iun);
 
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }
 
-    private void enrichWithLocation(SingleStatusUpdate eventMessage, String iun) {
-        String code = eventMessage.getDigitalLegal().getEventCode().name();
-        if (EventCodeIntForDigital.isWithAttachment(code)) {
-            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-            fileCreationRequest.setContentType(LEGALFACTS_MEDIATYPE_XML);
-            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
-            fileCreationRequest.setStatus(SAVED);
-            fileCreationRequest.setContent(buildXml(eventMessage.getDigitalLegal().getRequestId(), code));
-            log.info("[{}] Message sending to Safe Storage: {}", iun, fileCreationRequest);
-            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
-            log.info("[{}] Message sent to Safe Storage", iun);
-            eventMessage.getDigitalLegal().getGeneratedMessage().setLocation("safestorage://" + response.getKey());
-        }
-    }
 
-    private byte[] buildXml(String requestId, String code) {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder;
-
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.newDocument();
-            // add elements to Document
-            Element rootElement = doc.createElement("Notifica");
-            rootElement.setAttribute("status", EventCodeIntForDigital.getValueFromEnumString(code));
-            rootElement.setAttribute("requestId", requestId);
-            // append root element to document
-            doc.appendChild(rootElement);
-
-
-            // for output to bytearray-output
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            // to be compliant, prohibit the use of all protocols by external entities:
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            Transformer transformer = transformerFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            DOMSource source = new DOMSource(doc);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-            StreamResult result = new StreamResult(bos);
-            transformer.transform(source, result);
-            byte[] array = bos.toByteArray();
-            log.info("XML creating:\n {}", new String(array));
-            return array;
-        } catch (Exception e) {
-            throw new ExternalChannelsMockException("Error generating XML", e);
-        }
-    }
 
     private void saveHistoricalDateInCache(NotificationProgress notificationProgress) {
         log.debug("[{}] Saving historical date in cache", notificationProgress);
         String iun = notificationProgress.getIun();
         String requestId = notificationProgress.getRequestId();
-        CodeTimeToSend codeTimeToSend = notificationProgress.getCodeTimeToSendQueue().peek();
+        CodeTimeToSend codeTimeToSend = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue()).peek();
         assert codeTimeToSend != null;
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }
 
-    private void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun) {
-        String code = eventMessage.getAnalogMail().getStatusCode();
-        if(EventCodeIntForPaper.isWithAttachment(code)) {
-            eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun));
-        }
-    }
-
-    private AttachmentDetails buildAttachment(String iun) {
-        try {
-            ClassPathResource classPathResource = new ClassPathResource("avvisofronte-retro.pdf");
-            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-            fileCreationRequest.setContentType("application/pdf");
-            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
-            fileCreationRequest.setStatus(SAVED);
-            fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
-            log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
-            FileCreationResponseInt response = safeStorageService.createAndUploadContent(fileCreationRequest);
-            log.info("[{}] Message sent to Safe Storage", iun);
-            return new AttachmentDetails()
-                    .url(SAFE_STORAGE_URL_PREFIX + response.getKey())
-                    .id(iun + "DOCMock")
-                    .documentType("application/pdf")
-                    .date(OffsetDateTime.now());
-        } catch (IOException e) {
-            log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
-            return null;
-        }
-    }
-
+    
 }

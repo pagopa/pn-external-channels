@@ -17,7 +17,10 @@ nel seguente modo:
 
 1. Per un dominio **@fail.xxxx** viene trattato l’invio come fallimento generico, con sequenza e tempistiche predefinite.
    In particolare, viene inviato il seguente flusso: \
-   `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C007 → dopo 5s invio del C004`.
+   `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C007 → dopo 5s invio del C004`.\
+   un dominio **@fail.xxxx** inserito come pec di piattaforma (pec inserita su userAttributes) non comporterà il fallimento
+   dell'inserimento (sarà valutato come **@ok.xxxx**), il **@fail.xxxx** verrà valutato solo in fase d'invio della notifica, 
+   per testare il fallimento nell'inserimento della pec utilizzare **@failalways.xxxx**
 2. Per un dominio **@xxxx** viene trattato l’invio come successo generico, con sequenza e tempistiche predefinite: \
    `dopo 5s invio del C000 -> dopo 5s invio del C001 → dopo 5s invio del C005 → dopo 5s invio del C003`.
 3. Per un dominio **@sequence.xxxx** viene trattato l’invio secondo le tempistiche “programmate” dal dominio stesso
@@ -37,24 +40,16 @@ nel seguente modo:
 - **@sequence.5s-C008_5s-C008_5s-C008_5s-C000.5s-C001.5s-C005.5s-C003**  => equivale a tornare C008 per tre tentativi di invio
   distinti e poi d'inviare la sequenza dell’ok
 - **@sequence.5s-C000.5s-C001.5s-C005.5s-C008attempt5s-C000.5s-C001.5s-C005.5s-C003** => con la requestId contenente
-  “attempt_1”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
-  “attempt_2”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
+  “attempt_0”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
+  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003
+  **@sequence.5s-C000.5s-C001.5s-C005.5s-C008attempt5s-C000.5s-C001.5s-C005.5s-C003attempt5s-C000.5s-C001.5s-C005.5s-C004** => con la requestId contenente
+  “attempt_0”, il mock manderà la sequenza C000.5s-C001.5s-C005.5s-C008. Con la requestId contenente la parola
+  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C003 per il tentativo di repeat 
+-  “attempt_1”, il mock manderà la sequenza 5s-C000.5s-C001.5s-C005.5s-C004 per il secondo tentativo effettivo
 
-## Come utilizzare il Mock per le notifiche cartacee
-Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/external-channel/v1/paper-deliveries-engagements/:requestIdx`)
-è receiverAddress. In particolare:
-
-1. Se il campo receiverAddress contiene la stringa **@fail**, segue il seguente flusso di FALLIMENTO di invio: \
-   `"001", "002", "003", "005" (ogni cinque secondi)`. \
-   In più, se il receiverAddress contiene anche la stringa **discovered**, nell'ultima notifica inviata a DeliveryPush 
-   (quella con codice 005) verrà valorizzato il campo discoveredAddress (corrispondente all'indirizzo del destinatario desunto dalle indagini del personale postale).
-2. Altrimenti, segue il seguente flusso SUCCESSO: \
-   `"001", "002", "003", "004" (ogni cinque secondi)`.
-
-## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
-
-- via Milano@fail => segue il flusso di fallimento
-- via Milano => segue il flusso di successo
+- 
+PS: essendo state modificate le regexp che necessitano di un suffisso corto, le sequence supportano SOLO il suffisso ".it", quindi ad esempio:
+- **@sequence.5s-C000.5s-C001.5s-C005.5s-C003.it** => equivale all’invio ok
 
 ## Come utilizzare il Mock per le notifiche digitali di cortesia via SMS
 Il campo che viene preso in considerazione per l'invio di notifiche di cortesia tramite SMS
@@ -68,6 +63,60 @@ Il campo che viene preso in considerazione per l'invio di notifiche di cortesia 
 
 - 0013333333333 => segue il flusso di fallimento
 - 3333333333333 => segue il flusso di successo
+
+
+## Come utilizzare il Mock per le notifiche cartacee
+Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/external-channel/v1/paper-deliveries-engagements/:requestIdx`)
+è receiverAddress. In particolare:
+
+1. L'indirizzo prevede il passaggio di una @sequence. Per il formato si veda il JSON di esempio, cmq la sintassi è
+   1. **@sequence.5s-<codice>[comandi].10s-<codice>[comandi].20s-<codice>[comandi]** : 
+      1. 5s: durata di attesa prima di invio del codice
+      2. <codice>: il codice da spedire, esempio RECAG003D, senza < e >
+      3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY,DOC:< doctype >,DELAY:< duration >. 
+         1. DISCOVERY invia l'eventuale indirizzo di discovery specificato in @discovered. 
+         2. DOC invia un allegato con documentType=< doctype >.
+         3. FAILCAUSE invia una deliveryFailureCause popolata con il valore specificato
+         4. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
+         5. DELAYDOC aggiunge al timestamp dei DOCUMENTI dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
+   2. se contiene anche la stringa **@discovered**, il suo valore viene inviato come indirizzo nel codice con azione DISCOVERY 
+2. Se il campo receiverAddress contiene la stringa **@fail** o **@ok**, cerca nel parameter store MapExternalChannelMockSequence la 
+   sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
+3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
+
+
+## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
+
+- via Milano @fail => segue il flusso di fallimento per il productType specificato
+- via Milano => segue il flusso di successo per il productType specificato
+
+Per vedere altre stringhe possibili, fare riferimento a mocksequences.json
+
+## Invio cartaceo, simulazione CONSOLIDATORE
+
+Viene esposto anche un servizio di mock del consolidatore. Le regole con cui questo funziona sono le stesse del cartaceo.
+L'endpoint però prevede di inviare gli eventi verso un webhook.
+Tale webhook, può essere più di uno e va selezionato tramite l'header x-pagopa-extch-service-id.
+La risoluzione di che endpoint è, avviente tramite la ricerca di un simple parameter MapExternalChannelMockServiceIdEndpoint, il formato è:
+`[{
+   "serviceId":"pn-cons-000",
+   "endpoint":"http://localhost:8080",
+   "endpointServiceId":"pn-extchannel-000"
+},
+{
+   "serviceId":"pn-cons-001",
+   "endpoint":"http://localhost:8081",
+   "endpointServiceId":"pn-extchannel-001"
+}
+]`
+
+Risolto l'endpoint, nell'invocazione del webhook verrà usato il serviceid specificato e (opzionalmente) una api-key.
+L'api-key viene letta da
+`**arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey**`
+e deve avere il formato json:
+
+`[{"serviceId": "pn-cons-000", "apiKey":"1234567"}, {"serviceId": "pn-cons-001", "apiKey":"98765432"}]`
+
 
 ## Collection Postman
 

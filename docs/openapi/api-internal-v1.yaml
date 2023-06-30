@@ -232,7 +232,7 @@ paths:
     #############################################################################################
     ###                                  PAPER MAIL MESSAGES                                  ###
     #############################################################################################
-  /external-channel/v1/paper-deliveries-engagements/{requestIdx}:
+  /external-channels/v1/paper-deliveries-engagements/{requestIdx}:
     parameters:
       - $ref: '#/components/parameters/requestIdx'  
       - $ref: '#/components/parameters/xPagopaExtchCxId'                            # NO EXTERNAL
@@ -430,6 +430,13 @@ components:
           $ref: '#/components/schemas/LegalMessageSentDetails'
         analogMail:
           $ref: '#/components/schemas/PaperProgressStatusEvent'
+        clientId: 
+          type: string
+        eventTimestamp: 
+          type: string
+          format: date-time
+          description: >-
+            Data di produzione dell'evento.
     
 
     ### - RIFERIMENTI AD ALTRI FILE
