@@ -51,7 +51,7 @@ public class EventMessageUtil {
     public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
     public static final String SAVED = "SAVED";
 
-    private static final String MOCK_PREFIX = "mock-";
+    public static final String MOCK_PREFIX = "mock-";
 
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
