@@ -20,6 +20,10 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
+  AlarmSNSTopicName:
+    Type: String
+    Description: 'Topic alarm'
+
 Conditions:
   Never: !Equals [ 'true', 'false' ]
 
@@ -45,6 +49,20 @@ Resources:
       BillingMode: "PAY_PER_REQUEST"
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+
+  # Internal queues
+  InternalQueue:
+    Type: AWS::CloudFormation::Stack
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: !Sub '${ProjectName}-external_channels_internal'
+        AlarmSNSTopicName: !Ref AlarmSNSTopicName
+        VisibilityTimeout: 60
+        MaxReceiveCount: 10
+        DelaySeconds: 1
   
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
@@ -75,3 +93,20 @@ Outputs:
   VerificationCodeTableDynamoTableArn:
     Description: ARN of dynamodb table containing verification code for mock
     Value: !Sub '${VerificationCodeTable.Arn}'
+
+  # Internal Queue
+  InternalQueueName:
+    Value: !GetAtt InternalQueue.Outputs.QueueName
+    Description: pn-delivery-push actions queue name
+  InternalQueueURL:
+    Value: !GetAtt InternalQueue.Outputs.QueueURL
+    Description: pn-delivery-push actions queue URL
+  InternalQueueARN:
+    Value: !GetAtt InternalQueue.Outputs.QueueARN
+    Description: pn-delivery-push actions queue ARN
+  InternalQueueAlarmARN:
+    Value: !GetAtt InternalQueue.Outputs.SqsDLQAlarmArn
+    Description: pn-delivery-push actions queue dlq alarm queue
+  InternalQueueAgeAlarmARN:
+    Value: !GetAtt InternalQueue.Outputs.SqsAgeAlarmArn
+    Description: pn-delivery-push actions queue age alarm ARN

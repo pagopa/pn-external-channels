@@ -56,6 +56,8 @@ public class PnExternalChannelsProperties {
 
         private String toUserAttributes;
 
+        private String toInternal;
+
     }
 
     @Data

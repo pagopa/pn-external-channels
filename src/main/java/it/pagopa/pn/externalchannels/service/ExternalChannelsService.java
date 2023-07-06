@@ -12,6 +12,7 @@ import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,8 @@ public class ExternalChannelsService {
     
     private final VerificationCodeService verificationCodeService;
 
+    private final InternalSendClient internalSendClient;
+
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
@@ -85,6 +88,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     

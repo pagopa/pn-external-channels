@@ -1,9 +1,10 @@
 package it.pagopa.pn.externalchannels.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.externalchannels.sqs.DeliveryPushProducer;
-import it.pagopa.pn.externalchannels.sqs.PaperChannelProducer;
-import it.pagopa.pn.externalchannels.sqs.UserAttributesProducer;
+import it.pagopa.pn.externalchannels.sqs.producer.DeliveryPushProducer;
+import it.pagopa.pn.externalchannels.sqs.producer.InternalProducer;
+import it.pagopa.pn.externalchannels.sqs.producer.PaperChannelProducer;
+import it.pagopa.pn.externalchannels.sqs.producer.UserAttributesProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,11 @@ public class AppConfig {
     @Bean
     PaperChannelProducer paperChannelProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new PaperChannelProducer(sqs, properties.getTopics().getToPaperChannel(), objMapper);
+    }
+
+    @Bean
+    InternalProducer internalProducer(SqsClient sqs, ObjectMapper objMapper) {
+        return new InternalProducer(sqs, properties.getTopics().getToInternal(), objMapper);
     }
 
 }

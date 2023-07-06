@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.sqs;
+package it.pagopa.pn.externalchannels.sqs.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.api.dto.events.AbstractSqsMomProducer;
