@@ -110,6 +110,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
@@ -124,6 +126,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSource) {
@@ -163,6 +167,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
 
