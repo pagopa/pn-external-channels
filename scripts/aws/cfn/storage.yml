@@ -52,7 +52,7 @@ Resources:
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      QueueName: "pn-external_channels_internal"
+      QueueName: "pn-external_channels_to_internal"
       VisibilityTimeout: 60
       DelaySeconds: 1
   
