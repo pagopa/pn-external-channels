@@ -47,14 +47,14 @@ Resources:
         PointInTimeRecoveryEnabled: true
 
   # Internal queues (creato nel modo standard per compatibilità stack del mock consolidatore)
-  InternalQueue:
-    Type: AWS::SQS::Queue
-    UpdateReplacePolicy: Retain
-    DeletionPolicy: Retain
-    Properties:
-      QueueName: "pn-external_channels_internal"
-      VisibilityTimeout: 60
-      DelaySeconds: 1
+#  InternalQueue:
+#    Type: AWS::SQS::Queue
+#    UpdateReplacePolicy: Retain
+#    DeletionPolicy: Retain
+#    Properties:
+#      QueueName: "pn-external_channels_internal"
+#      VisibilityTimeout: 60
+#      DelaySeconds: 1
   
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
@@ -89,17 +89,17 @@ Outputs:
   # Internal Queue
   InternalQueueURL:
     Description: "URL of new Amazon SQS Queue"
-    Value:
-      Ref: "InternalQueue"
+    Value: "mock"
+#      Ref: "InternalQueue"
   InternalQueueARN:
     Description: "ARN of new AmazonSQS Queue"
-    Value:
-      Fn::GetAtt:
-        - "InternalQueue"
-        - "Arn"
+    Value: "mock"
+#      Fn::GetAtt:
+#        - "InternalQueue"
+#        - "Arn"Arn
   InternalQueueName:
     Description: "Name of new Amazon SQS Queue"
-    Value:
-      Fn::GetAtt:
-        - "InternalQueue"
-        - "QueueName"
+    Value: "mock"
+#      Fn::GetAtt:
+#        - "InternalQueue"
+#        - "QueueName"QueueName
