@@ -96,10 +96,10 @@ Outputs:
     Value:
       Fn::GetAtt:
         - "InternalQueue"
-        - "Arn"Arn
+        - "Arn"
   InternalQueueName:
     Description: "Name of new Amazon SQS Queue"
     Value:
       Fn::GetAtt:
         - "InternalQueue"
-        - "QueueName"QueueName
+        - "QueueName"
