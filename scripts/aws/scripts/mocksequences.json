@@ -170,5 +170,25 @@
     {
         "sequenceName": "FAIL_ConsolidatoreIndirizzo-AR",
         "sequence": "@sequence.5s-CON997"
+    },
+    {
+        "sequenceName": "OK-Retry_890_1MIN",
+        "sequence": "@sequence.60s-CON080.60s-RECAG004[FAILCAUSE:F02]@retry.60s-CON080.60s-RECAG001A.60s-RECAG001B[DOC:23L].60s-RECAG001C"
+    },
+    {
+        "sequenceName": "OK-Giacenza-lte10_890_1MIN",
+        "sequence": "@sequence.60s-CON080.60s-RECAG010.60s-RECAG011A.30s-RECAG012.60s-RECAG005A.60s-RECAG005B[DOC:ARCAD;DOC:23L].60s-RECAG005C"
+    },
+    {
+        "sequenceName": "OK-Giacenza-gt10-23L_890_1MIN",
+        "sequence": "@sequence.60s-CON080.60s-RECAG010.60s-RECAG011A.60s-RECAG012.60s-RECAG011B[DOC:ARCAD].60s-RECAG005A.60s-RECAG005B[DOC:23L].60s-RECAG005C"
+    },
+    {
+        "sequenceName": "OK_890_1MIN",
+        "sequence": "@sequence.60s-CON080.60s-RECAG001A.60s-RECAG001B[DOC:23L].60s-RECAG001C"
+    },
+    {
+        "sequenceName": "OK_AR_1MIN",
+        "sequence": "@sequence.60s-CON080.60s-RECRN001A.60s-RECRN001B[DOC:AR;DELAY:1s].60s-RECRN001C"
     }
 ]
