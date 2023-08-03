@@ -4,6 +4,6 @@
     "CacheMaxSize": "100000",
     "JobCronExpression": "*/5 * * * * *",
     "UseDynamodb": "true",
-    "CacheExpSsmMinutes": 60
+    "CacheExpSsmMinutes": "60"
   }
 }
