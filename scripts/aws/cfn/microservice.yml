@@ -132,9 +132,9 @@ Parameters:
     Description: 'Cron Expression of scheduler to read requests from Database'
 
   CacheExpSsmMinutes:
-    Type: Number
+    Type: String
     Description: 'Cache expiration for SSM Parameter Store'
-    Default: 5
+    Default: "5"
 
 Resources:
 
