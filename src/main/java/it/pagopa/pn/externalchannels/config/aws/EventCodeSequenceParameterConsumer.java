@@ -1,14 +1,17 @@
 package it.pagopa.pn.externalchannels.config.aws;
 
-import it.pagopa.pn.commons.abstractions.impl.AbstractCachedSsmParameterConsumer;
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
+import it.pagopa.pn.externalchannels.util.ParameterizedCachedSsmParameterConsumer;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
-@Component
-public class EventCodeSequenceParameterConsumer extends AbstractCachedSsmParameterConsumer {
+import java.time.Duration;
 
-    public EventCodeSequenceParameterConsumer(SsmClient ssmClient) {
-        super(ssmClient);
+@Component
+public class EventCodeSequenceParameterConsumer extends ParameterizedCachedSsmParameterConsumer {
+
+    public EventCodeSequenceParameterConsumer(SsmClient ssmClient, PnExternalChannelsProperties pnExternalChannelsProperties) {
+        super(ssmClient, Duration.ofMinutes(pnExternalChannelsProperties.getCacheExpSsmMinutes()));
     }
 
 }

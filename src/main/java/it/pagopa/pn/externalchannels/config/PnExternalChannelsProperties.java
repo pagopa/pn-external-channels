@@ -47,6 +47,9 @@ public class PnExternalChannelsProperties {
     private String tableName;
 
     private String verificationCodeTableName;
+
+    private Integer cacheExpSsmMinutes;
+
     @Data
     public static class Topics {
 

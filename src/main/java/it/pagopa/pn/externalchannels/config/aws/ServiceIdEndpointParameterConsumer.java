@@ -1,14 +1,17 @@
 package it.pagopa.pn.externalchannels.config.aws;
 
-import it.pagopa.pn.commons.abstractions.impl.AbstractCachedSsmParameterConsumer;
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
+import it.pagopa.pn.externalchannels.util.ParameterizedCachedSsmParameterConsumer;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
-@Component
-public class ServiceIdEndpointParameterConsumer extends AbstractCachedSsmParameterConsumer {
+import java.time.Duration;
 
-    public ServiceIdEndpointParameterConsumer(SsmClient ssmClient) {
-        super(ssmClient);
+@Component
+public class ServiceIdEndpointParameterConsumer extends ParameterizedCachedSsmParameterConsumer {
+
+    public ServiceIdEndpointParameterConsumer(SsmClient ssmClient, PnExternalChannelsProperties pnExternalChannelsProperties) {
+        super(ssmClient, Duration.ofMinutes(pnExternalChannelsProperties.getCacheExpSsmMinutes()));
     }
 
 }

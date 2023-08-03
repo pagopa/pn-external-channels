@@ -3,6 +3,7 @@
     "CacheExpireDays": "90",
     "CacheMaxSize": "100000",
     "JobCronExpression": "*/5 * * * * *",
-    "UseDynamodb": "true"
+    "UseDynamodb": "true",
+    "CacheExpSsmMinutes": 60
   }
 }
