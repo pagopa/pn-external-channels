@@ -131,6 +131,11 @@ Parameters:
     Type: String
     Description: 'Cron Expression of scheduler to read requests from Database'
 
+  CacheExpSsmMinutes:
+    Type: Number
+    Description: 'Cache expiration for SSM Parameter Store'
+    Default: 5
+
 Resources:
 
   # PN-External-Channels microservice
@@ -158,6 +163,7 @@ Resources:
         ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_VERIFICATIONCODETABLENAME=${VerificationCodeTableDynamoTableName}'
         ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
+        ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
