@@ -1,0 +1,231 @@
+openapi: 3.0.0
+info:
+  title: Input Deduplica API
+  version: 1.0.0
+paths:
+  mockPostel/checkUploadFile:
+    post:
+      operationId: checkUploadFile
+      summary: effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCheckUploadFile'
+      responses:
+        '200':
+          description: Risposta di successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseCheckUploadFile'
+          "400":
+            description: Bad Request
+            content:
+              application/problem+json:
+                schema:
+                  $ref: '#/components/schemas/ResponseCheckUploadFile'
+          "500":
+            description: InternalServerError
+            content:
+              application/problem+json:
+                schema:
+                  $ref: '#/components/schemas/ResponseCheckUploadFile'
+
+  mockPostel/deduplica:
+    post:
+      operationId: deduplica
+      summary: Effettua la deduplicazione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputDeduplica'
+      responses:
+        '200':
+          description: Risposta di successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RisultatoDeduplica'
+          "400":
+            description: Bad Request
+            content:
+              application/problem+json:
+                schema:
+                  $ref: '#/components/schemas/RisultatoDeduplica'
+          "500":
+            description: InternalServerError
+            content:
+              application/problem+json:
+                schema:
+                  $ref: '#/components/schemas/RisultatoDeduplica'
+components:
+  schemas:
+    RequestCheckUploadFile:
+      type: object
+      properties:
+        fileKey:
+          type: string
+    ResponseCheckUploadFile:
+      type: object
+      properties:
+        uri:
+          type: string
+        keyInput:
+          type: string
+        keyOutput:
+          type: string
+    InputDeduplica:
+      type: object
+      properties:
+        configIn:
+          $ref: '#/components/schemas/ConfigIn'
+        masterIn:
+          $ref: '#/components/schemas/MasterIn'
+        slaveIn:
+          $ref: '#/components/schemas/SlaveIn'
+    ConfigIn:
+      type: object
+      properties:
+        authKey:
+          type: string
+        configurazioneDeduplica:
+          type: string
+        configurazioneNorm:
+          type: string
+    MasterIn:
+      type: object
+      properties:
+        id:
+          type: string
+        provincia:
+          type: string
+        cap:
+          type: string
+        localita:
+          type: string
+        localitaAggiuntiva:
+          type: string
+        indirizzo:
+          type: string
+        stato:
+          type: string
+    SlaveIn:
+      type: object
+      properties:
+        id:
+          type: string
+        provincia:
+          type: string
+        cap:
+          type: string
+        localita:
+          type: string
+        localitaAggiuntiva:
+          type: string
+        indirizzo:
+          type: string
+        stato:
+          type: string
+    RisultatoDeduplica:
+      type: object
+      properties:
+        masterOut:
+          $ref: '#/components/schemas/MasterOut'
+        slaveOut:
+          $ref: '#/components/schemas/SlaveOut'
+        risultatoDedu:
+          type: string
+        erroreDedu:
+          type: integer
+        erroreGenerico:
+          type: integer
+    MasterOut:
+      type: object
+      properties:
+        id:
+          type: string
+        nRisultatoNorm:
+          type: integer
+        nErroreNorm:
+          type: integer
+        sSiglaProv:
+          type: string
+        fPostalizzabile:
+          type: string
+        sStatoUff:
+          type: string
+        sStatoAbb:
+          type: string
+        sStatoSpedizione:
+          type: string
+        sComuneUff:
+          type: string
+        sComuneAbb:
+          type: string
+        sComuneSpedizione:
+          type: string
+        sFrazioneUff:
+          type: string
+        sFrazioneAbb:
+          type: string
+        sFrazioneSpedizione:
+          type: string
+        sCivicoAltro:
+          type: string
+        sCap:
+          type: string
+        sPresso:
+          type: string
+        sViaCompletaUff:
+          type: string
+        sViaCompletaAbb:
+          type: string
+        sViaCompletaSpedizione:
+          type: string
+    SlaveOut:
+      type: object
+      properties:
+        id:
+          type: string
+        nRisultatoNorm:
+          type: integer
+        nErroreNorm:
+          type: integer
+        sSiglaProv:
+          type: string
+        fPostalizzabile:
+          type: string
+        sStatoUff:
+          type: string
+        sStatoAbb:
+          type: string
+        sStatoSpedizione:
+          type: string
+        sComuneUff:
+          type: string
+        sComuneAbb:
+          type: string
+        sComuneSpedizione:
+          type: string
+        sFrazioneUff:
+          type: string
+        sFrazioneAbb:
+          type: string
+        sFrazioneSpedizione:
+          type: string
+        sCivicoAltro:
+          type: string
+        sCap:
+          type: string
+        sPresso:
+          type: string
+        sViaCompletaUff:
+          type: string
+        sViaCompletaAbb:
+          type: string
+        sViaCompletaSpedizione:
+          type: string

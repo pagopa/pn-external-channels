@@ -19,4 +19,6 @@ public interface PnSafeStorageClient {
     OperationResultCodeResponse updateFileMetadata(String fileKey, UpdateFileMetadataRequest request);
 
     void uploadContent(FileCreationWithContentRequest fileCreationRequest, FileCreationResponse fileCreationResponse, String sha256);
+
+    public byte[] downloadContent(String downloadUrl);
 }
