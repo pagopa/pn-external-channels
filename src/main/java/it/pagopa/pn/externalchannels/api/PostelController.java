@@ -1,10 +1,10 @@
 package it.pagopa.pn.externalchannels.api;
 
 import it.pagopa.pn.externalchannels.mock_postel.InputDeduplica;
-import it.pagopa.pn.externalchannels.mock_postel.RequestCheckUploadFile;
-import it.pagopa.pn.externalchannels.mock_postel.ResponseCheckUploadFile;
+import it.pagopa.pn.externalchannels.mock_postel.RequestActivatePostel;
+import it.pagopa.pn.externalchannels.mock_postel.ResponseActivatePostel;
 import it.pagopa.pn.externalchannels.mock_postel.RisultatoDeduplica;
-import it.pagopa.pn.externalchannels.service.mockpostel.AddressManagerService;
+import it.pagopa.pn.externalchannels.service.mockpostel.PostelService;
 import it.pagopa.pn.externalchannels.service.mockpostel.DeduplicaService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +15,16 @@ import reactor.core.scheduler.Scheduler;
 
 @RestController
 @lombok.CustomLog
-public class DeduplicaController implements MockPostelApi {
+public class PostelController implements MockPostelApi {
 	private final Scheduler scheduler;
 	private final DeduplicaService deduplicaService;
-	private final AddressManagerService addressManagerService;
-	public DeduplicaController(@Qualifier ("externalChannelsScheduler") Scheduler scheduler,
-							   DeduplicaService deduplicatesService,
-							   AddressManagerService addressManagerService){
+	private final PostelService postelService;
+	public PostelController(@Qualifier ("externalChannelsScheduler") Scheduler scheduler,
+							DeduplicaService deduplicatesService,
+							PostelService postelService){
 		this.scheduler = scheduler;
 		this.deduplicaService = deduplicatesService;
-		this.addressManagerService = addressManagerService;
+		this.postelService = postelService;
 	}
 
 	/**
@@ -34,9 +34,9 @@ public class DeduplicaController implements MockPostelApi {
 	 * @return Risposta di successo (status code 200)
 	 */
 	@Override
-	public Mono<ResponseEntity<ResponseCheckUploadFile>> checkUploadFile(Mono<RequestCheckUploadFile> requestCheckUploadFile, ServerWebExchange exchange){
+	public Mono<ResponseEntity<ResponseActivatePostel>> activatePostel(Mono<RequestActivatePostel> requestCheckUploadFile, ServerWebExchange exchange){
 		return requestCheckUploadFile
-				.flatMap(inputDeduplica -> addressManagerService.checkUploadFile(inputDeduplica)
+				.flatMap(inputDeduplica -> postelService.checkUploadFile(inputDeduplica)
 						.map(deduplicateResponse -> ResponseEntity.ok().body(deduplicateResponse))
 						.publishOn(scheduler));
 	}

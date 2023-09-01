@@ -5,8 +5,8 @@ import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileCreationResponse;
 import it.pagopa.pn.externalchannels.middleware.addressmanager.AddressManagerClient;
 import it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient;
-import it.pagopa.pn.externalchannels.mock_postel.RequestCheckUploadFile;
-import it.pagopa.pn.externalchannels.mock_postel.ResponseCheckUploadFile;
+import it.pagopa.pn.externalchannels.mock_postel.RequestActivatePostel;
+import it.pagopa.pn.externalchannels.mock_postel.ResponseActivatePostel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 import reactor.core.publisher.Mono;
@@ -16,19 +16,19 @@ import java.security.MessageDigest;
 
 @Service
 @lombok.CustomLog
-public class AddressManagerService {
+public class PostelService {
 
     private final PnSafeStorageClient pnSafeStorageClient;
     private final AddressManagerClient addressManagerClient;
 
-    public AddressManagerService(PnSafeStorageClient pnSafeStorageClient,
-                            AddressManagerClient addressManagerClient) {
+    public PostelService(PnSafeStorageClient pnSafeStorageClient,
+                         AddressManagerClient addressManagerClient) {
         this.pnSafeStorageClient = pnSafeStorageClient;
         this.addressManagerClient = addressManagerClient;
     }
 
-    public Mono<ResponseCheckUploadFile> checkUploadFile(RequestCheckUploadFile requestCheckUploadFile){
-        String fileKey = requestCheckUploadFile.getFileKey();
+    public Mono<ResponseActivatePostel> checkUploadFile(RequestActivatePostel requestActivatePostel){
+        String fileKey = requestActivatePostel.getFileKey();
 
         return addressManagerClient.getPresignedURI(fileKey)
                 .flatMap(uriDownload -> {
@@ -47,7 +47,7 @@ public class AddressManagerService {
 
                     return addressManagerClient.performCallback(fileCreationResponse.getKey())
                             .flatMap(keyOutput -> {
-                                ResponseCheckUploadFile response = new ResponseCheckUploadFile();
+                                ResponseActivatePostel response = new ResponseActivatePostel();
                                 response.setKeyInput(fileCreationResponse.getKey());
                                 response.setKeyOutput(keyOutput);
                                 return Mono.just(response);

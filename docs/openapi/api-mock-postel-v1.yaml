@@ -1,39 +1,39 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Input Deduplica API
   version: 1.0.0
 paths:
-  mockPostel/checkUploadFile:
+  /mockPostel/activatePostel:
     post:
-      operationId: checkUploadFile
+      operationId: activatePostel
       summary: effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestCheckUploadFile'
+              $ref: '#/components/schemas/RequestActivatePostel'
       responses:
         '200':
           description: Risposta di successo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseCheckUploadFile'
-          "400":
-            description: Bad Request
-            content:
-              application/problem+json:
-                schema:
-                  $ref: '#/components/schemas/ResponseCheckUploadFile'
-          "500":
-            description: InternalServerError
-            content:
-              application/problem+json:
-                schema:
-                  $ref: '#/components/schemas/ResponseCheckUploadFile'
+                $ref: '#/components/schemas/ResponseActivatePostel'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ResponseActivatePostel'
+        '500':
+          description: InternalServerError
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ResponseActivatePostel'
 
-  mockPostel/deduplica:
+  /mockPostel/deduplica:
     post:
       operationId: deduplica
       summary: Effettua la deduplicazione
@@ -50,26 +50,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RisultatoDeduplica'
-          "400":
-            description: Bad Request
-            content:
-              application/problem+json:
-                schema:
-                  $ref: '#/components/schemas/RisultatoDeduplica'
-          "500":
-            description: InternalServerError
-            content:
-              application/problem+json:
-                schema:
-                  $ref: '#/components/schemas/RisultatoDeduplica'
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/RisultatoDeduplica'
+        '500':
+          description: InternalServerError
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/RisultatoDeduplica'
 components:
   schemas:
-    RequestCheckUploadFile:
+    RequestActivatePostel:
       type: object
       properties:
         fileKey:
           type: string
-    ResponseCheckUploadFile:
+
+    ResponseActivatePostel:
       type: object
       properties:
         uri:
@@ -78,6 +79,7 @@ components:
           type: string
         keyOutput:
           type: string
+
     InputDeduplica:
       type: object
       properties:
@@ -87,6 +89,7 @@ components:
           $ref: '#/components/schemas/MasterIn'
         slaveIn:
           $ref: '#/components/schemas/SlaveIn'
+
     ConfigIn:
       type: object
       properties:
@@ -96,6 +99,7 @@ components:
           type: string
         configurazioneNorm:
           type: string
+
     MasterIn:
       type: object
       properties:
@@ -113,6 +117,7 @@ components:
           type: string
         stato:
           type: string
+
     SlaveIn:
       type: object
       properties:
@@ -130,6 +135,7 @@ components:
           type: string
         stato:
           type: string
+
     RisultatoDeduplica:
       type: object
       properties:
