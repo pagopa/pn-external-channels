@@ -119,6 +119,10 @@ Parameters:
       - false
     Default: 'false'
 
+  ApplicationLoadBalancerDomain:
+    Type: String
+    Description: 'Base URL of the load balancer where the service is going to be reachable'
+
   CacheExpireDays:
     Type: String
     Description: 'Cache expire in days'
@@ -164,6 +168,7 @@ Resources:
         ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
         ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
+        ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'

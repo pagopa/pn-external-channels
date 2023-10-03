@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.middleware.addressmanager;
 
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,33 +13,22 @@ import java.time.Duration;
 @lombok.CustomLog
 public class AddressManagerWebClient extends CommonWebClient {
 
-    private final Integer tcpMaxPoolSize;
-    private final Integer tcpMaxQueuedConnections;
-    private final Integer tcpPendingAcquireTimeout;
-    private final Integer tcpPoolIdleTimeout;
-    private final String basePath;
+    private final PnExternalChannelsProperties properties;
 
-    public AddressManagerWebClient(@Value("${pn.external.channels.webclient.address-manager.tcp-max-poolsize}") Integer tcpMaxPoolSize,
-                           @Value("${pn.external.channels.webclient.address-manager.tcp-max-queued-connections}") Integer tcpMaxQueuedConnections,
-                           @Value("${pn.external.channels.webclient.address-manager.tcp-pending-acquired-timeout}") Integer tcpPendingAcquireTimeout,
-                           @Value("${pn.external.channels.webclient.address-manager.tcp-pool-idle-timeout}") Integer tcpPoolIdleTimeout,
-                           @Value("${pn.external.channels.webclient.address-manager.base-path}") String basePath) {
-        this.tcpMaxPoolSize = tcpMaxPoolSize;
-        this.tcpMaxQueuedConnections = tcpMaxQueuedConnections;
-        this.tcpPendingAcquireTimeout = tcpPendingAcquireTimeout;
-        this.tcpPoolIdleTimeout = tcpPoolIdleTimeout;
-        this.basePath = basePath;
+    public AddressManagerWebClient(PnExternalChannelsProperties properties) {
+        this.properties = properties;
     }
 
     public WebClient init() {
         ConnectionProvider provider = ConnectionProvider.builder("fixed")
-                .maxConnections(tcpMaxPoolSize)
-                .pendingAcquireMaxCount(tcpMaxQueuedConnections)
-                .pendingAcquireTimeout(Duration.ofMillis(tcpPendingAcquireTimeout))
-                .maxIdleTime(Duration.ofMillis(tcpPoolIdleTimeout)).build();
+                .maxConnections(properties.getAddressManager().getTcpMaxPoolsize())
+                .pendingAcquireMaxCount(properties.getAddressManager().getTcpMaxQueuedConnections())
+                .pendingAcquireTimeout(Duration.ofMillis(properties.getAddressManager().getTcpPendingAcquiredTimeout()))
+                .maxIdleTime(Duration.ofMillis(properties.getAddressManager().getTcpPoolIdleTimeout()))
+                .build();
 
         HttpClient httpClient = HttpClient.create(provider);
 
-        return super.initWebClient(httpClient, basePath);
+        return super.initWebClient(httpClient, properties.getAddressManager().getAddressManagerBaseUrl());
     }
 }
