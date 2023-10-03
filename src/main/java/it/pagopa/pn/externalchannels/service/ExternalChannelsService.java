@@ -393,10 +393,10 @@ public class ExternalChannelsService {
 
     private DiscoveredAddressEntity buildMockDiscoveredAddress(String sequence) {
         return new DiscoveredAddressEntity()
-                .city("Milan")
+                .city("Milano")
                 .address("via"+sequence)
-                .name("Milan")
-                .country("Italy")
+                .name("Destinatario")
+                .country("Italia")
                 .cap("20121")
                 .pr("MI");
     }
