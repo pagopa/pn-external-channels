@@ -140,6 +140,10 @@ Parameters:
     Description: 'Cache expiration for SSM Parameter Store'
     Default: "5"
 
+  PnAddressManagerBaseUrl:
+    Type: String
+    Description: 'Address Manager base url'
+
 Resources:
 
   # PN-External-Channels microservice
@@ -168,7 +172,7 @@ Resources:
         ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
         ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
-        ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=http://${ApplicationLoadBalancerDomain}:8080'
+        ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
