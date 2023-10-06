@@ -119,10 +119,6 @@ Parameters:
       - false
     Default: 'false'
 
-  ApplicationLoadBalancerDomain:
-    Type: String
-    Description: 'Base URL of the load balancer where the service is going to be reachable'
-
   CacheExpireDays:
     Type: String
     Description: 'Cache expire in days'
@@ -143,6 +139,7 @@ Parameters:
   PnAddressManagerBaseUrl:
     Type: String
     Description: 'Address Manager base url'
+    Default: ''
 
 Resources:
 
