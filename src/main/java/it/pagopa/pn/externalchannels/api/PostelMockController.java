@@ -4,8 +4,8 @@ import it.pagopa.pn.externalchannels.mock_postel.InputDeduplica;
 import it.pagopa.pn.externalchannels.mock_postel.RequestActivatePostel;
 import it.pagopa.pn.externalchannels.mock_postel.ResponseActivatePostel;
 import it.pagopa.pn.externalchannels.mock_postel.RisultatoDeduplica;
-import it.pagopa.pn.externalchannels.service.mockpostel.PostelService;
 import it.pagopa.pn.externalchannels.service.mockpostel.DeduplicaService;
+import it.pagopa.pn.externalchannels.service.mockpostel.PostelService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,20 +15,21 @@ import reactor.core.scheduler.Scheduler;
 
 @RestController
 @lombok.CustomLog
-public class PostelController implements MockPostelApi {
+public class PostelMockController implements PostelMockApi {
+
 	private final Scheduler scheduler;
-	private final DeduplicaService deduplicaService;
 	private final PostelService postelService;
-	public PostelController(@Qualifier ("externalChannelsScheduler") Scheduler scheduler,
-							DeduplicaService deduplicatesService,
-							PostelService postelService){
+	private final DeduplicaService deduplicaService;
+
+	public PostelMockController(@Qualifier ("externalChannelsScheduler") Scheduler scheduler,
+								PostelService postelService, DeduplicaService deduplicaService){
 		this.scheduler = scheduler;
-		this.deduplicaService = deduplicatesService;
 		this.postelService = postelService;
+		this.deduplicaService = deduplicaService;
 	}
 
 	/**
-	 * POST /mockPostel/checkUploadFile : effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
+	 * POST /activatePostel : effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
 	 *
 	 * @param requestCheckUploadFile  (required)
 	 * @return Risposta di successo (status code 200)
@@ -45,13 +46,13 @@ public class PostelController implements MockPostelApi {
 	/**
 	 * POST /deduplica : Effettua la deduplicazione
 	 *
-	 * @param inputDeduplicates  (required)
+	 * @param inputDeduplica (required)
 	 * @return Risposta di successo (status code 200)
 	 */
 	@Override
-	public Mono<ResponseEntity<RisultatoDeduplica>> deduplica(Mono<InputDeduplica> inputDeduplicates,ServerWebExchange exchange){
-		return inputDeduplicates
-				.flatMap(inputDeduplica -> deduplicaService.deduplica(inputDeduplica)
+	public Mono<ResponseEntity<RisultatoDeduplica>> deduplica(Mono<InputDeduplica> inputDeduplica, ServerWebExchange exchange) {
+		return inputDeduplica
+				.flatMap(input -> deduplicaService.deduplica(input)
 						.map(deduplicateResponse -> ResponseEntity.ok().body(deduplicateResponse))
 						.publishOn(scheduler));
 	}

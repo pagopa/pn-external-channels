@@ -50,16 +50,7 @@ public class PnExternalChannelsProperties {
 
     private Integer cacheExpSsmMinutes;
 
-    private AddressManager addressManager;
-
-    @Data
-    public  static class AddressManager{
-        private Integer tcpMaxPoolsize;
-        private Integer tcpMaxQueuedConnections;
-        private Integer tcpPendingAcquiredTimeout;
-        private Integer tcpPoolIdleTimeout;
-        private String addressManagerBaseUrl;
-    }
+    private String addressManagerBaseUrl;
 
     @Data
     public static class Topics {

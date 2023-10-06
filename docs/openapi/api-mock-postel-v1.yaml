@@ -3,7 +3,7 @@ info:
   title: Input Deduplica API
   version: 1.0.0
 paths:
-  /mockPostel/activatePostel:
+  /postel-mock/activatePostel:
     post:
       operationId: activatePostel
       summary: effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
@@ -33,7 +33,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseActivatePostel'
 
-  /mockPostel/deduplica:
+  /postel-mock/deduplica:
     post:
       operationId: deduplica
       summary: Effettua la deduplicazione
@@ -67,18 +67,25 @@ components:
     RequestActivatePostel:
       type: object
       properties:
-        fileKey:
+        id_lavorazione:
+          type: string
+        input_filekey:
+          type: string
+        url_callback:
+          type: string
+        id_conf:
+          type: boolean
+        token:
           type: string
 
     ResponseActivatePostel:
       type: object
       properties:
-        uri:
+        response:
           type: string
-        keyInput:
-          type: string
-        keyOutput:
-          type: string
+          enum:
+            - OK
+            - KO
 
     InputDeduplica:
       type: object
