@@ -42,7 +42,6 @@ public class UploadDownloadClient {
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(throwable -> log.error("uploadContent PnInternalException uploading file", throwable))
-                .onErrorResume(throwable -> Mono.just("")) //TODO: RIMUOVI DOPO TEST)
                 .map(s -> preLoadResponse);
     }
 }
