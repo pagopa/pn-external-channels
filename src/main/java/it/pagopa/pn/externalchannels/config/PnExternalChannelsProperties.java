@@ -25,7 +25,7 @@ public class PnExternalChannelsProperties {
 
     private Topics topics;
 
-    private String safeStorageBaseUrl = "http://localhost:8120";
+    private String safeStorageBaseUrl;
 
     private String safeStorageCxId;
 

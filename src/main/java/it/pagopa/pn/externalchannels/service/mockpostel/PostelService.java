@@ -82,7 +82,7 @@ public class PostelService {
             log.info("Response KO for requestId [{}]", normalizzazioneRequest.getRequestId());
             return Mono.just(mockPostelUtils.getNormalizzazioneKO(normalizzazioneRequest.getRequestId()));
         } else {
-            log.info("Response KO for requestId [{}]", normalizzazioneRequest.getRequestId());
+            log.info("Response OK for requestId [{}]", normalizzazioneRequest.getRequestId());
             return Mono.just(mockPostelUtils.getNormalizzazioneOK(normalizzazioneRequest.getRequestId()));
         }
     }
