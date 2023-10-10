@@ -25,14 +25,13 @@ public class PnExternalChannelsProperties {
 
     private Topics topics;
 
-    private String safeStorageBaseUrl;
+    private String safeStorageBaseUrl = "http://localhost:8120";
 
     private String safeStorageCxId;
 
     private String safeStorageCxIdUpdatemetadata;
 
     private String extchannelwebhookApiKey;
-
 
     private int cacheExpireAfterDays;
 
@@ -51,6 +50,8 @@ public class PnExternalChannelsProperties {
     private Integer cacheExpSsmMinutes;
 
     private String addressManagerBaseUrl;
+
+    private String addressManagerCxId;
 
     @Data
     public static class Topics {

@@ -35,7 +35,7 @@ public class UploadDownloadClient {
         headers.add("x-amz-meta-secret", preLoadResponse.getSecret());
         ByteArrayResource resource = new ByteArrayResource(content.getBytes());
         assert preLoadResponse.getUrl() != null;
-        return webClient.method(HttpMethod.POST)
+        return webClient.method(HttpMethod.PUT)
                 .uri(preLoadResponse.getUrl())
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .body(BodyInserters.fromResource(resource))

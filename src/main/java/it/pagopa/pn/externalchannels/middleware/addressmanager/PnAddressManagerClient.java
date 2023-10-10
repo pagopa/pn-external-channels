@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface PnAddressManagerClient {
 
-    Mono<PreLoadResponseData> getPresignedURI(String cxId, String xApiKey, PreLoadRequestData preLoadRequest);
+    PreLoadResponseData getPresignedURI(String cxId, String xApiKey, PreLoadRequestData preLoadRequest);
 
-    Mono<OperationResultCodeResponse> performCallback(String cxId, String xApiKey, NormalizerCallbackRequest callbackRequestData);
+    OperationResultCodeResponse performCallback(String cxId, String xApiKey, NormalizerCallbackRequest callbackRequestData);
 }
