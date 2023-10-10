@@ -2,142 +2,137 @@ package it.pagopa.pn.externalchannels.service.mockpostel;
 
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizeRequestPostelInput;
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizedAddress;
-import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
-import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.CallbackRequestData;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.PreLoadRequest;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.PreLoadRequestData;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileCreationResponse;
+import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.*;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileDownloadResponse;
 import it.pagopa.pn.externalchannels.middleware.addressmanager.PnAddressManagerClientImpl;
 import it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient;
-import it.pagopa.pn.externalchannels.mock_postel.RequestActivatePostel;
-import it.pagopa.pn.externalchannels.mock_postel.ResponseActivatePostel;
+import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneRequest;
+import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneResponse;
+import it.pagopa.pn.externalchannels.util.MockPostelUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @lombok.CustomLog
+@Slf4j
 public class PostelService {
     private final PnSafeStorageClient pnSafeStorageClient;
     private final PnAddressManagerClientImpl addressManagerClient;
+    private final UploadDownloadClient uploadDownloadClient;
+    private final MockPostelUtils mockPostelUtils;
     private static final String POSTEL_CXID = "POSTEL";
     private static final String POSTEL_APIKEY = "test";
+    private static final String REQUEST_ID_ERROR_PREFIX = "ACTIVATE_ERROR";
     private final CsvService csvService;
 
+
+    @Qualifier("addressManagerScheduler")
+    private final Scheduler scheduler;
+
     public PostelService(PnSafeStorageClient pnSafeStorageClient,
-                         PnAddressManagerClientImpl addressManagerClient, CsvService csvService) {
+                         PnAddressManagerClientImpl addressManagerClient,
+                         UploadDownloadClient uploadDownloadClient,
+                         MockPostelUtils mockPostelUtils, CsvService csvService,
+                         Scheduler scheduler) {
         this.pnSafeStorageClient = pnSafeStorageClient;
         this.addressManagerClient = addressManagerClient;
+        this.uploadDownloadClient = uploadDownloadClient;
+        this.mockPostelUtils = mockPostelUtils;
         this.csvService = csvService;
+        this.scheduler = scheduler;
     }
 
-    public Mono<ResponseActivatePostel> checkUploadFile(RequestActivatePostel requestActivatePostel) {
-        PreLoadRequestData preLoadRequestData = createPreloadRequest();
-        ResponseActivatePostel responseActivatePostel = new ResponseActivatePostel();
-        return addressManagerClient.getPresignedURI(POSTEL_CXID, POSTEL_APIKEY, preLoadRequestData)
-                .flatMap(uriDownload -> {
-                    FileDownloadResponse file = pnSafeStorageClient.getFile(requestActivatePostel.getInputFilekey(), true);
-                    assert file.getDownload() != null;
-                    byte[] download = pnSafeStorageClient.downloadContent(file.getDownload().getUrl());
+    public Mono<NormalizzazioneResponse> activateNormalizer(NormalizzazioneRequest normalizzazioneRequest) {
+        log.info("start Activate Postel Normalizer");
+        Mono.fromCallable(() -> {
+            byte[] fileInputContent = retrieveDataFromCsv(normalizzazioneRequest.getUri());
+            List<NormalizeRequestPostelInput> normalizeRequestPostelList = csvService.readItemsFromCsv(NormalizeRequestPostelInput.class, fileInputContent, 0);
+            List<NormalizedAddress> normalizedAddressList = checkFirstCapToMockUseCase(normalizeRequestPostelList);
 
-                    List<NormalizeRequestPostelInput> normalizeRequestPostelList = csvService.readItemsFromCsv(NormalizeRequestPostelInput.class, download, 0);
-                    List<NormalizedAddress> normalizedAddressList = checkFirstCapToMockUseCase(normalizeRequestPostelList);
+            if (CollectionUtils.isEmpty(normalizedAddressList)) {
+                return performCallbackWithError(normalizzazioneRequest.getRequestId());
+            } else {
+                String csvContent = csvService.writeItemsOnCsvToString(normalizedAddressList);
+                String sha256 = mockPostelUtils.computeSha256(csvContent.getBytes(StandardCharsets.UTF_8));
+                return performCallback(normalizzazioneRequest.getRequestId(), csvContent, sha256);
+            }
+        }).subscribeOn(scheduler).subscribe();
 
-                    if (normalizedAddressList == null) {
-                        responseActivatePostel.setResponse(ResponseActivatePostel.ResponseEnum.KO);
-                        return Mono.just(responseActivatePostel);
-                    } else if (CollectionUtils.isEmpty(normalizedAddressList)) {
-                        return performCallbackWithError(requestActivatePostel.getIdLavorazione());
-                    }
-                    String csvContent = csvService.writeItemsOnCsvToString(normalizedAddressList);
-                    FileCreationResponse fileCreationResponse = createAndUploadFile(csvContent);
-                    return performCallback(requestActivatePostel.getIdLavorazione(), fileCreationResponse);
-                });
-    }
 
-    private PreLoadRequestData createPreloadRequest() {
-        PreLoadRequestData preLoadRequestData = new PreLoadRequestData();
-        PreLoadRequest preLoadRequest = new PreLoadRequest();
-        preLoadRequest.setContentType("text/csv");
-        preLoadRequest.setPreloadIdx(UUID.randomUUID().toString());
-        preLoadRequest.setSha256(computeSha256("test-sha".getBytes(StandardCharsets.UTF_8)));
-        preLoadRequestData.setPreloads(List.of(preLoadRequest));
-        return preLoadRequestData;
-    }
-
-    private Mono<ResponseActivatePostel> performCallback(String batchId, FileCreationResponse fileCreationResponse) {
-        CallbackRequestData callbackRequestData = new CallbackRequestData();
-        callbackRequestData.setIdLavorazione(batchId);
-        callbackRequestData.setPresignedUrl(fileCreationResponse.getKey());
-        callbackRequestData.setErrMsg(null);
-        callbackRequestData.setIsError(false);
-
-        return addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, callbackRequestData)
-                .flatMap(callbackResponseData -> {
-                    ResponseActivatePostel response = new ResponseActivatePostel();
-                    response.setResponse(ResponseActivatePostel.ResponseEnum.OK);
-                    return Mono.just(response);
-                });
-    }
-
-    private Mono<ResponseActivatePostel> performCallbackWithError(String batchId) {
-        CallbackRequestData callbackRequestData = new CallbackRequestData();
-        callbackRequestData.setIdLavorazione(batchId);
-        callbackRequestData.setErrMsg("ERRORE DURANTE L'ELABORAZIONE DEL FILE DI INPUT");
-        callbackRequestData.setIsError(true);
-
-        return addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, callbackRequestData)
-                .flatMap(callbackResponseData -> {
-                    ResponseActivatePostel response = new ResponseActivatePostel();
-                    response.setResponse(ResponseActivatePostel.ResponseEnum.OK);
-                    return Mono.just(response);
-                });
-    }
-
-    private FileCreationResponse createAndUploadFile(String csvContent) {
-        FileCreationResponse fileCreationResponse = null;
-        if (StringUtils.hasText(csvContent)) {
-            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-            fileCreationRequest.setContent(csvContent.getBytes(StandardCharsets.UTF_8));
-            String sha256 = computeSha256(fileCreationRequest.getContent());
-            fileCreationResponse = pnSafeStorageClient.createFile(fileCreationRequest, sha256);
-            pnSafeStorageClient.uploadContent(fileCreationRequest, fileCreationResponse, sha256);
+        if (normalizzazioneRequest.getRequestId().startsWith(REQUEST_ID_ERROR_PREFIX)) {
+            return Mono.just(mockPostelUtils.getNormalizzazioneKO(normalizzazioneRequest.getRequestId()));
+        } else {
+            return Mono.just(mockPostelUtils.getNormalizzazioneOK(normalizzazioneRequest.getRequestId()));
         }
-        return fileCreationResponse;
+    }
+
+    private byte[] retrieveDataFromCsv(String uri) {
+        FileDownloadResponse file = pnSafeStorageClient.getFile(uri, true);
+        assert file.getDownload() != null;
+        return pnSafeStorageClient.downloadContent(file.getDownload().getUrl());
+    }
+
+    private Mono<Void> performCallback(String batchId, String content, String sha256) {
+        PreLoadRequestData preLoadRequestData = mockPostelUtils.createPreloadRequest(sha256);
+        return addressManagerClient.getPresignedURI(POSTEL_CXID, POSTEL_APIKEY, preLoadRequestData)
+                .flatMap(preLoadResponses -> {
+                    log.info("NORMALIZZAZIONE - getPresignedURI - PreloadResponse size: {}", preLoadResponses.getPreloads().size());
+                    return uploadContent(content, preLoadResponses.getPreloads(), batchId, sha256);
+                }).then();
+
+    }
+
+    public Mono<Void> uploadContent(String content, List<PreLoadResponse> preloadResponseList, String batchId, String sha256) {
+        return Flux.fromIterable(preloadResponseList)
+                .flatMap(preLoadResponse -> uploadDownloadClient.uploadContent(content, preLoadResponse))
+                .doOnNext(preLoadResponse -> log.info("NORMALIZZAZIONE - uploadContent OK"))
+                .flatMap(preLoadResponse -> {
+                    NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponse.getKey(), sha256);
+                    return addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, normalizerCallbackRequestOK);
+                })
+                .map(operationResultCodeResponse -> {
+                    log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
+                            operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+                    return operationResultCodeResponse;
+                }).then();
+    }
+
+    private Mono<Void> performCallbackWithError(String batchId) {
+        NormalizerCallbackRequest callbackRequest = new NormalizerCallbackRequest();
+        callbackRequest.setRequestId(batchId);
+        callbackRequest.setError("E001");
+
+        return addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, callbackRequest)
+                .map(operationResultCodeResponse -> {
+                    log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
+                            operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+                    return operationResultCodeResponse;
+                })
+                .then();
     }
 
     private List<NormalizedAddress> checkFirstCapToMockUseCase(List<NormalizeRequestPostelInput> normalizeRequestPostelInputList) {
         if (!CollectionUtils.isEmpty(normalizeRequestPostelInputList) && StringUtils.hasText(normalizeRequestPostelInputList.get(0).getCap())) {
+
             return switch (normalizeRequestPostelInputList.get(0).getCap()) {
-                case "00000" ->
-                    //ERRORE POSTEL ACTIVATE
-                        null;
-                case "11111" ->
-                    //INDIRIZZO POSTALIZZABILE CORRELATION NON COMPLETO
-                        retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, false);
-                case "22222" ->
-                    //INDIRIZZO NON POSTALIZZABILE
-                        retrieveNormalizedAddress(normalizeRequestPostelInputList, 0, true);
-                case "33333" ->
-                    //ERRORE IN CALLBACK RESPONSE
-                        Collections.emptyList();
-                default ->
-                    //INDIRIZZO POSTALIZZABILE
-                        retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true);
+                case "11111" -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, false); //INDIRIZZO POSTALIZZABILE CORRELATION NON COMPLETO
+                case "22222" -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 0, true); //INDIRIZZO NON POSTALIZZABILE
+                case "33333" -> Collections.emptyList(); //ERRORE IN CALLBACK RESPONSE
+                default -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true); //INDIRIZZO POSTALIZZABILE
             };
         } else {
-            //INDIRIZZO ESTERO (NO CAP) POSTALIZZABILE
-            return retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true);
+            return retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true); //INDIRIZZO ESTERO (NO CAP) POSTALIZZABILE
         }
     }
 
@@ -179,19 +174,5 @@ public class PostelService {
         return normalizedAddressList;
     }
 
-    private String computeSha256(byte[] content) {
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedHash = digest.digest(content);
-            return bytesToBase64(encodedHash);
-        } catch (Exception e) {
-            throw new ExternalChannelsMockException("Cannot compute sha256", e);
-        }
-    }
-
-    private static String bytesToBase64(byte[] hash) {
-        return Base64Utils.encodeToString(hash);
-    }
 
 }

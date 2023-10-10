@@ -11,19 +11,20 @@ import reactor.core.publisher.Mono;
 @Service
 @lombok.CustomLog
 public class DeduplicaService {
-	public Mono<RisultatoDeduplica> deduplica (InputDeduplica request) {
-		MasterIn masterIn = request.getMasterIn();
-		SlaveIn slaveIn = request.getSlaveIn();
+	public Mono<DeduplicaResponse> deduplica (DeduplicaRequest request) {
+		AddressIn masterIn = request.getMasterIn();
+		AddressIn slaveIn = request.getSlaveIn();
 		if (areFieldsBlank(masterIn) || areFieldsBlank(slaveIn)) {
-			return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Valorizzare i campi"));
+			log.error("Valorizzare tutti i campi richiesti");
+			return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valorizzare i campi"));
 		}
-		RisultatoDeduplica risultatoDeduplica;
+		DeduplicaResponse risultatoDeduplica;
 		if (!StringUtils.isBlank(masterIn.getCap())) {
 			switch (masterIn.getCap()) {
 				case "00000":
 					risultatoDeduplica = createRisultatoDeduplica(masterIn, slaveIn, 0, 1);
 					break;
-				case "55555":
+				case "00500":
 					return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"));
 				default:
 					risultatoDeduplica = createRisultatoDeduplica(masterIn, slaveIn, 1, null);
@@ -43,7 +44,7 @@ public class DeduplicaService {
 		return Mono.just(risultatoDeduplica);
 	}
 
-	private boolean areFieldsBlank (MasterIn masterIn) {
+	private boolean areFieldsBlank (AddressIn masterIn) {
 		if (StringUtils.isBlank(masterIn.getStato())
 				|| masterIn.getStato().toUpperCase().trim().startsWith("ITAL")) {
 			return StringUtils.isBlank(masterIn.getCap())
@@ -57,21 +58,7 @@ public class DeduplicaService {
 				|| StringUtils.isBlank(masterIn.getStato());
 	}
 
-	private boolean areFieldsBlank (SlaveIn slaveIn) {
-		if (StringUtils.isBlank(slaveIn.getStato())
-				|| slaveIn.getStato().toUpperCase().trim().startsWith("ITAL")) {
-			return StringUtils.isBlank(slaveIn.getCap())
-					|| StringUtils.isBlank(slaveIn.getIndirizzo())
-					|| StringUtils.isBlank(slaveIn.getLocalita())
-					|| StringUtils.isBlank(slaveIn.getProvincia());
-		}
-		return StringUtils.isBlank(slaveIn.getIndirizzo())
-				|| StringUtils.isBlank(slaveIn.getLocalita())
-				|| StringUtils.isBlank(slaveIn.getProvincia())
-				|| StringUtils.isBlank(slaveIn.getStato());
-	}
-
-	private void convertFieldsToUpperCase (MasterIn masterIn) {
+	private void convertFieldsToUpperCase (AddressIn masterIn) {
 		if (!StringUtils.isBlank(masterIn.getCap())) {
 			masterIn.setCap(masterIn.getCap().toUpperCase());
 		}
@@ -83,60 +70,33 @@ public class DeduplicaService {
 			masterIn.setStato(masterIn.getStato().toUpperCase());
 		}
 	}
-	private void convertFieldsToUpperCase (SlaveIn slaveIn) {
-		if (!StringUtils.isBlank(slaveIn.getCap())) {
-			slaveIn.setCap(slaveIn.getCap().toUpperCase());
-		}
-		slaveIn.setIndirizzo(slaveIn.getIndirizzo().toUpperCase());
-		slaveIn.setLocalita(slaveIn.getLocalita().toUpperCase());
-		slaveIn.setProvincia(slaveIn.getProvincia().toUpperCase());
-		slaveIn.setLocalitaAggiuntiva(slaveIn.getLocalitaAggiuntiva().toUpperCase());
-		if (!StringUtils.isBlank(slaveIn.getStato())) {
-			slaveIn.setStato(slaveIn.getStato().toUpperCase());
-		}
-	}
-	private RisultatoDeduplica createRisultatoDeduplica (MasterIn masterIn, SlaveIn slaveIn, Integer postalizzabile, Integer error) {
-		RisultatoDeduplica risultatoDeduplica = new RisultatoDeduplica();
-		MasterOut masterOut = getMasterOut(masterIn, postalizzabile, error);
-		SlaveOut slaveOut = getSlaveOut(slaveIn, postalizzabile, error);
+
+	private DeduplicaResponse createRisultatoDeduplica (AddressIn masterIn, AddressIn slaveIn, Integer postalizzabile, Integer error) {
+		DeduplicaResponse risultatoDeduplica = new DeduplicaResponse();
+		AddressOut masterOut = getAddressOut(masterIn, postalizzabile, error);
+		AddressOut slaveOut = getAddressOut(slaveIn, postalizzabile, error);
 		risultatoDeduplica.setMasterOut(masterOut);
 		risultatoDeduplica.setSlaveOut(slaveOut);
 		return risultatoDeduplica;
 	}
 
 	@NotNull
-	private static SlaveOut getSlaveOut (SlaveIn slaveIn, Integer postalizzabile, Integer error) {
-		SlaveOut slaveOut = new SlaveOut();
-		slaveOut.setnRisultatoNorm(1);
-		slaveOut.setfPostalizzabile(String.valueOf(postalizzabile));
-		slaveOut.setnErroreNorm(error);
-		slaveOut.setsCap(slaveIn.getCap());
-		slaveOut.setsViaCompletaSpedizione(slaveIn.getIndirizzo());
-		slaveOut.setsStatoUff(slaveIn.getStato());
-		slaveOut.setsComuneSpedizione(slaveIn.getLocalita());
-		slaveOut.setsFrazioneSpedizione(slaveIn.getLocalitaAggiuntiva());
-		slaveOut.setsCivicoAltro("address2");
-		slaveOut.setsSiglaProv(slaveIn.getProvincia());
-		return slaveOut;
+	private static AddressOut getAddressOut(AddressIn masterIn, Integer postalizzabile, Integer error) {
+		AddressOut addressOut = new AddressOut();
+		addressOut.setnRisultatoNorm(1);
+		addressOut.setfPostalizzabile(String.valueOf(postalizzabile));
+		addressOut.setnErroreNorm(error);
+		addressOut.setsCap(masterIn.getCap());
+		addressOut.setsViaCompletaSpedizione(masterIn.getIndirizzo());
+		addressOut.setsStatoUff(masterIn.getStato());
+		addressOut.setsComuneSpedizione(masterIn.getLocalita());
+		addressOut.setsFrazioneSpedizione(masterIn.getLocalitaAggiuntiva());
+		addressOut.setsCivicoAltro("address2");
+		addressOut.setsSiglaProv(masterIn.getProvincia());
+		return addressOut;
 	}
 
-	@NotNull
-	private static MasterOut getMasterOut (MasterIn masterIn, Integer postalizzabile, Integer error) {
-		MasterOut masterOut = new MasterOut();
-		masterOut.setnRisultatoNorm(1);
-		masterOut.setfPostalizzabile(String.valueOf(postalizzabile));
-		masterOut.setnErroreNorm(error);
-		masterOut.setsCap(masterIn.getCap());
-		masterOut.setsViaCompletaSpedizione(masterIn.getIndirizzo());
-		masterOut.setsStatoUff(masterIn.getStato());
-		masterOut.setsComuneSpedizione(masterIn.getLocalita());
-		masterOut.setsFrazioneSpedizione(masterIn.getLocalitaAggiuntiva());
-		masterOut.setsCivicoAltro("address2");
-		masterOut.setsSiglaProv(masterIn.getProvincia());
-		return masterOut;
-	}
-
-	private boolean areFieldsEqual (MasterIn masterIn, SlaveIn slaveIn) {
+	private boolean areFieldsEqual (AddressIn masterIn, AddressIn slaveIn) {
 		return masterIn.getCap().equals(slaveIn.getCap())
 				&& masterIn.getIndirizzo().equals(slaveIn.getIndirizzo())
 				&& masterIn.getLocalita().equals(slaveIn.getLocalita())
@@ -145,12 +105,12 @@ public class DeduplicaService {
 				&& masterIn.getStato().equals(slaveIn.getStato());
 	}
 
-	private void setSuccessfulResult (RisultatoDeduplica risultatoDeduplica) {
+	private void setSuccessfulResult (DeduplicaResponse risultatoDeduplica) {
 		risultatoDeduplica.setRisultatoDedu("1");
 		risultatoDeduplica.setErroreDedu(0);
 	}
 
-	private void setFailedResult (RisultatoDeduplica risultatoDeduplica) {
+	private void setFailedResult (DeduplicaResponse risultatoDeduplica) {
 		risultatoDeduplica.setRisultatoDedu("0");
 		risultatoDeduplica.setErroreDedu(1);
 	}

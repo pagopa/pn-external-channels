@@ -20,5 +20,5 @@ public interface PnSafeStorageClient {
 
     void uploadContent(FileCreationWithContentRequest fileCreationRequest, FileCreationResponse fileCreationResponse, String sha256);
 
-    public byte[] downloadContent(String downloadUrl);
+    byte[] downloadContent(String downloadUrl);
 }

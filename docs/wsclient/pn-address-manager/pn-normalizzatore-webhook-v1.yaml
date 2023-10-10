@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
   title: Normalizzatore ingress API.
   description: >-
@@ -13,42 +13,75 @@ tags:
     description: API esposte verso il normalizzatore
 
 paths:
-  /normalizzatore-ingress/v1/callback:
+  /normalizzatore-ingress/v1/normalizer-callback:
     post:
       summary: Richiesta di callback di avvenuta normalizzazione della lista di address in ingresso
       description: |-
         Operazione che avvisa pn-address-manager dell'avvenuta normalizzazione di una lista di address.
+        Il file di output conterrà i seguenti campi, gestiti con logica posizionale:
+        
+          - IDCODICECLIENTE : l’Id del cliente;
+          - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1 : normalizzato,2,3,4,5);
+          - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);
+          - NERRORENORM : Codice di errore;
+          - SSIGLAPROV : Sigla provincia normalizzata;
+          - SSTATOUFF : Stato normalizzato (Valorizzato ITALIA, REPUBBLICA DI SAN MARINO e CITTA’ DEL VATICANO + TUTTI GLI STATI ESTERI);
+          - SSTATOABB : Stato abbreviato normalizzato;
+          - SSTATOSPEDIZIONE : Stato di Spedizione;
+          - SCOMUNEUFF : Comune normalizzato;
+          - SCOMUNEABB : Comune Abbreviato normalizzato;
+          - SCOMUNESPEDIZIONE : Comune di spedizione;
+          - SFRAZIONEUFF : Frazione normalizzata;
+          - SFRAZIONEABB : Frazione Abbreviata normalizzata;
+          - SFRAZIONESPEDIZIONE : Frazione di Spedizione;
+          - SCIVICOALTRO : altri elementi del civico (interno, piano, scala, palazzo …) - VA IN INDIRIZZO 2
+          - SCAP : cap normalizzato;
+          - SPRESSO : informazioni di presso e casella postale (C.P 123, Presso sig. rossi …) -  VA IN NAME 2;
+          - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;
+          - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;
+          - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
+
       tags:
         - Normalizzatore
       parameters:
         - $ref: '#/components/parameters/xPagopaAddrManCxId'
         - $ref: '#/components/parameters/xPagopaAddrManApiKey'
-      operationId: callbackNormalizedAddress
+      operationId: normalizerCallback
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CallbackRequestData'
+              $ref: '#/components/schemas/NormalizerCallbackRequest'
       responses:
-        '200':
-          description: Risposta di successo
+        '202':
+          description: >-
+            OK, l'evento è stato registrato
           content:
             application/json:
+              example: { resultCode: '202.00', resultDescription: 'Accepted', clientResponseTimeStamp: '2019-08-24T14:15:22Z'}
               schema:
-                $ref: '#/components/schemas/CallbackResponseData'
+                $ref: '#/components/schemas/OperationResultCodeResponse'
         '400':
           description: Bad Request
           content:
-            application/problem+json:
+            application/json:
               schema:
-                $ref: '#/components/schemas/CallbackResponseData'
+                $ref: '#/components/schemas/OperationResultCodeResponse'
+              examples:
+                syntaxError:
+                  summary: 'Errore sintattico'
+                  value: { resultCode: '400.01', resultDescription: 'Syntax Error', errorList: [ 'field requestId is required' ], clientResponseTimeStamp: '2019-08-24T14:15:22Z' }
+                semanticError:
+                  summary: 'Errore semantico'
+                  value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'filekey not exists' ], clientResponseTimeStamp: '2019-08-24T14:15:22Z' }
+
         '500':
           description: InternalServerError
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/CallbackResponseData'
+                $ref: 'remote-refs.yaml#/components/schemas/Problem'
 
   /normalizzatore-ingress/v1/attachment-preload:
     put:
@@ -107,7 +140,7 @@ paths:
                   summary: 'Errore semantico'
                   value: { resultCode: '400.02', resultDescription: 'Semantic Error', errorList: [ 'unrecognized product Type' ], clientResponseTimeStamp: '2019-08-24T14:15:22Z' }
 
-  
+
   /normalizzatore-ingress/v1/get-attachment/{fileKey}:
     get:
       summary: ottieni metadati e contenuto di un file.
@@ -172,10 +205,10 @@ paths:
             - il parametro clientId è diverso dal client autenticato; <br/>
             - se il file identificato da fileKey non è ancora stato salvato; <br/>
 
-components: 
+components:
 
-  parameters: 
-    fileKey: 
+  parameters:
+    fileKey:
       name: fileKey
       description: La chiave definita per il file di cui si sta richiedendo il download
       in: path
@@ -186,8 +219,37 @@ components:
       $ref: 'parameters-pn-address.yaml#/components/parameters/xPagopaAddrManCxId'
     xPagopaAddrManApiKey:
       $ref: 'parameters-pn-address.yaml#/components/parameters/xPagopaAddrManApiKey'
-  
-  schemas: 
+
+  schemas:
+
+    NormalizerCallbackRequest:
+      type: object
+      required:
+        - requestId
+      properties:
+        requestId:
+          type: string
+          minLength: 1
+          maxLength: 250
+          description: id lavorazione
+        uri:
+          type: string
+          minLength: 5
+          maxLength: 2000
+          description: Le coordinate del documento correlato allo stato.
+        sha256:
+          type: string
+          minLength: 40
+          maxLength: 50
+          description: >-
+            sha256, codificato in base 64, del contenuto del file riferenziato dal campo uri
+        error:
+          type: string
+          description: >-
+            identificativo dell'errore
+            - _E01_ //FIXME elencare i casi
+            - _E02_
+
 
     ##########################################################################
     ###                 PRECARICAMENTO FILE SU SAFESTORAGE                 ###
@@ -200,14 +262,14 @@ components:
         preloadIdx:
           title: Id della richiesta di precaricamento di un file
           description: >-
-            Identificativo univoco all'interno della request HTTP, serve per correlare la risposta. 
+            Identificativo univoco all'interno della request HTTP, serve per correlare la risposta.
           type: string
           minLength: 1
           maxLength: 250
         contentType:
           title: MIME type del file che verrà caricato
           description: >-
-            Il MIME type dell'allegato che dovrà essere caricato. 
+            Il MIME type dell'allegato che dovrà essere caricato.
           type: string
           minLength: 3
           maxLength: 127
@@ -272,14 +334,14 @@ components:
         - $ref: '#/components/schemas/FileCreatedDto'
         - type: object
           properties:
-            download: 
+            download:
               $ref: '#/components/schemas/FileDownloadInfo'
-  
+
     FileCreatedDto:
       description: >-
         Evento generato quando il contenuto di un file è stato caricato, elaborato da 
         _SafeStorage_, ed è pronto all'uso.
-      type: object 
+      type: object
       required:
         - key
         - versionId
@@ -289,7 +351,7 @@ components:
         - documentType
         - documentStatus
         - retentionUntil
-      properties:  
+      properties:
         key:
           type: string
           description: la chiave da utilizzare per il recupero del file
@@ -315,7 +377,7 @@ components:
           description: dmensione, in byte, del contenuto.
         checksum:
           type: string
-          description: >- 
+          description: >-
             SHA256 o MD5 del contenuto del file. Il tipo di checksum cambia a seconda del 
             documentType.
         retentionUntil:
@@ -324,10 +386,10 @@ components:
           description: >-
             data e ora fino a cui il documento sarà garantito all'interno di _SafeStorage_. <br/>
             Può essere ritardata nel tempo, mai anticipata. Formattata con timezone secondo l'rfc 3339
-                            
+
     FileDownloadInfo:
       type: object
-      properties: 
+      properties:
         url:
           type: string
           description: >-
@@ -339,33 +401,11 @@ components:
             Stima del numero di secondi da aspettare prima che il contenuto del 
             documento sia scaricabile.
 
-
-    CallbackRequestData:
-      type: object
-      properties:
-        id_lavorazione:
-          type: string
-        presigned_url:
-          type: string
-        is_error:
-          type: boolean
-        err_msg:
-          type: string
-
-    CallbackResponseData:
-      type: object
-      properties:
-        response:
-          type: string
-          enum:
-            - OK
-            - KO
-
     OperationResultCodeResponse:
       required:
         - resultCode
-        - resultDescription  
-        - clientResponseTimeStamp 
+        - resultDescription
+        - clientResponseTimeStamp
       type: object
       properties:
         resultCode:
@@ -392,7 +432,7 @@ components:
             Descrizione dell’Esito dell’operazione, sempre valorizzato, anche in caso di esito positivo. <br />
             In caso di errore dovrà contenere info utili al chiamante per indirizzare le azioni correttive necessarie. <br />
             In nessun caso conterrà dettagli tecnici e/o stack trace. <br />
-        errorList: 
+        errorList:
           type: array
           minItems: 0
           maxItems: 50
@@ -403,7 +443,7 @@ components:
             example: 'unsupported printType value'
           description: >-
             Elenco degli errori di validazione, se presenti.
-        clientResponseTimeStamp: 
+        clientResponseTimeStamp:
           type: string
           format: date-time
           description: >-

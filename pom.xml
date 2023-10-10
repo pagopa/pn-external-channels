@@ -177,10 +177,15 @@
                                 ApiUtil.java
                             </supportingFilesToGenerate>
                             <configOptions>
+                                <dateLibrary>java11</dateLibrary>
+                                <delegatePattern>true</delegatePattern>
                                 <interfaceOnly>true</interfaceOnly>
-                                <dateLibrary>java8</dateLibrary>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
                                 <reactive>true</reactive>
                                 <skipDefaultInterface>false</skipDefaultInterface>
+                                <useTags>true</useTags>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -284,11 +289,11 @@
                         <configuration>
                             <inputSpec>${project.basedir}/docs/wsclient/pn-address-manager/pn-normalizzatore-webhook-v1.yaml</inputSpec>
                             <generatorName>java</generatorName>
-                            <library>resttemplate</library>
+                            <library>webclient</library>
+                            <generateApiDocumentation>false</generateApiDocumentation>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
-                            <typeMappings><typeMapping>OffsetDateTime=Instant</typeMapping></typeMappings>
-                            <importMappings><importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping></importMappings>
+                            <generateSupportingFiles>true</generateSupportingFiles>
                             <configOptions>
                                 <reactive>true</reactive>
                                 <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.api</apiPackage>
