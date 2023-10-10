@@ -14,24 +14,25 @@ public class DeduplicaService {
 	public Mono<DeduplicaResponse> deduplica (DeduplicaRequest request) {
 		AddressIn masterIn = request.getMasterIn();
 		AddressIn slaveIn = request.getSlaveIn();
-		if (areFieldsBlank(masterIn) || areFieldsBlank(slaveIn)) {
-			log.error("Valorizzare tutti i campi richiesti");
-			return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valorizzare i campi"));
-		}
 		DeduplicaResponse risultatoDeduplica;
 		if (!StringUtils.isBlank(masterIn.getCap())) {
 			switch (masterIn.getCap()) {
 				case "00000":
-					risultatoDeduplica = createRisultatoDeduplica(masterIn, slaveIn, 0, 1);
+					//ERRORE DI NORMALIZZAZIONE GESTISTO DA ADDRESS MANAGER IN 200
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 0, 1, null);
+					break;
+				case "11111":
+					//ERRORE TECNICO GESTITO DA ADDRESS MANAGER IN 400
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 0, 1, "E1");
 					break;
 				case "00500":
 					return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"));
 				default:
-					risultatoDeduplica = createRisultatoDeduplica(masterIn, slaveIn, 1, null);
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 1, null, null);
 					break;
 			}
 		} else {
-			risultatoDeduplica = createRisultatoDeduplica(masterIn, slaveIn, 1, null);
+			risultatoDeduplica = createRisultatoDeduplica(slaveIn, 1, null, null);
 		}
 		convertFieldsToUpperCase(masterIn);
 		convertFieldsToUpperCase(slaveIn);
@@ -42,20 +43,6 @@ public class DeduplicaService {
 			setFailedResult(risultatoDeduplica);
 		}
 		return Mono.just(risultatoDeduplica);
-	}
-
-	private boolean areFieldsBlank (AddressIn masterIn) {
-		if (StringUtils.isBlank(masterIn.getStato())
-				|| masterIn.getStato().toUpperCase().trim().startsWith("ITAL")) {
-			return StringUtils.isBlank(masterIn.getCap())
-					|| StringUtils.isBlank(masterIn.getIndirizzo())
-					|| StringUtils.isBlank(masterIn.getLocalita())
-					|| StringUtils.isBlank(masterIn.getProvincia());
-		}
-		return StringUtils.isBlank(masterIn.getIndirizzo())
-				|| StringUtils.isBlank(masterIn.getLocalita())
-				|| StringUtils.isBlank(masterIn.getProvincia())
-				|| StringUtils.isBlank(masterIn.getStato());
 	}
 
 	private void convertFieldsToUpperCase (AddressIn masterIn) {
@@ -71,12 +58,11 @@ public class DeduplicaService {
 		}
 	}
 
-	private DeduplicaResponse createRisultatoDeduplica (AddressIn masterIn, AddressIn slaveIn, Integer postalizzabile, Integer error) {
+	private DeduplicaResponse createRisultatoDeduplica (AddressIn slaveIn, Integer postalizzabile, Integer error, String erroreDedu) {
 		DeduplicaResponse risultatoDeduplica = new DeduplicaResponse();
-		AddressOut masterOut = getAddressOut(masterIn, postalizzabile, error);
 		AddressOut slaveOut = getAddressOut(slaveIn, postalizzabile, error);
-		risultatoDeduplica.setMasterOut(masterOut);
 		risultatoDeduplica.setSlaveOut(slaveOut);
+		risultatoDeduplica.setErrore(erroreDedu);
 		return risultatoDeduplica;
 	}
 
@@ -88,11 +74,11 @@ public class DeduplicaService {
 		addressOut.setnErroreNorm(error);
 		addressOut.setsCap(masterIn.getCap());
 		addressOut.setsViaCompletaSpedizione(masterIn.getIndirizzo());
-		addressOut.setsStatoUff(masterIn.getStato());
 		addressOut.setsComuneSpedizione(masterIn.getLocalita());
 		addressOut.setsFrazioneSpedizione(masterIn.getLocalitaAggiuntiva());
 		addressOut.setsCivicoAltro("address2");
 		addressOut.setsSiglaProv(masterIn.getProvincia());
+		addressOut.setsStatoSpedizione(masterIn.getStato());
 		return addressOut;
 	}
 
@@ -106,12 +92,10 @@ public class DeduplicaService {
 	}
 
 	private void setSuccessfulResult (DeduplicaResponse risultatoDeduplica) {
-		risultatoDeduplica.setRisultatoDedu("1");
-		risultatoDeduplica.setErroreDedu(0);
+		risultatoDeduplica.setRisultatoDedu(Boolean.TRUE);
 	}
 
 	private void setFailedResult (DeduplicaResponse risultatoDeduplica) {
-		risultatoDeduplica.setRisultatoDedu("0");
-		risultatoDeduplica.setErroreDedu(1);
+		risultatoDeduplica.setRisultatoDedu(Boolean.FALSE);
 	}
 }

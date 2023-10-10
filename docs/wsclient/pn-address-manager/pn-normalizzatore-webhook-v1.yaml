@@ -18,10 +18,9 @@ paths:
       summary: Richiesta di callback di avvenuta normalizzazione della lista di address in ingresso
       description: |-
         Operazione che avvisa pn-address-manager dell'avvenuta normalizzazione di una lista di address.
-        Il file di output conterrà i seguenti campi, gestiti con logica posizionale:
-        
-          - IDCODICECLIENTE : l’Id del cliente;
-          - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1 : normalizzato,2,3,4,5);
+        Il file di output conterrà i seguenti campi, gestiti con logica posizionale (nessuna intestazione, separatore ';'):
+          - IDCODICECLIENTE : Id del cliente;
+          - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1,2,3,4,5 : normalizzato);
           - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);
           - NERRORENORM : Codice di errore;
           - SSIGLAPROV : Sigla provincia normalizzata;
@@ -224,6 +223,9 @@ components:
 
     NormalizerCallbackRequest:
       type: object
+      description: >-
+        uri e sha256 obbligatori in caso di callback di successo
+        error obbligatorio in caso di callback di errore
       required:
         - requestId
       properties:

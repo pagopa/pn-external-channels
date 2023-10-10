@@ -8,15 +8,35 @@ paths:
       operationId: normalizzazione
       summary: PN richiede la normalizzazione batch
       description: >-
-        Il file in ingresso conterrà i seguenti campi gestiti con logica posizionale:
+        Il file in ingresso conterrà i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
           - IdCodiceCliente : Id del cliente
           - Provincia : Sigla Provincia - opzionale
           - Cap : cap - opzionale
           - localita : località/comune - obbligatorio
           - localitaAggiuntiva : frazione - opzionale
-          - indirizzo : svia - obbligatorio contiene la via completa DUG + TOPONIMO + CIVICO
-          - stato : sstato – opzionale
-
+          - indirizzo : svia - obbligatorio - contiene la via completa DUG + TOPONIMO + CIVICO
+          - stato : sstato - opzionale
+        Il processo di normalizzazione creerà un file di output contenente i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
+          - IDCODICECLIENTE : Id del cliente;
+          - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1,2,3,4,5 : normalizzato);
+          - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);
+          - NERRORENORM : Codice di errore;
+          - SSIGLAPROV : Sigla provincia normalizzata;
+          - SSTATOUFF : Stato normalizzato (Valorizzato ITALIA, REPUBBLICA DI SAN MARINO e CITTA’ DEL VATICANO + TUTTI GLI STATI ESTERI);
+          - SSTATOABB : Stato abbreviato normalizzato;
+          - SSTATOSPEDIZIONE : Stato di Spedizione;
+          - SCOMUNEUFF : Comune normalizzato;
+          - SCOMUNEABB : Comune Abbreviato normalizzato;
+          - SCOMUNESPEDIZIONE : Comune di spedizione;
+          - SFRAZIONEUFF : Frazione normalizzata;
+          - SFRAZIONEABB : Frazione Abbreviata normalizzata;
+          - SFRAZIONESPEDIZIONE : Frazione di Spedizione;
+          - SCIVICOALTRO : altri elementi del civico (interno, piano, scala, palazzo …) - VA IN INDIRIZZO 2
+          - SCAP : cap normalizzato;
+          - SPRESSO : informazioni di presso e casella postale (C.P 123, Presso sig. rossi …) -  VA IN NAME 2;
+          - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;
+          - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;
+          - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
       parameters:
         - $ref: '#/components/parameters/xPagopaAddrManCxId'
         - $ref: '#/components/parameters/xPagopaAddrManApiKey'
@@ -84,9 +104,19 @@ components:
 
   parameters:
     xPagopaAddrManCxId:
-      $ref: 'parameters-pn-address.yaml#/components/parameters/xPagopaAddrManCxId'
+      name: "pn-address-manager-cx-id"
+      in: header
+      schema:
+        type: string
+      required: true
     xPagopaAddrManApiKey:
-      $ref: 'parameters-pn-address.yaml#/components/parameters/xPagopaAddrManApiKey'
+      name: x-api-key
+      description: Credenziale di accesso
+      in: header
+      required: true
+      schema:
+        type: string
+        x-field-extra-annotation: "@lombok.ToString.Exclude" # NO EXTERNAL
 
 
   schemas:
@@ -137,12 +167,17 @@ components:
 
     DeduplicaRequest:
       type: object
+      required:
+        - masterIn
+        - slaveIn
       properties:
         configIn:
           $ref: '#/components/schemas/ConfigIn'
         masterIn:
+          description: Indirizzo base con cui deduplicare lo slave //FIXME
           $ref: '#/components/schemas/AddressIn'
         slaveIn:
+          description: Indirizzo oggetto della deduplica
           $ref: '#/components/schemas/AddressIn'
 
     ConfigIn:
@@ -155,6 +190,9 @@ components:
 
     AddressIn:
       type: object
+      required:
+        - localita
+        - indirizzo
       properties:
         id:
           type: string
@@ -173,20 +211,29 @@ components:
 
     DeduplicaResponse:
       type: object
+      description: >-
+        slaveOut e risultatoDedu: obbligatori in caso di risposta di successo
+        errore: valorizzato in caso di risposta con errore
       properties:
-        masterOut:
-          $ref: '#/components/schemas/AddressOut'
         slaveOut:
+          description: risultato delle deduplica //FIXME
           $ref: '#/components/schemas/AddressOut'
         risultatoDedu:
+          type: boolean
+          description: >-
+            Codice contenete l'esito del processo di deduplica
+            - false: Indirzzi differenti
+            - true: Indirizzi uguali
+        errore:
           type: string
-        erroreDedu:
-          type: integer
-        erroreGenerico:
-          type: integer
+          description: >-
+            identificativo dell'errore
+            - _E01_ //FIXME elencare i casi
+            - _E02_
 
     AddressOut:
       type: object
+      # FIXME elencare i parametri obbligatori
       properties:
         id:
           type: string
