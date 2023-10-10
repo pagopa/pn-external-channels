@@ -289,7 +289,7 @@
                         <configuration>
                             <inputSpec>${project.basedir}/docs/wsclient/pn-address-manager/pn-normalizzatore-webhook-v1.yaml</inputSpec>
                             <generatorName>java</generatorName>
-                            <library>webclient</library>
+                            <library>resttemplate</library>
                             <generateApiDocumentation>false</generateApiDocumentation>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>

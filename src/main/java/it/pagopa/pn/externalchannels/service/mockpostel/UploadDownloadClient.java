@@ -35,13 +35,14 @@ public class UploadDownloadClient {
         headers.add("x-amz-meta-secret", preLoadResponse.getSecret());
         ByteArrayResource resource = new ByteArrayResource(content.getBytes());
         assert preLoadResponse.getUrl() != null;
-        return webClient.method(HttpMethod.POST)
+        return webClient.method(HttpMethod.PUT)
                 .uri(preLoadResponse.getUrl())
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .body(BodyInserters.fromResource(resource))
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(throwable -> log.error("uploadContent PnInternalException uploading file", throwable))
+                .onErrorResume(throwable -> Mono.just("")) //TODO: RIMUOVI DOPO TEST)
                 .map(s -> preLoadResponse);
     }
 }
