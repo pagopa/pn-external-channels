@@ -25,5 +25,5 @@
     "JobCronExpression":"*/5 * * * * *",
     "UseDynamodb": "true",
     "PnAddressManagerBaseUrl": "http://internal-EcsA-20230406081307135800000004-20484703.eu-south-1.elb.amazonaws.com:8080",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:fa5cceb5d94859626d339b85f298bdebadc51f4bb6814983908dc99e60b18be4"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:056ce0ea95a1d1b5f38ce6f25666595e2acdc74a86446a995b7993c3c059ced6"
 }
