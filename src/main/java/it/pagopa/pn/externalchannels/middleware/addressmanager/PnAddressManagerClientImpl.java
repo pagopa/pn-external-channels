@@ -6,7 +6,6 @@ import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.
 import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.api.NormalizzatoreApi;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.*;
 import lombok.CustomLog;
-import org.checkerframework.checker.units.qual.N;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +28,12 @@ public class PnAddressManagerClientImpl implements  PnAddressManagerClient{
     public PreLoadResponseData getPresignedURI(String cxId, String xApiKey, PreLoadRequestData preLoadRequest) {
         log.logInvokingExternalService(PnLogger.EXTERNAL_SERVICES.PN_EXTERNAL_CHANNELS, "getPresignedURI");
         return normalizzatoreApi.presignedUploadRequest(cxId, xApiKey, preLoadRequest);
+    }
+
+    @Override
+    public FileDownloadResponse getFile(String cxId, String xApiKey, String fileKey) {
+        log.logInvokingExternalService(PnLogger.EXTERNAL_SERVICES.PN_EXTERNAL_CHANNELS, "getFile");
+        return normalizzatoreApi.getFile(fileKey, cxId, xApiKey);
     }
 
     @Override

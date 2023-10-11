@@ -125,7 +125,7 @@ public class PnSafeStorageClientImpl implements PnSafeStorageClient {
     public byte[] downloadContent(String downloadUrl) {
         try {
             ResponseEntity<byte[]> response = restTemplate.exchange(
-                    downloadUrl,
+                    URI.create(downloadUrl),
                     HttpMethod.GET,
                     null,
                     byte[].class

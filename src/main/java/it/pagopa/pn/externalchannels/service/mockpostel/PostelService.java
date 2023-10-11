@@ -1,9 +1,9 @@
 package it.pagopa.pn.externalchannels.service.mockpostel;
 
+import it.pagopa.pn.commons.exceptions.PnInternalException;
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizeRequestPostelInput;
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizedAddress;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.*;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model.FileDownloadResponse;
 import it.pagopa.pn.externalchannels.middleware.addressmanager.PnAddressManagerClientImpl;
 import it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient;
 import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneRequest;
@@ -21,6 +21,7 @@ import reactor.core.scheduler.Scheduler;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -88,25 +89,32 @@ public class PostelService {
     }
 
     private byte[] retrieveDataFromCsv(String uri) {
-        FileDownloadResponse file = pnSafeStorageClient.getFile(uri, true);
-        assert file.getDownload() != null;
-        return pnSafeStorageClient.downloadContent(file.getDownload().getUrl());
+        String finalFileKey = uri.replace(SAFE_STORAGE_URL_PREFIX, "");
+        FileDownloadResponse file = addressManagerClient.getFile(POSTEL_CXID, POSTEL_APIKEY, finalFileKey);
+        if(file.getDownload() != null) {
+            return pnSafeStorageClient.downloadContent(file.getDownload().getUrl());
+        }
+        log.debug("file download data is empty");
+        throw new PnInternalException("error during retrieve file from address manager", "file data is empty");
     }
 
     private OperationResultCodeResponse performCallback(String batchId, String content, String sha256) {
+        OperationResultCodeResponse operationResultCodeResponse = new OperationResultCodeResponse();
         PreLoadRequestData preLoadRequestData = mockPostelUtils.createPreloadRequest(sha256);
         PreLoadResponseData responseData = addressManagerClient.getPresignedURI(POSTEL_CXID, POSTEL_APIKEY, preLoadRequestData);
-        PreLoadResponse preLoadResponse = uploadContent(content, responseData.getPreloads());
-        NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponse.getKey(), sha256);
-        OperationResultCodeResponse operationResultCodeResponse = addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, normalizerCallbackRequestOK);
-        log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
-                operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+        if(responseData != null) {
+            PreLoadResponse preLoadResponse = uploadContent(content, responseData.getPreloads(), sha256);
+            NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponse.getKey(), sha256);
+            operationResultCodeResponse = addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, normalizerCallbackRequestOK);
+            log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
+                    operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+        }
         return operationResultCodeResponse;
     }
 
-    public PreLoadResponse uploadContent(String content, List<PreLoadResponse> preloadResponseList) {
+    public PreLoadResponse uploadContent(String content, List<PreLoadResponse> preloadResponseList, String sha256) {
         return Flux.fromIterable(preloadResponseList)
-                .flatMap(preLoadResponse -> uploadDownloadClient.uploadContent(content, preLoadResponse))
+                .flatMap(preLoadResponse -> uploadDownloadClient.uploadContent(content, preLoadResponse, sha256))
                 .doOnNext(preLoadResponse -> log.info("NORMALIZZAZIONE - uploadContent OK"))
                 .blockFirst();
     }
