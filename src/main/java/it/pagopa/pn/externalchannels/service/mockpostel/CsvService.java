@@ -27,7 +27,7 @@ public class CsvService {
             beanToCsv.write(items);
             return writer.toString();
         } catch (IOException | CsvDataTypeMismatchException | CsvRequiredFieldEmptyException e) {
-            throw new PnInternalException("Error during convert csv in String", "ERROR_WRITE_ITEM_ON_CSV");
+            throw new PnInternalException("Error during convert csv in String", "ERROR_WRITE_ITEM_ON_CSV", e);
         }
     }
 
