@@ -24,5 +24,6 @@
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
     "UseDynamodb": "true",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:9e9647110c8aacd7923265930aa8d7a9a064ddd666bbb1959d56ace01c86a662"
+    "PnAddressManagerBaseUrl": "http://internal-EcsA-20230406081307135800000004-20484703.eu-south-1.elb.amazonaws.com:8080",
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:056ce0ea95a1d1b5f38ce6f25666595e2acdc74a86446a995b7993c3c059ced6"
 }

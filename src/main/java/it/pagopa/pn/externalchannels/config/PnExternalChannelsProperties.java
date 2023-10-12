@@ -33,7 +33,6 @@ public class PnExternalChannelsProperties {
 
     private String extchannelwebhookApiKey;
 
-
     private int cacheExpireAfterDays;
 
     private int cacheMaxSize;
@@ -49,6 +48,10 @@ public class PnExternalChannelsProperties {
     private String verificationCodeTableName;
 
     private Integer cacheExpSsmMinutes;
+
+    private String addressManagerBaseUrl;
+
+    private String addressManagerCxId;
 
     @Data
     public static class Topics {
