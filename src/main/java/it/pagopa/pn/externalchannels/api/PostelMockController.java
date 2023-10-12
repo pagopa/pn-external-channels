@@ -29,10 +29,15 @@ public class PostelMockController implements DefaultApi {
     }
 
     /**
-     * POST /postel-mock/normalizzazione : effettua una chiamata nei confronti di Postel condividendo il fileKey relativo al file caricato.
+     * POST /send-normalizzatore-ingress/v1/normalizzazione : PN richiede la normalizzazione batch
+     * Il file in ingresso conterrà i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore &#39;;&#39;):   - IdCodiceCliente : Id del cliente   - Provincia : Sigla Provincia - opzionale   - Cap : cap - opzionale   - localita : località/comune - obbligatorio   - localitaAggiuntiva : frazione - opzionale   - indirizzo : svia - obbligatorio - contiene la via completa DUG + TOPONIMO + CIVICO   - stato : sstato - opzionale Il processo di normalizzazione creerà un file di output contenente i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore &#39;;&#39;):   - IDCODICECLIENTE : Id del cliente;   - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1,2,3,4,5 : normalizzato);   - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);   - NERRORENORM : Codice di errore;   - SSIGLAPROV : Sigla provincia normalizzata;   - SSTATOUFF : Stato normalizzato (Valorizzato ITALIA, REPUBBLICA DI SAN MARINO e CITTA’ DEL VATICANO + TUTTI GLI STATI ESTERI);   - SSTATOABB : Stato abbreviato normalizzato;   - SSTATOSPEDIZIONE : Stato di Spedizione;   - SCOMUNEUFF : Comune normalizzato;   - SCOMUNEABB : Comune Abbreviato normalizzato;   - SCOMUNESPEDIZIONE : Comune di spedizione;   - SFRAZIONEUFF : Frazione normalizzata;   - SFRAZIONEABB : Frazione Abbreviata normalizzata;   - SFRAZIONESPEDIZIONE : Frazione di Spedizione;   - SCIVICOALTRO : altri elementi del civico (interno, piano, scala, palazzo …) - VA IN INDIRIZZO 2   - SCAP : cap normalizzato;   - SPRESSO : informazioni di presso e casella postale (C.P 123, Presso sig. rossi …) -  VA IN NAME 2;   - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;   - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;   - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
      *
-     * @param normalizzazioneRequest (required)
-     * @return Risposta di successo (status code 200)
+     * @param pnAddressManagerCxId  (required)
+     * @param xApiKey Credenziale di accesso (required)
+     * @param normalizzazioneRequest  (required)
+     * @return OK (status code 200)
+     *         or Bad request (status code 400)
+     *         or Internal error (status code 500)
      */
     @Override
     public Mono<ResponseEntity<NormalizzazioneResponse>> normalizzazione(String pnAddressManagerCxId, String xApiKey,
@@ -48,10 +53,14 @@ public class PostelMockController implements DefaultApi {
 
 
     /**
-     * POST /postel-mock/deduplica : Effettua la deduplicazione
+     * POST /send-normalizzatore-ingress/v1/deduplica : PN richiede la deduplica online
      *
-     * @param inputDeduplica (required)
-     * @return Risposta di successo (status code 200)
+     * @param pnAddressManagerCxId  (required)
+     * @param xApiKey Credenziale di accesso (required)
+     * @param inputDeduplica  (required)
+     * @return OK (status code 200)
+     *         or Bad request (status code 400)
+     *         or Internal error (status code 500)
      */
     @Override
     public Mono<ResponseEntity<DeduplicaResponse>> deduplica(String pnAddressManagerCxId, String xApiKey,
