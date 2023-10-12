@@ -133,12 +133,16 @@ public class PostelService {
     private List<NormalizedAddress> checkFirstCapToMockUseCase(List<NormalizeRequestPostelInput> normalizeRequestPostelInputList) {
         if (!CollectionUtils.isEmpty(normalizeRequestPostelInputList) && StringUtils.hasText(normalizeRequestPostelInputList.get(0).getCap())) {
 
-            return switch (normalizeRequestPostelInputList.get(0).getCap()) {
-                case "11111" -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, false); //INDIRIZZO POSTALIZZABILE CORRELATION NON COMPLETO
-                case "22222" -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 0, true); //INDIRIZZO NON POSTALIZZABILE
-                case "33333" -> Collections.emptyList(); //ERRORE IN CALLBACK RESPONSE
-                default -> retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true); //INDIRIZZO POSTALIZZABILE
-            };
+            switch (normalizeRequestPostelInputList.get(0).getCap()) {
+                case "11111":
+                    return retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, false); //INDIRIZZO POSTALIZZABILE CORRELATION NON COMPLETO
+                case "22222":
+                    return retrieveNormalizedAddress(normalizeRequestPostelInputList, 0, true); //INDIRIZZO NON POSTALIZZABILE
+                case "33333":
+                    return Collections.emptyList(); //ERRORE IN CALLBACK RESPONSE
+                default:
+                    return retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true); //INDIRIZZO POSTALIZZABILE
+            }
         } else {
             return retrieveNormalizedAddress(normalizeRequestPostelInputList, 1, true); //INDIRIZZO ESTERO (NO CAP) POSTALIZZABILE
         }
