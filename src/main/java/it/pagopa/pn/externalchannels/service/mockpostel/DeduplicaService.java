@@ -45,14 +45,22 @@ public class DeduplicaService {
 		return Mono.just(risultatoDeduplica);
 	}
 
-	private void convertFieldsToUpperCase (AddressIn masterIn) {
+	private void convertFieldsToUpperCase(AddressIn masterIn) {
 		if (!StringUtils.isBlank(masterIn.getCap())) {
 			masterIn.setCap(masterIn.getCap().toUpperCase());
 		}
-		masterIn.setIndirizzo(masterIn.getIndirizzo().toUpperCase());
-		masterIn.setLocalita(masterIn.getLocalita().toUpperCase());
-		masterIn.setProvincia(masterIn.getProvincia().toUpperCase());
-		masterIn.setLocalitaAggiuntiva(masterIn.getLocalitaAggiuntiva().toUpperCase());
+		if(!StringUtils.isBlank(masterIn.getIndirizzo())){
+			masterIn.setIndirizzo(masterIn.getIndirizzo().toUpperCase());
+		}
+		if(!StringUtils.isBlank(masterIn.getLocalita())){
+			masterIn.setLocalita(masterIn.getLocalita().toUpperCase());
+		}
+		if(!StringUtils.isBlank(masterIn.getLocalitaAggiuntiva())){
+			masterIn.setLocalitaAggiuntiva(masterIn.getLocalitaAggiuntiva().toUpperCase());
+		}
+		if (!StringUtils.isBlank(masterIn.getProvincia())){
+			masterIn.setProvincia(masterIn.getProvincia().toUpperCase());
+		}
 		if(!StringUtils.isBlank(masterIn.getStato())){
 			masterIn.setStato(masterIn.getStato().toUpperCase());
 		}
