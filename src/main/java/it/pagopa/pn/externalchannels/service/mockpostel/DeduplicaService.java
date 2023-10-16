@@ -34,8 +34,6 @@ public class DeduplicaService {
 		} else {
 			risultatoDeduplica = createRisultatoDeduplica(slaveIn, 1, null, null);
 		}
-		convertFieldsToUpperCase(masterIn);
-		convertFieldsToUpperCase(slaveIn);
 
 		if (areFieldsEqual(masterIn, slaveIn)) {
 			setSuccessfulResult(risultatoDeduplica);
@@ -45,29 +43,30 @@ public class DeduplicaService {
 		return Mono.just(risultatoDeduplica);
 	}
 
-	private void convertFieldsToUpperCase(AddressIn masterIn) {
-		if (!StringUtils.isBlank(masterIn.getCap())) {
-			masterIn.setCap(masterIn.getCap().toUpperCase());
+	private void convertFieldsToUpperCase(AddressIn addressIn) {
+		if (!StringUtils.isBlank(addressIn.getCap())) {
+			addressIn.setCap(addressIn.getCap().toUpperCase());
 		}
-		if(!StringUtils.isBlank(masterIn.getIndirizzo())){
-			masterIn.setIndirizzo(masterIn.getIndirizzo().toUpperCase());
+		if(!StringUtils.isBlank(addressIn.getIndirizzo())){
+			addressIn.setIndirizzo(addressIn.getIndirizzo().toUpperCase());
 		}
-		if(!StringUtils.isBlank(masterIn.getLocalita())){
-			masterIn.setLocalita(masterIn.getLocalita().toUpperCase());
+		if(!StringUtils.isBlank(addressIn.getLocalita())){
+			addressIn.setLocalita(addressIn.getLocalita().toUpperCase());
 		}
-		if(!StringUtils.isBlank(masterIn.getLocalitaAggiuntiva())){
-			masterIn.setLocalitaAggiuntiva(masterIn.getLocalitaAggiuntiva().toUpperCase());
+		if(!StringUtils.isBlank(addressIn.getLocalitaAggiuntiva())){
+			addressIn.setLocalitaAggiuntiva(addressIn.getLocalitaAggiuntiva().toUpperCase());
 		}
-		if (!StringUtils.isBlank(masterIn.getProvincia())){
-			masterIn.setProvincia(masterIn.getProvincia().toUpperCase());
+		if (!StringUtils.isBlank(addressIn.getProvincia())){
+			addressIn.setProvincia(addressIn.getProvincia().toUpperCase());
 		}
-		if(!StringUtils.isBlank(masterIn.getStato())){
-			masterIn.setStato(masterIn.getStato().toUpperCase());
+		if(!StringUtils.isBlank(addressIn.getStato())){
+			addressIn.setStato(addressIn.getStato().toUpperCase());
 		}
 	}
 
 	private DeduplicaResponse createRisultatoDeduplica (AddressIn slaveIn, Integer postalizzabile, Integer error, String erroreDedu) {
 		DeduplicaResponse risultatoDeduplica = new DeduplicaResponse();
+		convertFieldsToUpperCase(slaveIn);
 		AddressOut slaveOut = getAddressOut(slaveIn, postalizzabile, error);
 		risultatoDeduplica.setSlaveOut(slaveOut);
 		risultatoDeduplica.setErrore(erroreDedu);
@@ -75,28 +74,28 @@ public class DeduplicaService {
 	}
 
 	@NotNull
-	private static AddressOut getAddressOut(AddressIn masterIn, Integer postalizzabile, Integer error) {
+	private static AddressOut getAddressOut(AddressIn addressIn, Integer postalizzabile, Integer error) {
 		AddressOut addressOut = new AddressOut();
 		addressOut.setnRisultatoNorm(1);
 		addressOut.setfPostalizzabile(String.valueOf(postalizzabile));
 		addressOut.setnErroreNorm(error);
-		addressOut.setsCap(masterIn.getCap());
-		addressOut.setsViaCompletaSpedizione(masterIn.getIndirizzo());
-		addressOut.setsComuneSpedizione(masterIn.getLocalita());
-		addressOut.setsFrazioneSpedizione(masterIn.getLocalitaAggiuntiva());
+		addressOut.setsCap(addressIn.getCap());
+		addressOut.setsViaCompletaSpedizione(addressIn.getIndirizzo());
+		addressOut.setsComuneSpedizione(addressIn.getLocalita());
+		addressOut.setsFrazioneSpedizione(addressIn.getLocalitaAggiuntiva());
 		addressOut.setsCivicoAltro("address2");
-		addressOut.setsSiglaProv(masterIn.getProvincia());
-		addressOut.setsStatoSpedizione(masterIn.getStato());
+		addressOut.setsSiglaProv(addressIn.getProvincia());
+		addressOut.setsStatoSpedizione(addressIn.getStato());
 		return addressOut;
 	}
 
 	private boolean areFieldsEqual (AddressIn masterIn, AddressIn slaveIn) {
-		return masterIn.getCap().equals(slaveIn.getCap())
-				&& masterIn.getIndirizzo().equals(slaveIn.getIndirizzo())
-				&& masterIn.getLocalita().equals(slaveIn.getLocalita())
-				&& masterIn.getProvincia().equals(slaveIn.getProvincia())
-				&& masterIn.getLocalitaAggiuntiva().equals(slaveIn.getLocalitaAggiuntiva())
-				&& masterIn.getStato().equals(slaveIn.getStato());
+		return masterIn.getCap().equalsIgnoreCase(slaveIn.getCap())
+				&& masterIn.getIndirizzo().equalsIgnoreCase(slaveIn.getIndirizzo())
+				&& masterIn.getLocalita().equalsIgnoreCase(slaveIn.getLocalita())
+				&& masterIn.getProvincia().equalsIgnoreCase(slaveIn.getProvincia())
+				&& masterIn.getLocalitaAggiuntiva().equalsIgnoreCase(slaveIn.getLocalitaAggiuntiva())
+				&& masterIn.getStato().equalsIgnoreCase(slaveIn.getStato());
 	}
 
 	private void setSuccessfulResult (DeduplicaResponse risultatoDeduplica) {
