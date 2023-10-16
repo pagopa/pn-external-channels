@@ -103,8 +103,13 @@ public class EventMessageUtil {
             if (codeTimeToSend.getAdditionalActions() != null
                     && codeTimeToSend.getAdditionalActions().stream().anyMatch(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DISCOVERY)
                     &&  notificationProgress.getDiscoveredAddress() != null) {
-                discoveredAddress = notificationProgress.getDiscoveredAddress();
-                log.info("found code with discovery enabled, using discovered={}", discoveredAddress.getAddress());
+                Optional<AdditionalAction> optionalAdditionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DISCOVERY).findFirst();
+                if (optionalAdditionalAction.isPresent()) {
+                    discoveredAddress = notificationProgress.getDiscoveredAddress();
+                    if (optionalAdditionalAction.get().getInfo() != null)
+                        discoveredAddress.setCap(optionalAdditionalAction.get().getInfo());
+                    log.info("found code with discovery enabled, using discovered={} and CAP={}", discoveredAddress.getAddress(), discoveredAddress.getCap());
+                }
             }
 
             return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), failcause.get(),
