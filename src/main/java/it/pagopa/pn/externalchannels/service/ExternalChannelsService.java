@@ -12,6 +12,7 @@ import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,10 +69,12 @@ public class ExternalChannelsService {
     
     private final VerificationCodeService verificationCodeService;
 
+    private final InternalSendClient internalSendClient;
+
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
-            verificationCodeService.saveVerificationCode(digitalNotificationRequest);    
+            verificationCodeService.saveVerificationCode(digitalNotificationRequest.getEventType(), digitalNotificationRequest.getMessageText(), digitalNotificationRequest.getReceiverDigitalAddress());
         }
         
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
@@ -85,11 +88,17 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
+        NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
+        if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
+            verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+        }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
                 digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
@@ -101,6 +110,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
@@ -115,6 +126,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
     public void sendPaperEngageRequest(PaperEngageRequest paperEngageRequest, String appSource) {
@@ -154,6 +167,8 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
         }
+
+        internalSendClient.sendNotification(notificationProgress);
     }
 
 
@@ -378,10 +393,10 @@ public class ExternalChannelsService {
 
     private DiscoveredAddressEntity buildMockDiscoveredAddress(String sequence) {
         return new DiscoveredAddressEntity()
-                .city("Milan")
+                .city("Milano")
                 .address("via"+sequence)
-                .name("Milan")
-                .country("Italy")
+                .name("Destinatario")
+                .country("Italia")
                 .cap("20121")
                 .pr("MI");
     }

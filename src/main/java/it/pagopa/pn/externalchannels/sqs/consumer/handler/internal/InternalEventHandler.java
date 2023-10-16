@@ -1,10 +1,11 @@
-package it.pagopa.pn.externalchannels.schedule;
+package it.pagopa.pn.externalchannels.sqs.consumer.handler.internal;
 
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
+import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebhookClient;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
@@ -13,21 +14,15 @@ import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-//import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.LinkedList;
 
-//non viene più utilizzato il batch, ma la coda SQS
-//Eliminare una volta testato la funzionalità con la coda
-@Deprecated
-//@Component
+@Component
 @RequiredArgsConstructor
 @Slf4j
-public class MessageScheduler {
-
+public class InternalEventHandler {
 
     private final NotificationProgressDao dao;
 
@@ -41,43 +36,32 @@ public class MessageScheduler {
 
     private final ExtChannelWebhookClient extChannelWebhookClient;
 
+    private final InternalSendClient internalSendClient;
 
-    @Scheduled(cron = "${job.cron-expression}")
-    public void run() {
-        log.trace("[{}] CLOCK!", Instant.now());
-        Collection<NotificationProgress> all = dao.findAll();
+    public void handleMessage(NotificationProgress notificationProgress) {
         Instant now = Instant.now();
-        for (NotificationProgress notificationProgress : all) {
-            handleMessage(notificationProgress, now);
-        }
+        log.trace("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
+        if (isTimeToSendMessage(now, notificationProgress)) {
+            log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
+            saveHistoricalDateInCache(notificationProgress);
+            sendMessage(notificationProgress);
+            notificationProgress.setLastMessageSentTimestamp(Instant.now());
 
-    }
-
-    private void handleMessage(NotificationProgress notificationProgress, Instant now) {
-        try {
-            log.trace("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
-            if (isTimeToSendMessage(now, notificationProgress)) {
-                log.info("[{}] Processing notificationProgress: {}", notificationProgress.getIun(), notificationProgress);
-                saveHistoricalDateInCache(notificationProgress);
-                sendMessage(notificationProgress);
-                notificationProgress.setLastMessageSentTimestamp(Instant.now());
-
-                log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
-                if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                    dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
-                    log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
-                }
-                else {
-                    dao.put(notificationProgress);
-                }
+            log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
+            if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
+                dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
+                log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
+            }
+            else {
+                dao.put(notificationProgress);
+                //metto in coda il nuovo notificationProgress, con un CodeTimeToSend in meno
+                internalSendClient.sendNotification(notificationProgress);
             }
         }
-        catch (Exception e) {
-            log.error(String.format("[%s] Error in handleMessage: %s", notificationProgress.getIun(), e.getMessage()), e);
-            //rimuovo il record dal database per non farlo rimanere in uno stato inconsistente
-            dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
+        else {
+            //rimetto in coda
+            internalSendClient.sendNotification(notificationProgress);
         }
-
     }
 
     private boolean isTimeToSendMessage(Instant now, NotificationProgress notificationProgress) {
@@ -112,8 +96,6 @@ public class MessageScheduler {
         notificationProgress.setLastMessageSentTimestamp(Instant.now());
     }
 
-
-
     private void saveHistoricalDateInCache(NotificationProgress notificationProgress) {
         log.debug("[{}] Saving historical date in cache", notificationProgress);
         String iun = notificationProgress.getIun();
@@ -122,6 +104,4 @@ public class MessageScheduler {
         assert codeTimeToSend != null;
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
     }
-
-    
 }

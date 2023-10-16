@@ -85,6 +85,14 @@ Parameters:
     Type: String
     Description: 'Push external-channel messages from this Queue to paper channel'
 
+  InternalQueueName:
+    Type: String
+    Description: 'Send and pull notification progress th this queue'
+
+  InternalQueueARN:
+    Type: String
+    Description: 'Send and pull notification progress th this queue'
+
   NotificationProgressDynamoTableName:
     Type: String
     Description: 'Name of dynamodb table containing Notification Progress for mock'
@@ -123,6 +131,16 @@ Parameters:
     Type: String
     Description: 'Cron Expression of scheduler to read requests from Database'
 
+  CacheExpSsmMinutes:
+    Type: String
+    Description: 'Cache expiration for SSM Parameter Store'
+    Default: "5"
+
+  PnAddressManagerBaseUrl:
+    Type: String
+    Description: 'Address Manager base url'
+    Default: ''
+
 Resources:
 
   # PN-External-Channels microservice
@@ -148,9 +166,13 @@ Resources:
         ContainerEnvEntry10: !Sub 'PN_EXTERNALCHANNELS_USEDYNAMODB=${UseDynamodb}'
         ContainerEnvEntry11: !Sub 'PN_EXTERNALCHANNELS_TABLENAME=${NotificationProgressDynamoTableName}'
         ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_VERIFICATIONCODETABLENAME=${VerificationCodeTableDynamoTableName}'
+        ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
+        ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
+        ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
-        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
+        MappedPaths: '/external-channels/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*,/send-normalizzatore-ingress/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref VpcEgressSubnetsIds
         VpcId: !Ref VpcId
@@ -182,6 +204,7 @@ Resources:
               - !Ref ExternalChannelsOutputsQueueARN
               - !Ref ExternalChannels2PaperChannelQueueARN
               - !Ref ExternalChannels2UserAttributesQueueARN
+              - !Ref InternalQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter

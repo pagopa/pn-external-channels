@@ -15,8 +15,8 @@ fi
 
 _AWS_USERPROFILE=$1
 _AWS_REGION="eu-south-1"
-_BUCKETNAME="cd-pipeline-cdartifactbucket-g0o7xx0eyyc7"
-_ENV="svil"
+_BUCKETNAME="cd-confinfo-pipeline-cdartifactbucket-1a9xy8b2tajiq"
+_ENV="hotfix-confinfo"
 
 CWD=$(pwd -P)
 

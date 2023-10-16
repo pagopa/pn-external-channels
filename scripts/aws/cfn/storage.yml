@@ -45,6 +45,16 @@ Resources:
       BillingMode: "PAY_PER_REQUEST"
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+
+  # Internal queues (creato nel modo standard per compatibilità stack del mock consolidatore)
+  InternalQueue:
+    Type: AWS::SQS::Queue
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      QueueName: "pn-external_channels_to_internal"
+      VisibilityTimeout: 60
+      DelaySeconds: 1
   
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
@@ -75,3 +85,21 @@ Outputs:
   VerificationCodeTableDynamoTableArn:
     Description: ARN of dynamodb table containing verification code for mock
     Value: !Sub '${VerificationCodeTable.Arn}'
+
+  # Internal Queue
+  InternalQueueURL:
+    Description: "URL of new Amazon SQS Queue"
+    Value:
+      Ref: "InternalQueue"
+  InternalQueueARN:
+    Description: "ARN of new AmazonSQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "InternalQueue"
+        - "Arn"
+  InternalQueueName:
+    Description: "Name of new Amazon SQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "InternalQueue"
+        - "QueueName"

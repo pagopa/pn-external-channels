@@ -2,7 +2,6 @@ package it.pagopa.pn.externalchannels.service;
 
 import it.pagopa.pn.externalchannels.dao.VerificationCodeDao;
 import it.pagopa.pn.externalchannels.dao.VerificationCodeEntity;
-import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +16,14 @@ public class VerificationCodeService {
         this.verificationCodeDao = verificationCodeDao;
     }
 
-    public void saveVerificationCode(DigitalNotificationRequest request) {
-        if(request.getEventType().equals("VerificationCode")){
-            String verificationCode = getVerificationCodeFromHtml(request.getMessageText());
-            log.info("Verification code is {} for address {}",verificationCode, request.getReceiverDigitalAddress());
+    public void saveVerificationCode(String eventType, String messageText, String receiverDigitalAddress) {
+        if("VerificationCode".equals(eventType)){
+            String verificationCode = getVerificationCodeFromHtml(messageText);
+            log.info("Verification code is {} for address {}",verificationCode, receiverDigitalAddress);
 
             VerificationCodeEntity verificationCodeEntity = new VerificationCodeEntity();
             verificationCodeEntity.setVerificationCode(verificationCode);
-            verificationCodeEntity.setPk(request.getReceiverDigitalAddress());
+            verificationCodeEntity.setPk(receiverDigitalAddress);
             
             verificationCodeDao.addVerificationCode(verificationCodeEntity);
         }
