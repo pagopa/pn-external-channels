@@ -72,42 +72,42 @@ public class NormalizedAddress {
     private String sComuneAbb;
 
     public static final String JSON_PROPERTY_S_COMUNE_SPEDIZIONE = "sComuneSpedizione";
-    @CsvBindByPosition(position = 9)
+    @CsvBindByPosition(position = 10)
     private String sComuneSpedizione;
 
     public static final String JSON_PROPERTY_S_FRAZIONE_UFF = "sFrazioneUff";
-    @CsvBindByPosition(position = 10)
+    @CsvBindByPosition(position = 11)
     private String sFrazioneUff;
 
     public static final String JSON_PROPERTY_S_FRAZIONE_ABB = "sFrazioneAbb";
-    @CsvBindByPosition(position = 11)
+    @CsvBindByPosition(position = 12)
     private String sFrazioneAbb;
 
     public static final String JSON_PROPERTY_S_FRAZIONE_SPEDIZIONE = "sFrazioneSpedizione";
-    @CsvBindByPosition(position = 12)
+    @CsvBindByPosition(position = 13)
     private String sFrazioneSpedizione;
 
     public static final String JSON_PROPERTY_S_CIVICO_ALTRO = "sCivicoAltro";
-    @CsvBindByPosition(position = 13)
+    @CsvBindByPosition(position = 14)
     private String sCivicoAltro;
 
     public static final String JSON_PROPERTY_S_CAP = "sCap";
-    @CsvBindByPosition(position = 14)
+    @CsvBindByPosition(position = 15)
     private String sCap;
 
     public static final String JSON_PROPERTY_S_PRESSO = "sPresso";
-    @CsvBindByPosition(position = 15)
+    @CsvBindByPosition(position = 16)
     private String sPresso;
 
     public static final String JSON_PROPERTY_S_VIA_COMPLETA_UFF = "sViaCompletaUff";
-    @CsvBindByPosition(position = 16)
+    @CsvBindByPosition(position = 17)
     private String sViaCompletaUff;
 
     public static final String JSON_PROPERTY_S_VIA_COMPLETA_ABB = "sViaCompletaAbb";
-    @CsvBindByPosition(position = 17)
+    @CsvBindByPosition(position = 18)
     private String sViaCompletaAbb;
 
     public static final String JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE = "sViaCompletaSpedizione";
-    @CsvBindByPosition(position = 18)
+    @CsvBindByPosition(position = 19)
     private String sViaCompletaSpedizione;
 }
