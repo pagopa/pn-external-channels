@@ -172,13 +172,28 @@ public class PostelService {
                         if (postalizzabile == 0) {
                             normalizedAddress.setNErroreNorm(2);
                         }
-                        normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo());
-                        normalizedAddress.setSCivicoAltro(input.getIndirizzo());
-                        normalizedAddress.setSCap(input.getCap());
-                        normalizedAddress.setSComuneSpedizione(input.getLocalita());
-                        normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva());
-                        normalizedAddress.setSSiglaProv(input.getProvincia());
-                        normalizedAddress.setSStatoSpedizione(input.getStato());
+                        if(!StringUtils.hasText(input.getIndirizzo())){
+                            normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
+                        }
+                        //ToDo: verificare a quale campo di input corrisponde civicoAltro
+                       /* if(!StringUtils.hasText(input.getIndirizzo())){
+                            normalizedAddress.setSCivicoAltro(input.getIndirizzo().toUpperCase());
+                        }*/
+                        if(!StringUtils.hasText(input.getCap())){
+                            normalizedAddress.setSCap(input.getCap().toUpperCase());
+                        }
+                        if(!StringUtils.hasText(input.getLocalita())){
+                            normalizedAddress.setSComuneSpedizione(input.getLocalita().toUpperCase());
+                        }
+                        if(!StringUtils.hasText(input.getLocalitaAggiuntiva())){
+                            normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva().toUpperCase());
+                        }
+                        if(!StringUtils.hasText(input.getProvincia())){
+                            normalizedAddress.setSSiglaProv(input.getProvincia().toUpperCase());
+                        }
+                        if(!StringUtils.hasText(input.getStato())){
+                            normalizedAddress.setSStatoSpedizione(input.getStato().toUpperCase());
+                        }
                         return normalizedAddress;
                     })
                     .toList()));
