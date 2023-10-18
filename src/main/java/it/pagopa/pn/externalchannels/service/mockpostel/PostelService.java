@@ -172,26 +172,26 @@ public class PostelService {
                         if (postalizzabile == 0) {
                             normalizedAddress.setNErroreNorm(2);
                         }
-                        if(!StringUtils.hasText(input.getIndirizzo())){
+                        if(StringUtils.hasText(input.getIndirizzo())){
                             normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
                         }
                         //ToDo: verificare a quale campo di input corrisponde civicoAltro
-                       /* if(!StringUtils.hasText(input.getIndirizzo())){
+                       /* if(StringUtils.hasText(input.getIndirizzo())){
                             normalizedAddress.setSCivicoAltro(input.getIndirizzo().toUpperCase());
                         }*/
-                        if(!StringUtils.hasText(input.getCap())){
+                        if(StringUtils.hasText(input.getCap())){
                             normalizedAddress.setSCap(input.getCap().toUpperCase());
                         }
-                        if(!StringUtils.hasText(input.getLocalita())){
+                        if(StringUtils.hasText(input.getLocalita())){
                             normalizedAddress.setSComuneSpedizione(input.getLocalita().toUpperCase());
                         }
-                        if(!StringUtils.hasText(input.getLocalitaAggiuntiva())){
+                        if(StringUtils.hasText(input.getLocalitaAggiuntiva())){
                             normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva().toUpperCase());
                         }
-                        if(!StringUtils.hasText(input.getProvincia())){
+                        if(StringUtils.hasText(input.getProvincia())){
                             normalizedAddress.setSSiglaProv(input.getProvincia().toUpperCase());
                         }
-                        if(!StringUtils.hasText(input.getStato())){
+                        if(StringUtils.hasText(input.getStato())){
                             normalizedAddress.setSStatoSpedizione(input.getStato().toUpperCase());
                         }
                         return normalizedAddress;
