@@ -42,7 +42,12 @@ public class NormalizeRequestPostelInput {
     private String indirizzo;
 
     @ToString.Exclude
-    @CsvBindByName(column = "stato")
+    @CsvBindByName(column = "indirizzoAggiuntivo")
     @CsvBindByPosition(position = 6)
+    private String indirizzoAggiuntivo;
+
+    @ToString.Exclude
+    @CsvBindByName(column = "stato")
+    @CsvBindByPosition(position = 7)
     private String stato;
 }

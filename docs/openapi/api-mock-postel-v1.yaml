@@ -1,42 +1,47 @@
 openapi: 3.0.3
 info:
-  title:  API fornite dal normalizzatore
+  title:  API fornite dal normalizzatore - servizio di deduplica
   version: 1.0.0
 paths:
   /send-normalizzatore-ingress/v1/normalizzazione:
     post:
       operationId: normalizzazione
       summary: PN richiede la normalizzazione batch
-      description: >-
-        Il file in ingresso conterrà i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
-          - IdCodiceCliente : Id del cliente
-          - Provincia : Sigla Provincia - opzionale
-          - Cap : cap - opzionale
-          - localita : località/comune - obbligatorio
-          - localitaAggiuntiva : frazione - opzionale
-          - indirizzo : svia - obbligatorio - contiene la via completa DUG + TOPONIMO + CIVICO
-          - stato : sstato - opzionale
-        Il processo di normalizzazione creerà un file di output contenente i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
-          - IDCODICECLIENTE : Id del cliente;
-          - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1,2,3,4,5 : normalizzato);
-          - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);
-          - NERRORENORM : Codice di errore;
-          - SSIGLAPROV : Sigla provincia normalizzata;
-          - SSTATOUFF : Stato normalizzato (Valorizzato ITALIA, REPUBBLICA DI SAN MARINO e CITTA’ DEL VATICANO + TUTTI GLI STATI ESTERI);
-          - SSTATOABB : Stato abbreviato normalizzato;
-          - SSTATOSPEDIZIONE : Stato di Spedizione;
-          - SCOMUNEUFF : Comune normalizzato;
-          - SCOMUNEABB : Comune Abbreviato normalizzato;
-          - SCOMUNESPEDIZIONE : Comune di spedizione;
-          - SFRAZIONEUFF : Frazione normalizzata;
-          - SFRAZIONEABB : Frazione Abbreviata normalizzata;
-          - SFRAZIONESPEDIZIONE : Frazione di Spedizione;
-          - SCIVICOALTRO : altri elementi del civico (interno, piano, scala, palazzo …) - VA IN INDIRIZZO 2
-          - SCAP : cap normalizzato;
-          - SPRESSO : informazioni di presso e casella postale (C.P 123, Presso sig. rossi …) -  VA IN NAME 2;
-          - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;
-          - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;
-          - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
+      description: >- 
+          Il file in ingresso conterrà i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
+            - IdCodiceCliente : Id del cliente
+            - Provincia : Sigla Provincia - opzionale
+            - Cap : cap - opzionale
+            - localita : località/comune - obbligatorio
+            - localitaAggiuntiva : frazione - opzionale
+            - indirizzo : svia - obbligatorio - contiene la via completa DUG + TOPONIMO + CIVICO
+            - indirizzoAggiuntivo : edificio - opzionale
+            - stato : sstato - opzionale
+          Il processo di normalizzazione creerà un file di output contenente i seguenti campi gestiti con logica posizionale (nessuna intestazione, separatore ';'):
+            - IDCODICECLIENTE : Id del cliente;
+            - NRISULTATONORM : Risultato di normalizzazione (0 : scartato/ 1,2,3,4,5 : normalizzato);
+            - FPOSTALIZZABILE (0 : NON Postalizzabile, 1 : Postalizzabile);
+            - NERRORENORM : Codice di errore;
+            - SSIGLAPROV : Sigla provincia normalizzata;
+            - SSTATOUFF : Stato normalizzato (Valorizzato ITALIA, REPUBBLICA DI SAN MARINO e CITTA' DEL VATICANO + TUTTI GLI STATI ESTERI);
+            - SSTATOABB : Stato abbreviato normalizzato;
+            - SSTATOSPEDIZIONE : Stato di Spedizione;
+            - SCOMUNEUFF : Comune normalizzato;
+            - SCOMUNEABB : Comune Abbreviato normalizzato;
+            - SCOMUNESPEDIZIONE : Comune di spedizione;
+            - SFRAZIONEUFF : Frazione normalizzata;
+            - SFRAZIONEABB : Frazione Abbreviata normalizzata;
+            - SFRAZIONESPEDIZIONE : Frazione di Spedizione;
+            - SCIVICOALTRO : altri elementi del civico (interno, piano, scala, palazzo …) - VA IN INDIRIZZO 2
+            - SCAP : cap normalizzato;
+            - SPRESSO : informazioni di presso e casella postale (C.P 123, Presso sig. rossi …) -  VA IN NAME 2;
+            - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;
+            - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;
+            - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
+
+            NERRORENORM può contenere i seguenti valori
+              - //FIXME: aggiungere codifica errori
+
       parameters:
         - $ref: '#/components/parameters/xPagopaAddrManCxId'
         - $ref: '#/components/parameters/xPagopaAddrManApiKey'
@@ -120,6 +125,7 @@ components:
 
 
   schemas:
+
     NormalizzazioneRequest:
       type: object
       required:
@@ -150,20 +156,23 @@ components:
       type: object
       required:
         - requestId
+      description: >-
+        error valorizzato solo in caso di mancata accettazione
       properties:
         requestId:
           type: string
           minLength: 1
           maxLength: 250
           description: id lavorazione
-        stato:
-          type: string
         error:
           type: string
           description: >-
-            identificativo dell'errore
-            - _E01_ //FIXME elencare i casi
-            - _E02_
+            identificativo dell'errore            
+              - NOR400: BAD REQUEST. Mi passa un input errato sia dal punto di vista del contenuto o formale;
+              - NOR401: UNAUTHORIZATED. Mi passa delle credenziali vuote o errate;
+              - NOR404: NOT FOUND. Il servizio nel server Postel non è disponibile;
+              - NOR500: INTERNAL_SERVER_ERROR. Il servizio nei server Postel non è raggiungibile;
+              - NOR998: SERVIZIO DI NORMALIZZAZIONE NON DISPONIBILE; 
 
     DeduplicaRequest:
       type: object
@@ -174,7 +183,7 @@ components:
         configIn:
           $ref: '#/components/schemas/ConfigIn'
         masterIn:
-          description: Indirizzo base con cui deduplicare lo slave //FIXME
+          description: Indirizzo base con cui deduplicare lo slave
           $ref: '#/components/schemas/AddressIn'
         slaveIn:
           description: Indirizzo oggetto della deduplica
@@ -206,6 +215,8 @@ components:
           type: string
         indirizzo:
           type: string
+        indirizzoAggiuntivo:
+          type: string
         stato:
           type: string
 
@@ -215,8 +226,11 @@ components:
         slaveOut e risultatoDedu: obbligatori in caso di risposta di successo
         errore: valorizzato in caso di risposta con errore
       properties:
+        masterOut:
+          description: risultato delle deduplica
+          $ref: '#/components/schemas/AddressOut'
         slaveOut:
-          description: risultato delle deduplica //FIXME
+          description: risultato delle deduplica
           $ref: '#/components/schemas/AddressOut'
         risultatoDedu:
           type: boolean
@@ -228,12 +242,22 @@ components:
           type: string
           description: >-
             identificativo dell'errore
-            - _E01_ //FIXME elencare i casi
-            - _E02_
+            - DED400: BAD REQUEST. Mi passa un input errato sia dal punto di vista del contenuto o formale;
+            - DED401: UNAUTHORIZATED. Mi passa delle credenziali vuote o errate;
+            - DED404: NOT FOUND. Il servizio nel server Postel non è disponibile;
+            - DED500: INTERNAL_SERVER_ERROR. Il servizio nei server Postel non è raggiungibile; 
+            - DED998: SERVIZIO DI NORMALIZZAZIONE NON DISPONIBILE; 
+            - DED997: SERVIZIO ORACLE NON DISPONIBILE; 
+            - DED992: ERRORE_GENERICO;
+            - DED996: ENTRAMBI_SCARTATI;
+            - DED995: INDIRIZZO_MASTER_SCARTATO;
+            - DED994: INDIRIZZO_SLAVE_SCARTATO;
 
     AddressOut:
       type: object
-      # FIXME elencare i parametri obbligatori
+      required:
+        - nRisultatoNorm
+        - fPostalizzabile
       properties:
         id:
           type: string
