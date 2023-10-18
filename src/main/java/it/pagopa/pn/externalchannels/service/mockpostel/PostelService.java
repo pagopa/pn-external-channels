@@ -175,10 +175,9 @@ public class PostelService {
                         if(StringUtils.hasText(input.getIndirizzo())){
                             normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
                         }
-                        //ToDo: verificare a quale campo di input corrisponde civicoAltro
-                       /* if(StringUtils.hasText(input.getIndirizzo())){
-                            normalizedAddress.setSCivicoAltro(input.getIndirizzo().toUpperCase());
-                        }*/
+                        if(StringUtils.hasText(input.getIndirizzoAggiuntivo())){
+                            normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo().toUpperCase());
+                        }
                         if(StringUtils.hasText(input.getCap())){
                             normalizedAddress.setSCap(input.getCap().toUpperCase());
                         }

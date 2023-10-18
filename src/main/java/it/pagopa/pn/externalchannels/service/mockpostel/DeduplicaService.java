@@ -19,20 +19,20 @@ public class DeduplicaService {
 			switch (masterIn.getCap()) {
 				case "00000":
 					//ERRORE DI NORMALIZZAZIONE GESTISTO DA ADDRESS MANAGER IN 200
-					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 0, 1, null);
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 1, null);
 					break;
 				case "11111":
 					//ERRORE TECNICO GESTITO DA ADDRESS MANAGER IN 400
-					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 0, 1, "E1");
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 1, "E1");
 					break;
 				case "00500":
 					return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"));
 				default:
-					risultatoDeduplica = createRisultatoDeduplica(slaveIn, 1, null, null);
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, null, null);
 					break;
 			}
 		} else {
-			risultatoDeduplica = createRisultatoDeduplica(slaveIn, 1, null, null);
+			risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, null, null);
 		}
 
 		if (areFieldsEqual(masterIn, slaveIn)) {
@@ -50,7 +50,10 @@ public class DeduplicaService {
 		if(!StringUtils.isBlank(addressIn.getIndirizzo())){
 			addressIn.setIndirizzo(addressIn.getIndirizzo().toUpperCase());
 		}
-		if(!StringUtils.isBlank(addressIn.getLocalita())){
+		if (!StringUtils.isBlank(addressIn.getIndirizzoAggiuntivo())){
+			addressIn.setIndirizzoAggiuntivo(addressIn.getIndirizzoAggiuntivo().toUpperCase());
+		}
+		if (!StringUtils.isBlank(addressIn.getLocalita())){
 			addressIn.setLocalita(addressIn.getLocalita().toUpperCase());
 		}
 		if(!StringUtils.isBlank(addressIn.getLocalitaAggiuntiva())){
@@ -64,11 +67,13 @@ public class DeduplicaService {
 		}
 	}
 
-	private DeduplicaResponse createRisultatoDeduplica (AddressIn slaveIn, Integer postalizzabile, Integer error, String erroreDedu) {
+	private DeduplicaResponse createRisultatoDeduplica (AddressIn slaveIn, AddressIn masterIn, Integer postalizzabile, Integer error, String erroreDedu) {
 		DeduplicaResponse risultatoDeduplica = new DeduplicaResponse();
 		convertFieldsToUpperCase(slaveIn);
 		AddressOut slaveOut = getAddressOut(slaveIn, postalizzabile, error);
+		AddressOut masterOut = getAddressOut(masterIn, postalizzabile, error);
 		risultatoDeduplica.setSlaveOut(slaveOut);
+		risultatoDeduplica.setMasterOut(masterOut);
 		risultatoDeduplica.setErrore(erroreDedu);
 		return risultatoDeduplica;
 	}
@@ -83,20 +88,27 @@ public class DeduplicaService {
 		addressOut.setsViaCompletaSpedizione(addressIn.getIndirizzo());
 		addressOut.setsComuneSpedizione(addressIn.getLocalita());
 		addressOut.setsFrazioneSpedizione(addressIn.getLocalitaAggiuntiva());
-		addressOut.setsCivicoAltro("address2");
+		addressOut.setsCivicoAltro(addressIn.getIndirizzoAggiuntivo());
 		addressOut.setsSiglaProv(addressIn.getProvincia());
 		addressOut.setsStatoSpedizione(addressIn.getStato());
 		return addressOut;
 	}
 
 	private boolean areFieldsEqual (AddressIn masterIn, AddressIn slaveIn) {
-		return masterIn.getCap().equalsIgnoreCase(slaveIn.getCap())
-				&& masterIn.getIndirizzo().equalsIgnoreCase(slaveIn.getIndirizzo())
-				&& masterIn.getLocalita().equalsIgnoreCase(slaveIn.getLocalita())
-				&& masterIn.getProvincia().equalsIgnoreCase(slaveIn.getProvincia())
-				&& masterIn.getLocalitaAggiuntiva().equalsIgnoreCase(slaveIn.getLocalitaAggiuntiva())
-				&& masterIn.getStato().equalsIgnoreCase(slaveIn.getStato());
+		return compareString(masterIn.getCap(), slaveIn.getCap())
+				&& compareString(masterIn.getIndirizzo(), slaveIn.getIndirizzo())
+				&& compareString(masterIn.getIndirizzoAggiuntivo(), slaveIn.getIndirizzoAggiuntivo())
+				&& compareString(masterIn.getLocalita(), slaveIn.getLocalita())
+				&& compareString(masterIn.getProvincia(), slaveIn.getProvincia())
+				&& compareString(masterIn.getLocalitaAggiuntiva(), slaveIn.getLocalitaAggiuntiva())
+				&& compareString(masterIn.getStato(), slaveIn.getStato());
 	}
+
+	private boolean compareString(String base, String target) {
+		if(!StringUtils.isBlank(base)){
+			return base.equalsIgnoreCase(target);
+		}else return StringUtils.isBlank(base) && StringUtils.isBlank(target);
+    }
 
 	private void setSuccessfulResult (DeduplicaResponse risultatoDeduplica) {
 		risultatoDeduplica.setRisultatoDedu(Boolean.TRUE);

@@ -33,7 +33,6 @@ public class MockPostelUtils {
     public NormalizzazioneResponse getNormalizzazioneOK(String requestId) {
         NormalizzazioneResponse normalizzazioneResponse = new NormalizzazioneResponse();
         normalizzazioneResponse.setRequestId(requestId);
-        normalizzazioneResponse.setStato("PRESO IN CARICO");
         return normalizzazioneResponse;
     }
 
