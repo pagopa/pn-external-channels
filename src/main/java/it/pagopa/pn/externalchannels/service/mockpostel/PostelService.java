@@ -152,9 +152,7 @@ public class PostelService {
         List<NormalizedAddress> normalizedAddressList = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(inputList)) {
-
             Map<String, List<NormalizeRequestPostelInput>> map = inputList.stream().collect(groupingBy(input -> input.getIdCodiceCliente().split("#")[0]));
-
             if (!complete) {
                 map.forEach((s, normalizeRequestPostelInputs) -> {
                     if (normalizeRequestPostelInputs.size() > 1) {
@@ -163,41 +161,45 @@ public class PostelService {
                 });
             }
 
-            map.forEach((s, normalizeRequestPostelInputs) -> normalizedAddressList.addAll(normalizeRequestPostelInputs.stream()
-                    .map(input -> {
-                        NormalizedAddress normalizedAddress = new NormalizedAddress();
-                        normalizedAddress.setId(input.getIdCodiceCliente());
-                        normalizedAddress.setFPostalizzabile(postalizzabile);
-                        normalizedAddress.setNRisultatoNorm(1);
-                        if (postalizzabile == 0) {
-                            normalizedAddress.setNErroreNorm(2);
-                        }
-                        if(StringUtils.hasText(input.getIndirizzo())){
-                            normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getIndirizzoAggiuntivo())){
-                            normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getCap())){
-                            normalizedAddress.setSCap(input.getCap().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getLocalita())){
-                            normalizedAddress.setSComuneSpedizione(input.getLocalita().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getLocalitaAggiuntiva())){
-                            normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getProvincia())){
-                            normalizedAddress.setSSiglaProv(input.getProvincia().toUpperCase());
-                        }
-                        if(StringUtils.hasText(input.getStato())){
-                            normalizedAddress.setSStatoSpedizione(input.getStato().toUpperCase());
-                        }
-                        return normalizedAddress;
-                    })
-                    .toList()));
+            addItemToList(map, normalizedAddressList, postalizzabile);
         }
         return normalizedAddressList;
+    }
+
+    private void addItemToList(Map<String, List<NormalizeRequestPostelInput>> map, List<NormalizedAddress> normalizedAddressList, int postalizzabile) {
+        map.forEach((s, normalizeRequestPostelInputs) -> normalizedAddressList.addAll(normalizeRequestPostelInputs.stream()
+                .map(input -> {
+                    NormalizedAddress normalizedAddress = new NormalizedAddress();
+                    normalizedAddress.setId(input.getIdCodiceCliente());
+                    normalizedAddress.setFPostalizzabile(postalizzabile);
+                    normalizedAddress.setNRisultatoNorm(1);
+                    if (postalizzabile == 0) {
+                        normalizedAddress.setNErroreNorm(2);
+                    }
+                    if(StringUtils.hasText(input.getIndirizzo())){
+                        normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getIndirizzoAggiuntivo())){
+                        normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getCap())){
+                        normalizedAddress.setSCap(input.getCap().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getLocalita())){
+                        normalizedAddress.setSComuneSpedizione(input.getLocalita().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getLocalitaAggiuntiva())){
+                        normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getProvincia())){
+                        normalizedAddress.setSSiglaProv(input.getProvincia().toUpperCase());
+                    }
+                    if(StringUtils.hasText(input.getStato())){
+                        normalizedAddress.setSStatoSpedizione(input.getStato().toUpperCase());
+                    }
+                    return normalizedAddress;
+                })
+                .toList()));
     }
 
 
