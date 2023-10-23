@@ -19,11 +19,19 @@ public class DeduplicaService {
 			switch (masterIn.getCap()) {
 				case "00000":
 					//ERRORE DI NORMALIZZAZIONE GESTISTO DA ADDRESS MANAGER IN 200
-					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 1, null);
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 441, null);
 					break;
 				case "11111":
 					//ERRORE TECNICO GESTITO DA ADDRESS MANAGER IN 400
-					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 1, "E1");
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, null, "DED400");
+					break;
+				case "22222":
+					//ERRORE MASTER SCARTATO GESTITO DA ADDRESS MANAGER
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,1, null, "DED001");
+					break;
+				case "33333":
+					//ERRORE NON POSTALIZZABILE E SLAVE SCARTATO GESTITO DA ADDRESS MANAGER
+					risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn,0, 443, "DED002");
 					break;
 				case "00500":
 					return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"));
