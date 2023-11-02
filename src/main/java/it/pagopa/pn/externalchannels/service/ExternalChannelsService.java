@@ -96,7 +96,9 @@ public class ExternalChannelsService {
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
+        log.info("OutputChannel is {}",outputChannel);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
+            log.info("start saveVerificationCode");
             verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
         }
 

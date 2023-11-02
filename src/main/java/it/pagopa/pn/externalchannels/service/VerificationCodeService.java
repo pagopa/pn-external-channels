@@ -17,6 +17,7 @@ public class VerificationCodeService {
     }
 
     public void saveVerificationCode(String eventType, String messageText, String receiverDigitalAddress) {
+        log.info("Start saveVerificationCode eventType: {} receiverDigitalAddress: {}",messageText,receiverDigitalAddress);
         if("VerificationCode".equals(eventType)){
             String verificationCode = getVerificationCodeFromHtml(messageText);
             log.info("Verification code is {} for address {}",verificationCode, receiverDigitalAddress);
