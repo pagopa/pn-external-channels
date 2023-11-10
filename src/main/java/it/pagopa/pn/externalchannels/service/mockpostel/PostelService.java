@@ -1,6 +1,7 @@
 package it.pagopa.pn.externalchannels.service.mockpostel;
 
 import it.pagopa.pn.commons.exceptions.PnInternalException;
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizeRequestPostelInput;
 import it.pagopa.pn.externalchannels.dto.postelmock.NormalizedAddress;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.*;
@@ -32,11 +33,9 @@ public class PostelService {
     private final PnAddressManagerClientImpl addressManagerClient;
     private final UploadDownloadClient uploadDownloadClient;
     private final MockPostelUtils mockPostelUtils;
-    private static final String POSTEL_CXID = "POSTEL";
-    private static final String POSTEL_APIKEY = "test";
     private static final String REQUEST_ID_ERROR_PREFIX = "ACTIVATE_ERROR";
     private final CsvService csvService;
-
+    private final PnExternalChannelsProperties pnExternalChannelsProperties;
 
     @Qualifier("addressManagerScheduler")
     private final Scheduler scheduler;
@@ -45,11 +44,13 @@ public class PostelService {
                          PnAddressManagerClientImpl addressManagerClient,
                          UploadDownloadClient uploadDownloadClient,
                          MockPostelUtils mockPostelUtils, CsvService csvService,
-                         Scheduler scheduler) {
+                         PnExternalChannelsProperties pnExternalChannelsProperties, Scheduler scheduler) {
+
         this.pnSafeStorageClient = pnSafeStorageClient;
         this.addressManagerClient = addressManagerClient;
         this.uploadDownloadClient = uploadDownloadClient;
         this.mockPostelUtils = mockPostelUtils;
+        this.pnExternalChannelsProperties = pnExternalChannelsProperties;
         this.csvService = csvService;
         this.scheduler = scheduler;
     }
@@ -90,7 +91,7 @@ public class PostelService {
 
     private byte[] retrieveDataFromCsv(String uri) {
         String finalFileKey = uri.replace(SAFE_STORAGE_URL_PREFIX, "");
-        FileDownloadResponse file = addressManagerClient.getFile(POSTEL_CXID, POSTEL_APIKEY, finalFileKey);
+        FileDownloadResponse file = addressManagerClient.getFile(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), finalFileKey);
         if (file.getDownload() != null) {
             return pnSafeStorageClient.downloadContent(file.getDownload().getUrl());
         }
@@ -101,11 +102,11 @@ public class PostelService {
     private OperationResultCodeResponse performCallback(String batchId, String content, String sha256) {
         OperationResultCodeResponse operationResultCodeResponse = new OperationResultCodeResponse();
         PreLoadRequestData preLoadRequestData = mockPostelUtils.createPreloadRequest(sha256);
-        PreLoadResponseData responseData = addressManagerClient.getPresignedURI(POSTEL_CXID, POSTEL_APIKEY, preLoadRequestData);
+        PreLoadResponseData responseData = addressManagerClient.getPresignedURI(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), preLoadRequestData);
         if (responseData != null) {
             PreLoadResponse preLoadResponse = uploadContent(content, responseData.getPreloads(), sha256);
             NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponse.getKey(), sha256);
-            operationResultCodeResponse = addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, normalizerCallbackRequestOK);
+            operationResultCodeResponse = addressManagerClient.performCallback(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), normalizerCallbackRequestOK);
             log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
                     operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
         }
@@ -124,7 +125,7 @@ public class PostelService {
         callbackRequest.setRequestId(batchId);
         callbackRequest.setError("E001");
 
-        OperationResultCodeResponse operationResultCodeResponse = addressManagerClient.performCallback(POSTEL_CXID, POSTEL_APIKEY, callbackRequest);
+        OperationResultCodeResponse operationResultCodeResponse = addressManagerClient.performCallback(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), callbackRequest);
         log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
                 operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
         return operationResultCodeResponse;

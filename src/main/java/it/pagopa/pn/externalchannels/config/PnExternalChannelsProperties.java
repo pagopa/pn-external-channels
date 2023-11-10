@@ -53,6 +53,8 @@ public class PnExternalChannelsProperties {
 
     private String addressManagerCxId;
 
+    private String addressManagerApiKey;
+
     @Data
     public static class Topics {
 
