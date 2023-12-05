@@ -55,6 +55,8 @@ public class PnExternalChannelsProperties {
 
     private String addressManagerApiKey;
 
+    private Long addressManagerCallbackAfterMinutes;
+
     @Data
     public static class Topics {
 

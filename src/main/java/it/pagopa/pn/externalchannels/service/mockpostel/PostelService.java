@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -56,29 +57,30 @@ public class PostelService {
     }
 
     public Mono<NormalizzazioneResponse> activateNormalizer(NormalizzazioneRequest normalizzazioneRequest) {
-        log.info("start Activate Postel Normalizer");
-        Mono.fromCallable(() -> {
-            if (!normalizzazioneRequest.getRequestId().startsWith(REQUEST_ID_ERROR_PREFIX)) {
-                byte[] fileInputContent = retrieveDataFromCsv(normalizzazioneRequest.getUri());
-                log.info("retrieved data from inputCsv");
-                List<NormalizeRequestPostelInput> normalizeRequestPostelList = csvService.readItemsFromCsv(NormalizeRequestPostelInput.class, fileInputContent, 0);
-                List<NormalizedAddress> normalizedAddressList = checkCodiceClienteAndNormalizeAddresses(normalizeRequestPostelList);
+        log.info("Callback delay: {}", pnExternalChannelsProperties.getAddressManagerCallbackAfterMinutes());
 
-                if (CollectionUtils.isEmpty(normalizedAddressList)) {
-                    log.info("start perform callback with error");
-                    return performCallbackWithError(normalizzazioneRequest.getRequestId());
-                } else {
-                    log.info("start perform callback");
-                    String csvContent = csvService.writeItemsOnCsvToString(normalizedAddressList);
-                    String sha256 = mockPostelUtils.computeSha256(csvContent.getBytes(StandardCharsets.UTF_8));
-                    return performCallback(normalizzazioneRequest.getRequestId(), csvContent, sha256);
-                }
-            } else {
-                log.info("callback skipped for activate KO");
-                return Mono.empty();
-            }
-        }).subscribeOn(scheduler).subscribe();
+        Mono.delay(Duration.ofMinutes(pnExternalChannelsProperties.getAddressManagerCallbackAfterMinutes()))
+                .flatMap(aLong -> {
+                    if (!normalizzazioneRequest.getRequestId().startsWith(REQUEST_ID_ERROR_PREFIX)) {
+                        byte[] fileInputContent = retrieveDataFromCsv(normalizzazioneRequest.getUri());
+                        log.info("retrieved data from inputCsv");
+                        List<NormalizeRequestPostelInput> normalizeRequestPostelList = csvService.readItemsFromCsv(NormalizeRequestPostelInput.class, fileInputContent, 0);
+                        List<NormalizedAddress> normalizedAddressList = checkCodiceClienteAndNormalizeAddresses(normalizeRequestPostelList);
 
+                        if (CollectionUtils.isEmpty(normalizedAddressList)) {
+                            log.info("start perform callback with error");
+                            return Mono.just(performCallbackWithError(normalizzazioneRequest.getRequestId()));
+                        } else {
+                            log.info("start perform callback");
+                            String csvContent = csvService.writeItemsOnCsvToString(normalizedAddressList);
+                            String sha256 = mockPostelUtils.computeSha256(csvContent.getBytes(StandardCharsets.UTF_8));
+                            return performCallback(normalizzazioneRequest.getRequestId(), csvContent, sha256);
+                        }
+                    } else {
+                        log.info("callback skipped for activate KO");
+                        return Mono.empty();
+                    }
+                }).subscribeOn(scheduler).subscribe();
 
         if (normalizzazioneRequest.getRequestId().startsWith(REQUEST_ID_ERROR_PREFIX)) {
             log.info("Response KO for requestId [{}]", normalizzazioneRequest.getRequestId());
@@ -99,25 +101,29 @@ public class PostelService {
         throw new PnInternalException("error during retrieve file from address manager", "file data is empty");
     }
 
-    private OperationResultCodeResponse performCallback(String batchId, String content, String sha256) {
-        OperationResultCodeResponse operationResultCodeResponse = new OperationResultCodeResponse();
+    private Mono<OperationResultCodeResponse> performCallback(String batchId, String content, String sha256) {
         PreLoadRequestData preLoadRequestData = mockPostelUtils.createPreloadRequest(sha256);
         PreLoadResponseData responseData = addressManagerClient.getPresignedURI(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), preLoadRequestData);
         if (responseData != null) {
-            PreLoadResponse preLoadResponse = uploadContent(content, responseData.getPreloads(), sha256);
-            NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponse.getKey(), sha256);
-            operationResultCodeResponse = addressManagerClient.performCallback(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), normalizerCallbackRequestOK);
-            log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
-                    operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+            return uploadContent(content, responseData.getPreloads(), sha256)
+                    .map(preLoadResponses -> {
+                        NormalizerCallbackRequest normalizerCallbackRequestOK = mockPostelUtils.createNormalizerCallbackRequest(batchId, preLoadResponses.get(0).getKey(), sha256);
+                        OperationResultCodeResponse operationResultCodeResponse = addressManagerClient.performCallback(pnExternalChannelsProperties.getAddressManagerCxId(), pnExternalChannelsProperties.getAddressManagerApiKey(), normalizerCallbackRequestOK);
+                        log.info("operationResultCodeResponse for batchId: [{}] --> code: {}, description: {}, error: {}", batchId, operationResultCodeResponse.getResultCode(),
+                                operationResultCodeResponse.getResultDescription(), operationResultCodeResponse.getErrorList());
+
+                        return operationResultCodeResponse;
+                    });
+
         }
-        return operationResultCodeResponse;
+        return Mono.just(new OperationResultCodeResponse());
     }
 
-    public PreLoadResponse uploadContent(String content, List<PreLoadResponse> preloadResponseList, String sha256) {
+    public Mono<List<PreLoadResponse>> uploadContent(String content, List<PreLoadResponse> preloadResponseList, String sha256) {
         return Flux.fromIterable(preloadResponseList)
                 .flatMap(preLoadResponse -> uploadDownloadClient.uploadContent(content, preLoadResponse, sha256))
                 .doOnNext(preLoadResponse -> log.info("NORMALIZZAZIONE - uploadContent OK"))
-                .blockFirst();
+                .collectList();
     }
 
     private OperationResultCodeResponse performCallbackWithError(String batchId) {
