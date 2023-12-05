@@ -65,7 +65,7 @@
   },
   {
     "sequenceName": "OK-CausaForzaMaggiore_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN015.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-RECRN015[FAILCAUSE:C04].5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_890",
@@ -149,7 +149,7 @@
   },
   {
     "sequenceName": "OK-CausaForzaMaggiore_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG015.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-RECAG015[FAILCAUSE:C01].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   },
   {
     "sequenceName": "OK_RIS",
