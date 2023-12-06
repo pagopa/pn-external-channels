@@ -217,6 +217,7 @@ Resources:
               - ssm:GetParameters
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence2'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockServiceIdEndpoint'
           - Effect: Allow
             Action:
