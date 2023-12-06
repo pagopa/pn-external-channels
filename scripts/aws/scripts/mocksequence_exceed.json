@@ -1,0 +1,10 @@
+[
+  {
+    "sequenceName": "FAIL_RS",
+    "sequence": "@sequence.5s-CON080.5s-RECRS002A[FAILCAUSE:M07].5s-RECRS002B[DOC:Plico].5s-RECRS002C"
+  },
+  {
+    "sequenceName": "OK-Retry_RS",
+    "sequence": "@sequence.5s-CON080.5s-RECRS006[FAILCAUSE:F03]@retry.5s-CON080.5s-RECRS001C"
+  }
+]
