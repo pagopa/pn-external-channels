@@ -58,7 +58,7 @@ public class ExternalChannelsService {
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
-    private static final String SEQUENCE_PARAMETER_NAME = "MapExternalChannelMockSequence";
+    private static final List<String> SEQUENCE_PARAMETER_NAME = Arrays.asList("MapExternalChannelMockSequence","MapExternalChannelMockSequence2");
     private static final String SERVICEID_PARAMETER_NAME = "MapExternalChannelMockServiceIdEndpoint";
 
     private final NotificationProgressDao notificationProgressDao;
@@ -362,7 +362,7 @@ public class ExternalChannelsService {
         return result.charAt(0) == '.' ? result.substring(1) : result;
     }
 
-    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
+    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,List<String> parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
         Optional<EventCodeSequenceDTO[]> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
         if(sequenceEventCode.isEmpty())return Optional.empty();
         EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();

@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.ssm.model.SsmException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,6 +44,30 @@ public abstract class ParameterizedCachedSsmParameterConsumer implements Paramet
         return (Optional<T>) optValue;
     }
 
+    public <T> Optional<T> getParameterValue(List<String> parametersName, Class<T> clazz ) {
+        Object optValue = null;
+        for(String parameterName: parametersName){
+            optValue = valueCache.computeIfAbsent(parameterName, key -> new ParameterizedCachedSsmParameterConsumer.ExpiringValue()).getValueCheckTimestamp();
+            if(optValue == null){
+                log.debug("Value for {} not in cache",parameterName);
+            }else{
+                break;
+            }
+        }//search in cache
+
+        if ( optValue == null ) {
+            for(String parameterName: parametersName){
+                Optional<T> value = getParameter(parameterName, clazz);
+                if(value.isPresent()){
+                    optValue = value;
+                    valueCache.put( parameterName, new ParameterizedCachedSsmParameterConsumer.ExpiringValue(optValue, cacheExpiration));
+                    break;
+                }
+            }
+        }//search in parameter store
+
+        return (Optional<T>) optValue;
+    }
 
     public String getParameter(String parameterName) {
         GetParameterRequest parameterRequest = GetParameterRequest.builder()
