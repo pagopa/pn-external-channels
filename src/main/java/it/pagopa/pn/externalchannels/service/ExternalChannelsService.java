@@ -363,9 +363,15 @@ public class ExternalChannelsService {
     }
 
     private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,List<String> parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
-        Optional<EventCodeSequenceDTO[]> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
-        if(sequenceEventCode.isEmpty())return Optional.empty();
-        EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
+        List<Optional<EventCodeSequenceDTO[]>> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
+        List<EventCodeSequenceDTO> eventCodeSequenceMergedList = new ArrayList<>();
+        sequenceEventCode.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(eventCodeSequenceDTOS -> eventCodeSequenceMergedList.addAll(Arrays.asList(eventCodeSequenceDTOS)));
+
+        if(eventCodeSequenceMergedList.isEmpty())  return Optional.empty();
+        EventCodeSequenceDTO[] eventCodeSequenceList = eventCodeSequenceMergedList.toArray(new EventCodeSequenceDTO[]{});
         EventCodeSequenceDTO eventCodeSequenceDTO = null;
         log.info("Search for receiverAddress {}",receiverAddress);
         receiverAddress = receiverAddress.toLowerCase();
