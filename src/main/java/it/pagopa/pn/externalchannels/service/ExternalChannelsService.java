@@ -99,7 +99,15 @@ public class ExternalChannelsService {
         log.info("OutputChannel is {}",outputChannel);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
             log.info("start saveVerificationCode");
-            verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+            try {
+                // nel caso di messaggi che hanno "pec-rejected" nell'id, non mi interessa recuperare il codice di verifica.
+                if (!digitalCourtesyMailRequest.getRequestId().contains("pec-rejected"))
+                    verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+                else
+                    log.info("skip saveVerificationCode for pec-rejected");
+            } catch (Exception e) {
+                log.warn("Cannot detect verification code", e);
+            }
         }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
