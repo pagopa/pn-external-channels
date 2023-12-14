@@ -6,5 +6,13 @@
   {
     "sequenceName": "OK-Retry_RS",
     "sequence": "@sequence.5s-CON080.5s-RECRS006[FAILCAUSE:F03]@retry.5s-CON080.5s-RECRS001C"
+  },
+  {
+    "sequenceName": "OK-Giacenza-lte10_890-3",
+    "sequence": "@sequence.5s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG011B[DOC:23L]"
+  },
+  {
+    "sequenceName": "OK_23I_AR",
+    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:23I;DELAY:1s].5s-RECRN001C"
   }
 ]
