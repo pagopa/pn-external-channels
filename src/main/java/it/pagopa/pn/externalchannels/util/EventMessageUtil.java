@@ -62,7 +62,7 @@ public class EventMessageUtil {
 
     private static final String OK_CODE = "C003";
 
-    private static final String ZIP_SUFFIX = "#ZIP";
+    private static final String ZIP_SUFFIX = "#Z";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
