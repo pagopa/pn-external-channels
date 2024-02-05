@@ -14,5 +14,13 @@
   {
     "sequenceName": "OK_23I_AR",
     "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:23I;DELAY:1s].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK_890_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#ZIP].5s-RECAG001C"
+  },
+  {
+    "sequenceName": "OK_AR_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#ZIP;DELAY:1s].5s-RECRN001C"
   }
 ]
