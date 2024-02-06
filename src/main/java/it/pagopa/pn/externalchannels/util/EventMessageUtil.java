@@ -290,6 +290,7 @@ public class EventMessageUtil {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
             if(documentType.endsWith(ZIP_SUFFIX)) {
+                log.info("[{}] ZIP attachment found!", iun);
                 documentType = documentType.replace(ZIP_SUFFIX, "");
                 fileCreationRequest = buildZIPAttachment();
             }
