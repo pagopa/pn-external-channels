@@ -84,6 +84,11 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
 3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
 
+Inoltre sul doctype, è possibile aggiungere il suffisso **#Z**, che permette di caricare un allegato di tipo ZIP invece che 
+PDF. Lo ZIP conterrà un file XML e un file PDF. \
+Esempio di utilizzo:
+`@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#Z].5s-RECAG001C`.
+
 
 ## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
 
