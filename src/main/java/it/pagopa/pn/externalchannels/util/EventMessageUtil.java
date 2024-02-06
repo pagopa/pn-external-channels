@@ -62,6 +62,8 @@ public class EventMessageUtil {
 
     private static final String OK_CODE = "C003";
 
+    private static final String ZIP_SUFFIX = "#Z";
+
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
         CodeTimeToSend codeTimeToSend = codeTimeToSends.poll();
@@ -286,12 +288,16 @@ public class EventMessageUtil {
 
     private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService) {
         try {
-            ClassPathResource classPathResource = new ClassPathResource("test.pdf");
-            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-            fileCreationRequest.setContentType("application/pdf");
-            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
-            fileCreationRequest.setStatus(SAVED);
-            fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+            final FileCreationWithContentRequest fileCreationRequest;
+            if(documentType.endsWith(ZIP_SUFFIX)) {
+                log.info("[{}] ZIP attachment found!", iun);
+                documentType = documentType.replace(ZIP_SUFFIX, "");
+                fileCreationRequest = buildZIPAttachment();
+            }
+            else {
+                fileCreationRequest = buildPDFAttachment();
+            }
+
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
@@ -305,6 +311,30 @@ public class EventMessageUtil {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
             return null;
         }
+    }
+
+    private static FileCreationWithContentRequest buildPDFAttachment() throws IOException {
+
+            ClassPathResource classPathResource = new ClassPathResource("test.pdf");
+            FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+            fileCreationRequest.setContentType("application/pdf");
+            fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
+            fileCreationRequest.setStatus(SAVED);
+            fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+            return fileCreationRequest;
+
+    }
+
+    private static FileCreationWithContentRequest buildZIPAttachment() throws IOException {
+
+        ClassPathResource classPathResource = new ClassPathResource("zip-with-pdf-and-xml.zip");
+        FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+        fileCreationRequest.setContentType("application/zip");
+        fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
+        fileCreationRequest.setStatus(SAVED);
+        fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+        return fileCreationRequest;
+
     }
 
 
