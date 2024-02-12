@@ -327,7 +327,7 @@ public class EventMessageUtil {
 
     private static FileCreationWithContentRequest buildZIPAttachment() throws IOException {
 
-        ClassPathResource classPathResource = new ClassPathResource("zip-with-pdf-and-xml.zip");
+        ClassPathResource classPathResource = new ClassPathResource("23L_PN_EXTERNAL_LEGAL_FACTS.zip");
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/zip");
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
