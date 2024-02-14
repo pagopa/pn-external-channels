@@ -22,5 +22,13 @@
   {
     "sequenceName": "OK_AR_ZIP",
     "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z;DELAY:1s].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK-REC008_890",
+    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG012.5s-RECAG008C"
+  },
+  {
+    "sequenceName": "OK-REC008_890-E",
+    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG008C.60s-RECAG012"
   }
 ]
