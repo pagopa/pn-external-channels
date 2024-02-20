@@ -145,7 +145,7 @@
   },
   {
     "sequenceName": "OK_RIS",
-    "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003"
+    "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003C"
   },
   {
     "sequenceName": "FAIL_RIS",
