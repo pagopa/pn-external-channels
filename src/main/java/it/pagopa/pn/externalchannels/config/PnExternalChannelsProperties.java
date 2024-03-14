@@ -57,6 +57,16 @@ public class PnExternalChannelsProperties {
 
     private Long addressManagerCallbackAfterMinutes;
 
+    private Csv csv;
+
+    @Data
+    public static class Csv{
+
+        private String pathCap;
+
+        private String pathCountry;
+    }
+
     @Data
     public static class Topics {
 
