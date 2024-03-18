@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -37,6 +36,7 @@ public class PostelService {
     private static final String REQUEST_ID_ERROR_PREFIX = "ACTIVATE_ERROR";
     private final CsvService csvService;
     private final PnExternalChannelsProperties pnExternalChannelsProperties;
+    private final AddressUtils addressUtils;
 
     @Qualifier("addressManagerScheduler")
     private final Scheduler scheduler;
@@ -45,8 +45,9 @@ public class PostelService {
                          PnAddressManagerClientImpl addressManagerClient,
                          UploadDownloadClient uploadDownloadClient,
                          MockPostelUtils mockPostelUtils, CsvService csvService,
-                         PnExternalChannelsProperties pnExternalChannelsProperties, Scheduler scheduler) {
-
+                         PnExternalChannelsProperties pnExternalChannelsProperties,
+                         Scheduler scheduler,
+                         AddressUtils addressUtils) {
         this.pnSafeStorageClient = pnSafeStorageClient;
         this.addressManagerClient = addressManagerClient;
         this.uploadDownloadClient = uploadDownloadClient;
@@ -54,6 +55,7 @@ public class PostelService {
         this.pnExternalChannelsProperties = pnExternalChannelsProperties;
         this.csvService = csvService;
         this.scheduler = scheduler;
+        this.addressUtils = addressUtils;
     }
 
     public Mono<NormalizzazioneResponse> activateNormalizer(NormalizzazioneRequest normalizzazioneRequest) {
@@ -175,57 +177,64 @@ public class PostelService {
                     NormalizedAddress normalizedAddress = new NormalizedAddress();
                     normalizedAddress.setId(input.getIdCodiceCliente());
                     evaluateCap(input, normalizedAddress);
-                    addressToUpperCase(input, normalizedAddress);
+                    NormalizeRequestPostelInput normalizeRequestPostelInput = addressUtils.normalizeAddress(input);
+                    toNormalizedAddress(normalizeRequestPostelInput, normalizedAddress);
                     return normalizedAddress;
                 })
                 .toList()));
     }
-
-    private void addressToUpperCase(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
-        if (StringUtils.hasText(input.getIndirizzo())) {
-            normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getIndirizzoAggiuntivo())) {
-            normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getCap())) {
-            normalizedAddress.setSCap(input.getCap().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getLocalita())) {
-            normalizedAddress.setSComuneSpedizione(input.getLocalita().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getLocalitaAggiuntiva())) {
-            normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getProvincia())) {
-            normalizedAddress.setSSiglaProv(input.getProvincia().toUpperCase());
-        }
-        if (StringUtils.hasText(input.getStato())) {
-            normalizedAddress.setSStatoSpedizione(input.getStato().toUpperCase());
-        }
+    private void toNormalizedAddress(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
+        normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo());
+        normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo());
+        normalizedAddress.setSCap(input.getCap());
+        normalizedAddress.setSComuneSpedizione(input.getLocalita());
+        normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva());
+        normalizedAddress.setSSiglaProv(input.getProvincia());
+        normalizedAddress.setSStatoSpedizione(input.getStato());
     }
 
     private void evaluateCap(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
-        switch (input.getCap()) {
-            case "11111":
-                normalizedAddress.setFPostalizzabile(0);
-                normalizedAddress.setNRisultatoNorm(0);
-                normalizedAddress.setNErroreNorm(303);
-                break;
-            case "22222":
-                normalizedAddress.setFPostalizzabile(0);
-                normalizedAddress.setNRisultatoNorm(0);
-                normalizedAddress.setNErroreNorm(901);
-                break;
-            case "33333":
-                normalizedAddress.setFPostalizzabile(0);
-                normalizedAddress.setNRisultatoNorm(0);
-                normalizedAddress.setNErroreNorm(999);
-                break;
-            default:
+        boolean isItalian = addressUtils.isItalian(input.getStato());
+        if (isItalian) {
+            switch (input.getCap()) {
+                case "11111":
+                    normalizedAddress.setFPostalizzabile(0);
+                    normalizedAddress.setNRisultatoNorm(0);
+                    normalizedAddress.setNErroreNorm(303);
+                    break;
+                case "22222":
+                    normalizedAddress.setFPostalizzabile(0);
+                    normalizedAddress.setNRisultatoNorm(0);
+                    normalizedAddress.setNErroreNorm(901);
+                    break;
+                case "33333":
+                    normalizedAddress.setFPostalizzabile(0);
+                    normalizedAddress.setNRisultatoNorm(0);
+                    normalizedAddress.setNErroreNorm(999);
+                    break;
+                default:
+                    try {
+                        addressUtils.verifyCapAndCity(input.getCap(), input.getProvincia(), input.getLocalita());
+                        normalizedAddress.setFPostalizzabile(1);
+                        normalizedAddress.setNRisultatoNorm(1);
+                        normalizedAddress.setNErroreNorm(null);
+                    } catch (PnInternalException e) {
+                        normalizedAddress.setFPostalizzabile(0);
+                        normalizedAddress.setNRisultatoNorm(0);
+                        normalizedAddress.setNErroreNorm(19);
+                    }
+            }
+        } else {
+            try {
+                addressUtils.searchCountry(input.getStato());
                 normalizedAddress.setFPostalizzabile(1);
                 normalizedAddress.setNRisultatoNorm(1);
-                break;
+                normalizedAddress.setNErroreNorm(null);
+            } catch (PnInternalException e) {
+                normalizedAddress.setFPostalizzabile(0);
+                normalizedAddress.setNRisultatoNorm(0);
+                normalizedAddress.setNErroreNorm(601);
+            }
         }
     }
 }
