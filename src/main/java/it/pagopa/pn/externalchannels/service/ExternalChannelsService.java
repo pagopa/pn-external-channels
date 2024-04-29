@@ -6,12 +6,13 @@ import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceDTO;
 import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsumer;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
-import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
-import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
+import it.pagopa.pn.externalchannels.dao.*;
 import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
+import it.pagopa.pn.externalchannels.mapper.SmartMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,8 @@ public class ExternalChannelsService {
 
     private final InternalSendClient internalSendClient;
 
+    private final ReceivedMessageEntityDaoDynamo receivedMessageEntityDaoDynamo;
+
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
@@ -88,11 +91,12 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalNotificationRequest));
+        }
 
         internalSendClient.sendNotification(notificationProgress);
     }
-
-    
 
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
@@ -120,6 +124,9 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
         }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalCourtesyMailRequest));
+        }
 
         internalSendClient.sendNotification(notificationProgress);
     }
@@ -135,6 +142,9 @@ public class ExternalChannelsService {
 
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
+        }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalCourtesySmsRequest));
         }
 
         internalSendClient.sendNotification(notificationProgress);
@@ -176,6 +186,9 @@ public class ExternalChannelsService {
 
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
+        }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(paperEngageRequest));
         }
 
         internalSendClient.sendNotification(notificationProgress);
