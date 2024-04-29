@@ -81,7 +81,7 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "requestId"
           AttributeType: "S"
-        - AttributeName: "iun"
+        - AttributeName: "iunRecIndex"
           AttributeType: "S"
       KeySchema:
         - AttributeName: "requestId"
@@ -91,7 +91,7 @@ Resources:
           IndexName: "iun-gsi"
           KeySchema:
             -
-              AttributeName: "iun"
+              AttributeName: "iunRecIndex"
               KeyType: "HASH"
           Projection:
             ProjectionType: "ALL"
