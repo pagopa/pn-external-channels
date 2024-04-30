@@ -53,7 +53,7 @@ public class RequestsToReceivedMessagesMapper {
         {
             int indexofiun_ = requestId.indexOf("IUN_");
 
-            return requestId.substring(indexofiun_, requestId.indexOf(".", indexofiun_) );
+            return requestId.substring(indexofiun_+4, requestId.indexOf(".", indexofiun_) );
         }
         return null;
     }
@@ -63,7 +63,7 @@ public class RequestsToReceivedMessagesMapper {
         {
             int indexofrecindex_ = requestId.indexOf("RECINDEX_");
 
-            return requestId.substring(indexofrecindex_, requestId.indexOf(".", indexofrecindex_) );
+            return requestId.substring(indexofrecindex_+9, requestId.indexOf(".", indexofrecindex_) );
         }
         return null;
     }

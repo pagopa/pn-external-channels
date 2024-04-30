@@ -4,7 +4,7 @@ import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 @Data
 @DynamoDbBean
@@ -29,7 +29,7 @@ public class ReceivedMessageDigitalNotificationRequestEntity {
     private String qos;
 
     @Getter(onMethod = @__({@DynamoDbAttribute("clientRequestTimeStamp")}))
-    private Instant clientRequestTimeStamp;
+    private OffsetDateTime clientRequestTimeStamp;
 
     @Getter(onMethod = @__({@DynamoDbAttribute("receiverDigitalAddress")}))
     private String receiverDigitalAddress;
