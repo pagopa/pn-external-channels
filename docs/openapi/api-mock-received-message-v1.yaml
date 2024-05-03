@@ -28,7 +28,7 @@ paths:
   /external-channels/received-message/{iun}/{recipientIndex}:
     get:
       operationId: getReceivedMessages
-      summary: Recupero del receivedMessage tramite requestId iun and recipientIndex
+      summary: Recupero del receivedMessage tramite requestId iun e recipientIndex ordinati dal più recente
       parameters:
         - in: path
           name: iun
@@ -49,8 +49,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReceivedMessage'
-        '404':
-          description: Not Found
 
 components:
   schemas:
@@ -64,7 +62,8 @@ components:
         recipientIndex:
           type: integer
         created:
-          type: Instant
+          type: string
+          format: date-time
         digitalNotificationRequest:
           $ref: '#/components/schemas/DigitalNotificationRequest'
         digitalCourtesyMailRequest:
