@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.mapper;
 
 
 import it.pagopa.pn.externalchannels.dao.*;
+import it.pagopa.pn.externalchannels.dto.ReceivedMessage;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
@@ -46,7 +47,28 @@ public class RequestsToReceivedMessagesMapper {
         return receivedMessageEntity;
     }
 
+    public static ReceivedMessage mapReceivedMessageFromEntityToDto(ReceivedMessageEntity receivedMessageEntity) {
+        String iun = getIunFromRequestId(receivedMessageEntity.getPk());
+        String recIndex = getRecIndexFromRequestId(receivedMessageEntity.getPk());
 
+        ReceivedMessage receivedMessage = ReceivedMessage.builder()
+                .requestId(receivedMessageEntity.getPk())
+                .iun(iun)
+                .recipientIndex(recIndex)
+                .created(receivedMessageEntity.getCreated())
+                .build();
+
+        if (receivedMessageEntity.getDigitalCourtesyMailRequest() != null)
+            receivedMessage.setDigitalCourtesyMailRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalCourtesyMailRequest(), DigitalCourtesyMailRequest.class));
+        if (receivedMessageEntity.getDigitalCourtesySmsRequest() != null)
+            receivedMessage.setDigitalCourtesySmsRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalCourtesySmsRequest(), DigitalCourtesySmsRequest.class));
+        if (receivedMessageEntity.getDigitalNotificationRequest() != null)
+            receivedMessage.setDigitalNotificationRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalNotificationRequest(), DigitalNotificationRequest.class));
+        if (receivedMessageEntity.getPaperEngageRequest() != null)
+            receivedMessage.setPaperEngageRequest(SmartMapper.mapToClass(receivedMessageEntity.getPaperEngageRequest(), PaperEngageRequest.class));
+
+        return receivedMessage;
+    }
 
     private static String getIunFromRequestId(String requestId){
         if (requestId.toUpperCase().contains("IUN_"))
