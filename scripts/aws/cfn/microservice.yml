@@ -110,7 +110,15 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing Verification Code for mock'
     Default: 'pn-VerificationCode'
-    
+  MockEcReceivedMessageTableDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing requests'
+
+  MockEcReceivedMessageTableDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing requests'
+
+
   UseDynamodb:
     Type: String
     Description: 'True if you choose dynamodb as storage, false for in-memory storage'
@@ -176,6 +184,7 @@ Resources:
         ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
         ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
+        ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_RECEIVEDMESSAGESTABLENAME=${MockEcReceivedMessageTableDynamoTableName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         MappedPaths: '/external-channels/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*,/send-normalizzatore-ingress/*'
@@ -230,3 +239,5 @@ Resources:
             Resource:
               - !Sub "${NotificationProgressDynamoTableArn}"
               - !Sub "${VerificationCodeTableDynamoTableArn}"
+              - !Sub "${MockEcReceivedMessageTableDynamoTableArn}"
+              - !Sub "${MockEcReceivedMessageTableDynamoTableArn}/*"

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +59,10 @@ public class PnExternalChannelsProperties {
     private Long addressManagerCallbackAfterMinutes;
 
     private Csv csv;
+
+    private String receivedMessageTableName;
+
+    private Duration receivedMessagesTtl;
 
     @Data
     public static class Csv{
