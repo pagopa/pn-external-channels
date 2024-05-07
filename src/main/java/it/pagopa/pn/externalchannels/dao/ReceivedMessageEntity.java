@@ -1,9 +1,6 @@
 package it.pagopa.pn.externalchannels.dao;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
@@ -12,6 +9,7 @@ import java.time.Instant;
 @Data
 @DynamoDbBean
 @NoArgsConstructor
+@ToString
 public class ReceivedMessageEntity {
     public static final String GSI_INDEX_IUN = "iun-gsi";
 

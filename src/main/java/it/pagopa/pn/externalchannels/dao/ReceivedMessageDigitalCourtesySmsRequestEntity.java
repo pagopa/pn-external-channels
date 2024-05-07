@@ -6,13 +6,13 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
 import java.time.OffsetDateTime;
 
-@Data
 @DynamoDbBean
 @NoArgsConstructor
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @Builder
+@ToString
 public class ReceivedMessageDigitalCourtesySmsRequestEntity {
 
 

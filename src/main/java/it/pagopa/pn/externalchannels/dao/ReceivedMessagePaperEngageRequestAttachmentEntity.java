@@ -6,13 +6,13 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
 import java.math.BigDecimal;
 
-@Data
 @DynamoDbBean
 @NoArgsConstructor
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @Builder
+@ToString
 public class ReceivedMessagePaperEngageRequestAttachmentEntity {
 
     @Getter(onMethod = @__({@DynamoDbAttribute("uri")}))

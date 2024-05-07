@@ -1,11 +1,14 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Mock Received Message API
   version: 1.0.0
-
+tags:
+  - name: MockReceivedMessages
 paths:
   /external-channels/received-message/{requestId}:
     get:
+      tags:
+        - MockReceivedMessages
       operationId: getReceivedMessage
       summary: Recupero del receivedMessage tramite requestId
       parameters:
@@ -20,13 +23,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
                 $ref: '#/components/schemas/ReceivedMessage'
         '404':
           description: Not Found
 
   /external-channels/received-message/{iun}/{recipientIndex}:
     get:
+      tags:
+        - MockReceivedMessages
       operationId: getReceivedMessages
       summary: Recupero del receivedMessage tramite requestId iun e recipientIndex ordinati dal più recente
       parameters:

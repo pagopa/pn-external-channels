@@ -7,13 +7,13 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@Data
 @DynamoDbBean
 @NoArgsConstructor
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @Builder
+@ToString
 public class ReceivedMessagePaperEngageRequestEntity {
 
 
