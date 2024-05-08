@@ -19,15 +19,18 @@ public class RequestsToReceivedMessagesMapper {
         ReceivedMessageEntity receivedMessageEntity = new ReceivedMessageEntity(getIunFromRequestId(requestId), getRecIndexFromRequestId(requestId));
         receivedMessageEntity.setPk(requestId);
         receivedMessageEntity.setDigitalNotificationRequest(SmartMapper.mapToClass(input, ReceivedMessageDigitalNotificationRequestEntity.class));
+        receivedMessageEntity.getDigitalNotificationRequest().setMessageText(truncate(receivedMessageEntity.getDigitalNotificationRequest().getMessageText()));
 
         return receivedMessageEntity;
     }
+
 
     public static ReceivedMessageEntity map(DigitalCourtesyMailRequest input) {
         String requestId = input.getRequestId();
         ReceivedMessageEntity receivedMessageEntity = new ReceivedMessageEntity(getIunFromRequestId(requestId), getRecIndexFromRequestId(requestId));
         receivedMessageEntity.setPk(requestId);
         receivedMessageEntity.setDigitalCourtesyMailRequest(SmartMapper.mapToClass(input, ReceivedMessageDigitalCourtesyMailRequestEntity.class));
+        receivedMessageEntity.getDigitalCourtesyMailRequest().setMessageText(truncate(receivedMessageEntity.getDigitalCourtesyMailRequest().getMessageText()));
 
         return receivedMessageEntity;
     }
@@ -37,6 +40,7 @@ public class RequestsToReceivedMessagesMapper {
         ReceivedMessageEntity receivedMessageEntity = new ReceivedMessageEntity(getIunFromRequestId(requestId), getRecIndexFromRequestId(requestId));
         receivedMessageEntity.setPk(requestId);
         receivedMessageEntity.setDigitalCourtesySmsRequest(SmartMapper.mapToClass(input, ReceivedMessageDigitalCourtesySmsRequestEntity.class));
+        receivedMessageEntity.getDigitalCourtesySmsRequest().setMessageText(truncate(receivedMessageEntity.getDigitalCourtesySmsRequest().getMessageText()));
 
         return receivedMessageEntity;
     }
@@ -72,6 +76,14 @@ public class RequestsToReceivedMessagesMapper {
             receivedMessage.setPaperEngageRequest(SmartMapper.mapToClass(receivedMessageEntity.getPaperEngageRequest(), it.pagopa.pn.externalchannels.mockreceivedmessage.PaperEngageRequest.class));
 
         return receivedMessage;
+    }
+
+
+    private static String truncate(String str) {
+        if (str != null && str.length() > 300000)
+            return str.substring(0,300000);
+
+        return str;
     }
 
     private static String getIunFromRequestId(String requestId){
