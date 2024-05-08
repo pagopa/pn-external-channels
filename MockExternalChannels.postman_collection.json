@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "6d8258db-7d2d-4697-9be2-f981ee1eb5b1",
+		"_postman_id": "2081d5c0-41c9-49e4-a038-bde9ee905f15",
 		"name": "MockExternalChannels",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "5442830"
+		"_exporter_id": "31430175"
 	},
 	"item": [
 		{
@@ -22,7 +22,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"channel\": \"PEC\",\n    \"subjectText\": \"oggetto mock\",\n    \"messageContentType\": \"text/plain\",\n    \"requestId\": \"MOCK-SUCC-WKHU-202209-P-1_send_digital_domicile0_source_PLATFORM_attempt_1\",\n    \"eventType\": \"mockEventType\",\n    \"qos\": \"BATCH\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"receiverDigitalAddress\": \"mock@pec.it\",\n    \"messageText\": \"MockText Messaggio\"\n\n}",
+							"raw": "{\n    \"channel\": \"PEC\",\n    \"subjectText\": \"oggetto mock\",\n    \"messageContentType\": \"text/plain\",\n    \"requestId\": \"SENDDIGITAL.IUN_MOCK-SUCC-WKHU-202209-P-1.RECINDEX_0._PLATFORM_attempt_1\",\n    \"eventType\": \"mockEventType\",\n    \"qos\": \"BATCH\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"receiverDigitalAddress\": \"mock@pec.it\",\n    \"messageText\": \"MockText Messaggio\",\n    \"senderDigitalAddress\":\"mail@piri.it\",\n    \"attachmentUrls\":[\"a\",\"b\",\"c\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -241,6 +241,38 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "getReceivedMessage(requestId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "SENDDIGITAL.IUN_MOCK-SUCC-WKHU-202209-P-1.RECINDEX_0._PLATFORM_attempt_1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -367,6 +399,38 @@
 								{
 									"key": "requestIdx",
 									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReceivedMessage(requestId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "SENDPAPER.IUN_MOCK-SUCC-WKHU-202209-P-4.RECINDEX_4._PLATFORM_attempt_1"
 								}
 							]
 						}
@@ -554,6 +618,186 @@
 								{
 									"key": "requestIdx",
 									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReceivedMessage(requestId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "SENDSMS.IUN_MOCK-SUCC-WKHU-202209-P-3.RECINDEX_3._PLATFORM_attempt_10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MAIL REQUEST",
+			"item": [
+				{
+					"name": "sendDigitalCourtesyMessage",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"channel\": \"EMAIL\",\n    \"subjectText\": \"oggetto mock\",\n    \"messageContentType\": \"text/plain\",\n    \"requestId\": \"SENDMAIL.IUN_MOCK-SUCC-WKHU-202209-P-3.RECINDEX_3._PLATFORM_attempt_1\",\n    \"eventType\": \"mockEventType\",\n    \"qos\": \"BATCH\",\n    \"clientRequestTimeStamp\": \"2012-04-23T18:25:43.511Z\",\n    \"receiverDigitalAddress\": \"mock@pec.it\",\n    \"messageText\": \"MockText Messaggio\",\n    \"senderDigitalAddress\":\"mail@piri.it\",\n    \"attachmentUrls\":[\"a\",\"b\",\"c\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8082/external-channels/v1/digital-deliveries/courtesy-full-message-requests/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"v1",
+								"digital-deliveries",
+								"courtesy-full-message-requests",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "request-mock"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReceivedMessage(requestId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "SENDMAIL.IUN_MOCK-SUCC-WKHU-202209-P-5.RECINDEX_5._PLATFORM_attempt_1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GET Received Message",
+			"item": [
+				{
+					"name": "getReceivedMessage(requestId)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-pagopa-extch-cx-id",
+								"value": "prova",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:requestIdx",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":requestIdx"
+							],
+							"variable": [
+								{
+									"key": "requestIdx",
+									"value": "SENDMAIL.IUN_MOCK-SUCC-WKHU-202209-P-3.RECINDEX_3._PLATFORM_attempt_1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getReceivedMessage(iun, recIndex)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8082/external-channels/received-message/:iun/:recipientIndex",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"external-channels",
+								"received-message",
+								":iun",
+								":recipientIndex"
+							],
+							"variable": [
+								{
+									"key": "iun",
+									"value": "MOCK-SUCC-WKHU-202209-P-3"
+								},
+								{
+									"key": "recipientIndex",
+									"value": "3"
 								}
 							]
 						}
