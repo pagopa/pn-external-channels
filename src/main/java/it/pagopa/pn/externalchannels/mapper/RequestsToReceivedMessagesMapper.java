@@ -2,10 +2,14 @@ package it.pagopa.pn.externalchannels.mapper;
 
 
 import it.pagopa.pn.externalchannels.dao.*;
+import it.pagopa.pn.externalchannels.mockreceivedmessage.ReceivedMessage;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import it.pagopa.pn.externalchannels.model.DigitalCourtesySmsRequest;
 import it.pagopa.pn.externalchannels.model.DigitalNotificationRequest;
 import it.pagopa.pn.externalchannels.model.PaperEngageRequest;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public class RequestsToReceivedMessagesMapper {
     private RequestsToReceivedMessagesMapper(){}
@@ -46,14 +50,36 @@ public class RequestsToReceivedMessagesMapper {
         return receivedMessageEntity;
     }
 
+    public static ReceivedMessage mapReceivedMessageFromEntityToDto(ReceivedMessageEntity receivedMessageEntity) {
+        String iun = getIunFromRequestId(receivedMessageEntity.getPk());
+        String recIndex = getRecIndexFromRequestId(receivedMessageEntity.getPk());
 
+        ReceivedMessage receivedMessage = new ReceivedMessage();
+        receivedMessage.setRequestId(receivedMessageEntity.getPk());
+        receivedMessage.setIun(iun);
+        receivedMessage.setRecipientIndex(recIndex != null ? Integer.valueOf(recIndex) : null);
+        receivedMessage.setCreated(OffsetDateTime.from(receivedMessageEntity.getCreated().atOffset(ZoneOffset.UTC)));
+
+
+        if (receivedMessageEntity.getDigitalCourtesyMailRequest() != null)
+            receivedMessage.setDigitalCourtesyMailRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalCourtesyMailRequest(),
+                    it.pagopa.pn.externalchannels.mockreceivedmessage.DigitalCourtesyMailRequest.class));
+        if (receivedMessageEntity.getDigitalCourtesySmsRequest() != null)
+            receivedMessage.setDigitalCourtesySmsRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalCourtesySmsRequest(), it.pagopa.pn.externalchannels.mockreceivedmessage.DigitalCourtesySmsRequest.class));
+        if (receivedMessageEntity.getDigitalNotificationRequest() != null)
+            receivedMessage.setDigitalNotificationRequest(SmartMapper.mapToClass(receivedMessageEntity.getDigitalNotificationRequest(), it.pagopa.pn.externalchannels.mockreceivedmessage.DigitalNotificationRequest.class));
+        if (receivedMessageEntity.getPaperEngageRequest() != null)
+            receivedMessage.setPaperEngageRequest(SmartMapper.mapToClass(receivedMessageEntity.getPaperEngageRequest(), it.pagopa.pn.externalchannels.mockreceivedmessage.PaperEngageRequest.class));
+
+        return receivedMessage;
+    }
 
     private static String getIunFromRequestId(String requestId){
         if (requestId.toUpperCase().contains("IUN_"))
         {
             int indexofiun_ = requestId.indexOf("IUN_");
 
-            return requestId.substring(indexofiun_, requestId.indexOf(".", indexofiun_) );
+            return requestId.substring(indexofiun_+4, requestId.indexOf(".", indexofiun_) );
         }
         return null;
     }
@@ -63,7 +89,7 @@ public class RequestsToReceivedMessagesMapper {
         {
             int indexofrecindex_ = requestId.indexOf("RECINDEX_");
 
-            return requestId.substring(indexofrecindex_, requestId.indexOf(".", indexofrecindex_) );
+            return requestId.substring(indexofrecindex_+9, requestId.indexOf(".", indexofrecindex_) );
         }
         return null;
     }

@@ -154,6 +154,44 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>api-mock-received-message-v1</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/docs/openapi/api-mock-received-message-v1.yaml
+                            </inputSpec>
+                            <library>spring-boot</library>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
+                            <modelPackage>it.pagopa.pn.externalchannels.mockreceivedmessage</modelPackage>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <skipValidateSpec>true</skipValidateSpec>
+                            </additionalProperties>
+                            <supportingFilesToGenerate>
+                                ApiUtil.java
+                            </supportingFilesToGenerate>
+                            <configOptions>
+                                <dateLibrary>java8</dateLibrary>
+                                <delegatePattern>true</delegatePattern>
+                                <interfaceOnly>true</interfaceOnly>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>openapi-mock-postel</id>
                         <goals>
                             <goal>generate</goal>

@@ -35,7 +35,7 @@ public class ReceivedMessageEntityDaoDynamo extends BaseDAO<ReceivedMessageEntit
     protected ReceivedMessageEntityDaoDynamo(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
                                              DynamoDbAsyncClient dynamoDbAsyncClient, PnExternalChannelsProperties cfg) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient, cfg.getReceivedMessageTableName(), ReceivedMessageEntity.class);
-        ttl = cfg.getReceivedMessageTtl();
+        ttl = cfg.getReceivedMessagesTtl();
     }
 
     public Mono<ReceivedMessageEntity> put(ReceivedMessageEntity entity) {

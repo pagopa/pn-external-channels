@@ -4,16 +4,16 @@ import lombok.*;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
-@Data
 @DynamoDbBean
 @NoArgsConstructor
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @Builder
+@ToString
 public class ReceivedMessagePaperEngageRequestEntity {
 
 
@@ -30,7 +30,7 @@ public class ReceivedMessagePaperEngageRequestEntity {
 
 
     @Getter(onMethod = @__({@DynamoDbAttribute("clientRequestTimeStamp")}))
-    private Instant clientRequestTimeStamp;
+    private OffsetDateTime clientRequestTimeStamp;
 
 
     @Getter(onMethod = @__({@DynamoDbAttribute("productType")}))

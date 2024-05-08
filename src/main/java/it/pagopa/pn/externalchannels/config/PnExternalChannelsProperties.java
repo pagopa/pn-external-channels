@@ -62,7 +62,7 @@ public class PnExternalChannelsProperties {
 
     private String receivedMessageTableName;
 
-    private Duration receivedMessageTtl;
+    private Duration receivedMessagesTtl;
 
     @Data
     public static class Csv{

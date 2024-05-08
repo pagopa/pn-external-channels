@@ -1,26 +1,19 @@
 package it.pagopa.pn.externalchannels.dao;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-import it.pagopa.pn.externalchannels.model.DigitalCourtesyMailRequest;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 
-import javax.validation.Valid;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@Data
 @DynamoDbBean
 @NoArgsConstructor
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
 @Builder
+@ToString
 public class ReceivedMessageDigitalCourtesyMailRequestEntity {
 
 
@@ -37,7 +30,7 @@ public class ReceivedMessageDigitalCourtesyMailRequestEntity {
     private String qos;
 
     @Getter(onMethod = @__({@DynamoDbAttribute("clientRequestTimeStamp")}))
-    private Instant clientRequestTimeStamp;
+    private OffsetDateTime clientRequestTimeStamp;
 
     @Getter(onMethod = @__({@DynamoDbAttribute("receiverDigitalAddress")}))
     private String receiverDigitalAddress;
