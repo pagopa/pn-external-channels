@@ -40,6 +40,7 @@ public class ReceivedMessageEntityDaoDynamo extends BaseDAO<ReceivedMessageEntit
 
     public Mono<ReceivedMessageEntity> put(ReceivedMessageEntity entity) {
         entity.setTtl(LocalDateTime.now().plus(ttl).atZone(ZoneId.systemDefault()).toEpochSecond());
+        log.info("put receivedmessage entity={}", entity);
         return super.put(entity);
     }
 
