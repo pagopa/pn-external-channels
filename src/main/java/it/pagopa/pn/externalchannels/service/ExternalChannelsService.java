@@ -12,9 +12,9 @@ import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
-import it.pagopa.pn.externalchannels.mapper.SmartMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
+import it.pagopa.pn.externalchannels.util.AttachmentValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -85,6 +85,10 @@ public class ExternalChannelsService {
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
+
+        List<String> attachments = digitalNotificationRequest.getAttachmentUrls();
+        if(!attachments.isEmpty())
+            AttachmentValidationUtils.validateDigitalAttachments(attachments);
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -177,6 +181,9 @@ public class ExternalChannelsService {
             });
         }
 
+        List<PaperEngageRequestAttachments> attachments = paperEngageRequest.getAttachments();
+        if(!attachments.isEmpty())
+            AttachmentValidationUtils.validatePaperAttachments(attachments);
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
