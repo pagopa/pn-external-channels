@@ -86,9 +86,7 @@ public class ExternalChannelsService {
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
 
-        List<String> attachments = digitalNotificationRequest.getAttachmentUrls();
-        if(!attachments.isEmpty())
-            AttachmentValidationUtils.validateDigitalAttachments(attachments);
+        AttachmentValidationUtils.validateDigitalAttachments(digitalNotificationRequest.getAttachmentUrls());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -181,9 +179,7 @@ public class ExternalChannelsService {
             });
         }
 
-        List<PaperEngageRequestAttachments> attachments = paperEngageRequest.getAttachments();
-        if(!attachments.isEmpty())
-            AttachmentValidationUtils.validatePaperAttachments(attachments);
+        AttachmentValidationUtils.validatePaperAttachments(paperEngageRequest.getAttachments());
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
