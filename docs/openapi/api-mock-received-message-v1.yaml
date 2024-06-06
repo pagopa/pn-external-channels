@@ -5,7 +5,7 @@ info:
 tags:
   - name: MockReceivedMessages
 paths:
-  /external-channels/received-message/{requestId}:
+  /historical/received-message/{requestId}:
     get:
       tags:
         - MockReceivedMessages
@@ -27,7 +27,7 @@ paths:
         '404':
           description: Not Found
 
-  /external-channels/received-message/{iun}/{recipientIndex}:
+  /historical/received-message/{iun}/{recipientIndex}:
     get:
       tags:
         - MockReceivedMessages
