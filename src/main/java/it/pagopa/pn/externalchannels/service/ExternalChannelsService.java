@@ -86,7 +86,7 @@ public class ExternalChannelsService {
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
                 selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
 
-        AttachmentValidationUtils.validateDigitalAttachments(digitalNotificationRequest.getAttachmentUrls());
+        AttachmentValidationUtils.validateDigitalAttachments(digitalNotificationRequest.getAttachmentUrls(), digitalNotificationRequest.getEventType());
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
