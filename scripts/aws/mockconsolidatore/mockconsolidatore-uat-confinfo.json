@@ -26,5 +26,5 @@
     "UseDynamodb": "true",
     "PnAddressManagerBaseUrl": "http://internal-EcsA-2023050521295416230000000b-242462731.eu-south-1.elb.amazonaws.com:8080",
     "PnAddressManagerCallbackAfterMinutes": "0",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:5e42dc27854d48a31656e7e733f11bcfddf3bbe17537372843fdcaad8a64b003"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:88fef1038e1e0b881ab08ce02186822817f443ed6ed67b6a3c27280377599ee5"
 }
