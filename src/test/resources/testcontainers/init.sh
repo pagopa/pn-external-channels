@@ -16,6 +16,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     ssm put-parameter \
     --name "MapExternalChannelMockSequence" \
     --type String \
+    --tier Advanced \
     --value "[
 				{
 					\"sequenceName\":\"OK_RS\",
@@ -70,6 +71,20 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 					\"sequence\":\"@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012[DELAY:10d].5s-RECAG011B[DOC:ARCAD;DOC:23L;DELAY:10d].5s-RECAG008A[DELAY:60d].5s-RECAG008B[DOC:Plico;DELAY:60d].5s-RECAG008C[DELAY:60d]\"
 				}
 
+			]" \
+    --overwrite
+
+echo "### START PARAMETER STORE TWO CREATION FOR EXTERNAL CHANNEL MOCK ###"
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    ssm put-parameter \
+    --name "MapExternalChannelMockSequence2" \
+    --type String \
+    --tier Advanced \
+    --value "[
+				{
+					\"sequenceName\":\"FAIL2-Irreperibile_890\",
+					\"sequence\":\"@sequence.5s-CON996@retry.10s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F\"
+				}
 			]" \
     --overwrite
 
