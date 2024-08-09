@@ -5,7 +5,7 @@
   },
   {
     "sequenceName": "OK_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "FAIL_AR",
