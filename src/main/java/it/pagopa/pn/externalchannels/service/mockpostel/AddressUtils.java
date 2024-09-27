@@ -8,6 +8,7 @@ import lombok.CustomLog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class AddressUtils {
         return capList.stream()
                 .anyMatch(capModel -> capModel.getCap().equalsIgnoreCase(cap.trim())
                         && capModel.getProvince().equalsIgnoreCase(province.trim())
-                        && capModel.getCity().equalsIgnoreCase(city.trim()));
+                        && compareCity(capModel.getCity(), city));
     }
 
     public void searchCountry(String country) {
@@ -92,4 +93,22 @@ public class AddressUtils {
             throw new PnInternalException(String.format("Country not found: [%s]", normalizedCountry),"COUNTRY_NOT_FOUND");
         }
     }
+
+    public boolean compareCity(String cityCSV, String cityInput) {
+        if(StringUtils.isNoneBlank(cityCSV) && StringUtils.isNoneBlank(cityInput)) {
+            var cityCSVWithoutAccent = removeAccents(cityCSV);
+            var cityInputWithoutAccent = removeAccents(cityInput);
+            return cityCSVWithoutAccent.equalsIgnoreCase(cityInputWithoutAccent.trim());
+        }
+        return false;
+    }
+
+    public static String removeAccents(String input) {
+        // Normalizza la stringa in modo da separare i caratteri dagli accenti
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        // Rimuove i caratteri diacritici (accents)
+        return normalized.replaceAll("\\p{M}", "");
+    }
+
+
 }
