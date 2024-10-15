@@ -20,7 +20,8 @@ public class AdditionalAction implements Serializable  {
         DOC,
         FAILCAUSE,
         DELAY,
-        DELAYDOC
+        DELAYDOC,
+        PAGES
     }
 
     @Getter(onMethod=@__({@DynamoDbAttribute("action")})) private ADDITIONAL_ACTIONS action;
