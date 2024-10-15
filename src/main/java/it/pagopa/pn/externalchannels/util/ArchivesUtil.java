@@ -40,6 +40,8 @@ import java.util.zip.ZipOutputStream;
 public class ArchivesUtil {
 
     public static final String SEVEN_ZIP_EXTENSION = ".7z";
+    public static final String TMP_FILE_PREFIX = "tmp_";
+
 
     public static void createBolFile(NotificationProgress notificationProgress, Integer pages) {
         try (FileOutputStream fos = new FileOutputStream("src/main/resources/attachment_example.bol")) {
@@ -77,7 +79,8 @@ public class ArchivesUtil {
         String file2 = "src/main/resources/attachment_example.bol";
         final List<String> srcFiles = Arrays.asList(file1, file2);
         try {
-            File outputFile = File.createTempFile(UUID.randomUUID().toString(), SEVEN_ZIP_EXTENSION);
+            ClassPathResource classPathResource = new ClassPathResource("/");
+            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
@@ -101,7 +104,8 @@ public class ArchivesUtil {
 
     public static File create7Zip(byte[] data) {
         try {
-            File outputFile = File.createTempFile(UUID.randomUUID().toString(), SEVEN_ZIP_EXTENSION);
+            ClassPathResource classPathResource = new ClassPathResource("/");
+            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
