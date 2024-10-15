@@ -15,7 +15,6 @@ import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.model.*;
 import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -29,6 +28,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -41,6 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
+import static it.pagopa.pn.externalchannels.util.ArchivesUtil.*;
 
 @Slf4j
 public class EventMessageUtil {
@@ -49,6 +50,8 @@ public class EventMessageUtil {
 
     public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
     public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
+    public static final String CON020_ZIP = "CON020_ZIP";
+    public static final String CON020_7_ZIP = "CON020_7_ZIP";
     public static final String SAVED = "SAVED";
 
     public static final String MOCK_PREFIX = "mock-";
@@ -63,6 +66,9 @@ public class EventMessageUtil {
     private static final String OK_CODE = "C003";
 
     private static final String ZIP_SUFFIX = "#Z";
+    private static final String ZIP = "ZIP";
+    private static final String SEVEN_ZIP = "7ZIP";
+
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
@@ -78,6 +84,8 @@ public class EventMessageUtil {
         AtomicReference<Duration> delay = new AtomicReference<>(Duration.ZERO);
         AtomicReference<Duration> delaydoc = new AtomicReference<>(Duration.ZERO);
         AtomicReference<String> failcause = new AtomicReference<>(null);
+        AtomicReference<Integer> pdfPages = new AtomicReference<>(1);
+
 
 
         if (codeTimeToSend.getAdditionalActions() != null) {
@@ -94,6 +102,10 @@ public class EventMessageUtil {
             Optional<AdditionalAction> failCauseAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.FAILCAUSE).findFirst();
             failCauseAction.ifPresent(x -> failcause.set(x.getInfo()));
             log.info("found code with FAILCAUSE, using fail={}", failcause);
+
+            Optional<AdditionalAction> pagesAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.PAGES).findFirst();
+            pagesAction.ifPresent(x -> pdfPages.set(Integer.valueOf(x.getInfo())));
+            log.info("found code with PAGES, using pages={}", pagesAction);
         }
 
 
@@ -115,7 +127,7 @@ public class EventMessageUtil {
             }
 
             return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), failcause.get(),
-                    notificationProgress, eventCodeDocumentsDao, safeStorageService);
+                    notificationProgress, eventCodeDocumentsDao, safeStorageService, pdfPages.get());
         }
 
         return buildDigitalCourtesyMessage(code, requestId, delay.get());
@@ -203,7 +215,7 @@ public class EventMessageUtil {
                 .eventTimestamp(OffsetDateTime.now());
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService) {
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService, Integer pages) {
         SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
@@ -224,7 +236,7 @@ public class EventMessageUtil {
                 .iun(iun)
                 .recipient(notificationProgress.getDestinationAddress())
                 .code(singleStatusUpdate.getAnalogMail().getStatusCode()).build();
-        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, notificationProgress, safeStorageService);
+        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, notificationProgress, safeStorageService, pages);
 
         return singleStatusUpdate;
     }
@@ -272,13 +284,14 @@ public class EventMessageUtil {
                                                    EventCodeMapKey eventCodeMapKey, Duration delaydoc,
                                                    EventCodeDocumentsDao eventCodeDocumentsDao,
                                                    NotificationProgress notificationProgress,
-                                                   SafeStorageService safeStorageService) {
+                                                   SafeStorageService safeStorageService,
+                                                   Integer pages) {
         Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
         log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
         if(eventCodeList.isPresent()) {
             int id = 1;
             for(String documentType: eventCodeList.get()){
-                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, notificationProgress, safeStorageService));
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, notificationProgress, safeStorageService, pages));
             }
             eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
         }
@@ -286,15 +299,22 @@ public class EventMessageUtil {
 
 
 
-    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService) {
+    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages) {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
             if(documentType.endsWith(ZIP_SUFFIX)) {
                 log.info("[{}] ZIP attachment found!", iun);
                 documentType = documentType.replace(ZIP_SUFFIX, "");
                 fileCreationRequest = buildZIPAttachment();
-            }
-            else {
+            } else if (documentType.endsWith(SEVEN_ZIP)) {
+                log.info("[{}] CON020 7ZIP for attachment found!", iun);
+                documentType = documentType.replace(SEVEN_ZIP, "");
+                fileCreationRequest = buildCON0207ZIPAttachment(notificationProgress, pages);
+            } else if (documentType.endsWith(ZIP)) {
+                log.info("[{}] CON020 ZIP for attachment found!", iun);
+                documentType = documentType.replace(ZIP, "");
+                fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
+            } else {
                 fileCreationRequest = buildPDFAttachment();
             }
 
@@ -307,7 +327,7 @@ public class EventMessageUtil {
                     .sha256(response.getSha256())
                     .documentType(documentType)
                     .date(OffsetDateTime.now().minus(delaydoc));
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
             return null;
         }
@@ -333,6 +353,32 @@ public class EventMessageUtil {
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
         fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+        return fileCreationRequest;
+    }
+
+    private static FileCreationWithContentRequest buildCON020ZIPAttachment(NotificationProgress notificationProgress, Integer pages) throws Exception {
+        createBolFile(notificationProgress, pages);
+        byte[] zipFile = createZip(pages);
+        createZip(createP7mFile(zipFile));
+        ClassPathResource classPathResource = new ClassPathResource("attachment_example_completed.zip");
+        FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+        fileCreationRequest.setContentType("application/zip");
+        fileCreationRequest.setDocumentType(CON020_ZIP);
+        fileCreationRequest.setStatus(SAVED);
+        fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+        return fileCreationRequest;
+    }
+
+    private static FileCreationWithContentRequest buildCON0207ZIPAttachment(NotificationProgress notificationProgress, Integer pages) throws Exception {
+        createBolFile(notificationProgress, pages);
+        byte[] zipFile = create7Zip(pages);
+        File outputFile = create7Zip(createP7mFile(zipFile));
+        FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
+        fileCreationRequest.setContentType("application/x-7z-compressed");
+        fileCreationRequest.setDocumentType(CON020_7_ZIP);
+        fileCreationRequest.setStatus(SAVED);
+        fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
+        outputFile.deleteOnExit();
         return fileCreationRequest;
 
     }
