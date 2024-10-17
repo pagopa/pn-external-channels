@@ -50,6 +50,7 @@ public class EventMessageUtil {
 
     public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
     public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
+    public static final String CON020_DOCUMENT_TYPE = "Affido conservato";
     public static final String SAVED = "SAVED";
     public static final String MOCK_PREFIX = "mock-";
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
@@ -304,9 +305,11 @@ public class EventMessageUtil {
                 fileCreationRequest = buildZIPAttachment();
             } else if (documentType.endsWith(SEVEN_ZIP)) {
                 log.info("[{}] CON020 7ZIP for attachment found!", iun);
+                documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON0207ZIPAttachment(notificationProgress, pages);
             } else if (documentType.endsWith(ZIP)) {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
+                documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
             } else {
                 fileCreationRequest = buildPDFAttachment();
@@ -355,7 +358,7 @@ public class EventMessageUtil {
         byte[] zipFile = createZip(pages, bolFile);
         byte[] zipFileCompleted = createZip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-        fileCreationRequest.setContentType("application/zip");
+        fileCreationRequest.setContentType("application/octet-stream");
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
         fileCreationRequest.setContent(zipFileCompleted);
@@ -367,7 +370,7 @@ public class EventMessageUtil {
         byte[] zipFile = create7Zip(pages, bolFile);
         File outputFile = create7Zip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
-        fileCreationRequest.setContentType("application/x-7z-compressed");
+        fileCreationRequest.setContentType("application/octet-stream");
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
         try {
