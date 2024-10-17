@@ -304,11 +304,9 @@ public class EventMessageUtil {
                 fileCreationRequest = buildZIPAttachment();
             } else if (documentType.endsWith(SEVEN_ZIP)) {
                 log.info("[{}] CON020 7ZIP for attachment found!", iun);
-                documentType = documentType.replace(SEVEN_ZIP, "");
                 fileCreationRequest = buildCON0207ZIPAttachment(notificationProgress, pages);
             } else if (documentType.endsWith(ZIP)) {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
-                documentType = documentType.replace(ZIP, "");
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
             } else {
                 fileCreationRequest = buildPDFAttachment();
