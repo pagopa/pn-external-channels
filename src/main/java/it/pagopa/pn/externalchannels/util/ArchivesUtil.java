@@ -47,11 +47,10 @@ public class ArchivesUtil {
     // Modify createBolFile method
     public static void createBolFile(NotificationProgress notificationProgress, Integer pages) {
         try {
-            ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
-            if (!exampleBol.getFile().exists()) {
-                try (FileOutputStream fos = new FileOutputStream(exampleBol.getFile())) {
-                    fos.write(String.format("attachment_example_%d.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
-                }
+            File exampleBol = new File("src/main/resources/"+BOL_FILE_NAME);
+            exampleBol.createNewFile();
+            try (FileOutputStream fos = new FileOutputStream(exampleBol)) {
+                fos.write(String.format("attachment_example_%d.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
             }
         } catch (Exception e) {
             log.error("Error creating bol file", e);
@@ -62,7 +61,7 @@ public class ArchivesUtil {
     public static void deleteBolFile() {
         try {
             ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
-            if (exampleBol.getFile().exists()) {
+            if (exampleBol.exists()) {
                 exampleBol.getFile().delete();
             }
         } catch (Exception e) {
@@ -141,7 +140,8 @@ public class ArchivesUtil {
     }
 
     public static void createZip(byte[] data) {
-        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream("src/main/resources/attachment_example_completed.zip"))) {
+        ClassPathResource zipCompleted = new ClassPathResource("attachment_example_completed.zip");
+        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipCompleted.getFile()))) {
             try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
                 ZipEntry zipEntry = new ZipEntry("attachment_example.zip.p7m");
                 zipOut.putNextEntry(zipEntry);
@@ -159,14 +159,16 @@ public class ArchivesUtil {
     }
 
     public static byte[] createP7mFile(byte[] data) {
+        ClassPathResource keyFile = new ClassPathResource("private.key");
+        ClassPathResource certFile = new ClassPathResource("certificate.crt");
         try {
-            PEMParser pemParser = new PEMParser(new StringReader(Files.readString(Paths.get("src/main/resources/private.key"))));
+            PEMParser pemParser = new PEMParser(new StringReader(Files.readString(Paths.get(keyFile.getPath()))));
             final PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
             final byte[] encoded = pemKeyPair.getPrivateKeyInfo().getEncoded();
             KeyFactory kf = KeyFactory.getInstance("RSA");
             PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
 
-            InputStream targetStream = new ByteArrayInputStream((Files.readAllBytes(Paths.get("src/main/resources/certificate.crt"))));
+            InputStream targetStream = new ByteArrayInputStream((Files.readAllBytes(Paths.get(certFile.getPath()))));
             X509Certificate cert = (X509Certificate) CertificateFactory
                     .getInstance("X509")
                     .generateCertificate(targetStream);
