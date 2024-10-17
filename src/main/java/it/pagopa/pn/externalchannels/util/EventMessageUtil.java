@@ -366,6 +366,7 @@ public class EventMessageUtil {
         fileCreationRequest.setDocumentType(CON020_ZIP);
         fileCreationRequest.setStatus(SAVED);
         fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
+        deleteBolFile();
         return fileCreationRequest;
     }
 
@@ -379,6 +380,7 @@ public class EventMessageUtil {
         fileCreationRequest.setStatus(SAVED);
         fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
         outputFile.deleteOnExit();
+        deleteBolFile();
         return fileCreationRequest;
 
     }

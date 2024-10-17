@@ -41,20 +41,39 @@ public class ArchivesUtil {
 
     public static final String SEVEN_ZIP_EXTENSION = ".7z";
     public static final String TMP_FILE_PREFIX = "tmp_";
+    public static final String BOL_FILE_NAME = "attachment_example.bol";
 
 
+    // Modify createBolFile method
     public static void createBolFile(NotificationProgress notificationProgress, Integer pages) {
-        try (FileOutputStream fos = new FileOutputStream("src/main/resources/attachment_example.bol")) {
-            fos.write(String.format("attachment_example_%d.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
+        try {
+            ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
+            if (!exampleBol.getFile().exists()) {
+                try (FileOutputStream fos = new FileOutputStream(exampleBol.getFile())) {
+                    fos.write(String.format("attachment_example_%d.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
+                }
+            }
         } catch (Exception e) {
             log.error("Error creating bol file", e);
             throw new ExternalChannelsMockException("Error creating bol file", e);
         }
     }
+    
+    public static void deleteBolFile() {
+        try {
+            ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
+            if (exampleBol.getFile().exists()) {
+                exampleBol.getFile().delete();
+            }
+        } catch (Exception e) {
+            log.error("Error deleting bol file", e);
+            throw new ExternalChannelsMockException("Error deleting bol file", e);
+        }
+    }
 
     public static byte[] createZip(Integer pages) {
         ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + ".pdf");
-        ClassPathResource exampleBol = new ClassPathResource("attachment_example.bol");
+        ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
         final List<ClassPathResource> srcFiles = Arrays.asList(examplePdf, exampleBol);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -75,21 +94,20 @@ public class ArchivesUtil {
     }
 
     public static byte[] create7Zip(Integer pages) {
-        String file1 = "src/main/resources/attachment_example_" + pages + ".pdf";
-        String file2 = "src/main/resources/attachment_example.bol";
-        final List<String> srcFiles = Arrays.asList(file1, file2);
+        ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + ".pdf");
+        ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
+        final List<ClassPathResource> srcFiles = Arrays.asList(examplePdf, exampleBol);
         try {
             ClassPathResource classPathResource = new ClassPathResource("/");
             File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
-                for (String srcFile : srcFiles) {
-                    File fileToZip = new File(srcFile);
+                for (ClassPathResource srcFile : srcFiles) {
                     final SevenZArchiveEntry entry = new SevenZArchiveEntry();
-                    entry.setName(fileToZip.getName());
+                    entry.setName(srcFile.getFilename());
                     outArchive.putArchiveEntry(entry);
-                    try (FileInputStream fis = new FileInputStream(fileToZip)) {
+                    try (FileInputStream fis = new FileInputStream(srcFile.getFile())) {
                         outArchive.write(fis.readAllBytes());
                     }
                     outArchive.closeArchiveEntry();
