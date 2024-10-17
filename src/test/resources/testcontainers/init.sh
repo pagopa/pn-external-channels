@@ -99,7 +99,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --value "[
 				{
 					\"serviceId\":\"pn-cons-000\",
-					\"endpoint\":\"http://localhost:8080\",
+					\"endpoint\":\"http://localhost:8082\",
 					\"endpointServiceId\":\"pn-extchannel-000\"
 				},
 				{
