@@ -356,33 +356,34 @@ public class EventMessageUtil {
         return fileCreationRequest;
     }
 
-    private static FileCreationWithContentRequest buildCON020ZIPAttachment(NotificationProgress notificationProgress, Integer pages) throws Exception {
-        createBolFile(notificationProgress, pages);
-        byte[] zipFile = createZip(pages);
-        createZip(createP7mFile(zipFile));
-        ClassPathResource classPathResource = new ClassPathResource("attachment_example_completed.zip");
+    private static FileCreationWithContentRequest buildCON020ZIPAttachment(NotificationProgress notificationProgress, Integer pages) {
+        File bolFile = createBolFile(notificationProgress, pages);
+        byte[] zipFile = createZip(pages, bolFile);
+        byte[] zipFileCompleted = createZip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/zip");
         fileCreationRequest.setDocumentType(CON020_ZIP);
         fileCreationRequest.setStatus(SAVED);
-        fileCreationRequest.setContent(Files.readAllBytes(classPathResource.getFile().toPath()));
-        deleteBolFile();
+        fileCreationRequest.setContent(zipFileCompleted);
         return fileCreationRequest;
     }
 
-    private static FileCreationWithContentRequest buildCON0207ZIPAttachment(NotificationProgress notificationProgress, Integer pages) throws Exception {
-        createBolFile(notificationProgress, pages);
-        byte[] zipFile = create7Zip(pages);
+    private static FileCreationWithContentRequest buildCON0207ZIPAttachment(NotificationProgress notificationProgress, Integer pages) {
+        File bolFile = createBolFile(notificationProgress, pages);
+        byte[] zipFile = create7Zip(pages, bolFile);
         File outputFile = create7Zip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/x-7z-compressed");
         fileCreationRequest.setDocumentType(CON020_7_ZIP);
         fileCreationRequest.setStatus(SAVED);
-        fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
+        try {
+            fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
+        } catch (IOException e) {
+            log.error("Error reading 7zip file", e);
+            throw new ExternalChannelsMockException("Error reading 7zip file", e);
+        }
         outputFile.deleteOnExit();
-        deleteBolFile();
         return fileCreationRequest;
-
     }
 
 

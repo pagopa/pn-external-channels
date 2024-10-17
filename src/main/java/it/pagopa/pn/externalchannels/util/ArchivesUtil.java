@@ -43,70 +43,58 @@ public class ArchivesUtil {
     public static final String TMP_FILE_PREFIX = "tmp_";
     public static final String BOL_FILE_NAME = "attachment_example.bol";
 
-
-    // Modify createBolFile method
-    public static void createBolFile(NotificationProgress notificationProgress, Integer pages) {
+    public static File createBolFile(NotificationProgress notificationProgress, Integer pages) {
         try {
-            File exampleBol = new File("src/main/resources/"+BOL_FILE_NAME);
-            exampleBol.createNewFile();
-            try (FileOutputStream fos = new FileOutputStream(exampleBol)) {
-                fos.write(String.format("attachment_example_%d.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
+            ClassPathResource classPathResource = new ClassPathResource("/");
+            File outputFile = File.createTempFile(BOL_FILE_NAME, SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+                fos.write(String.format("attachment_example_%d_pages.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
             }
+            return outputFile;
         } catch (Exception e) {
             log.error("Error creating bol file", e);
             throw new ExternalChannelsMockException("Error creating bol file", e);
         }
     }
-    
-    public static void deleteBolFile() {
+
+    public static byte[] createZip(Integer pages, File bolFile) {
         try {
-            ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
-            if (exampleBol.exists()) {
-                exampleBol.getFile().delete();
-            }
-        } catch (Exception e) {
-            log.error("Error deleting bol file", e);
-            throw new ExternalChannelsMockException("Error deleting bol file", e);
-        }
-    }
+            ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + "_pages.pdf");
+            final List<File> srcFiles = Arrays.asList(examplePdf.getFile(), bolFile);
 
-    public static byte[] createZip(Integer pages) {
-        ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + ".pdf");
-        ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
-        final List<ClassPathResource> srcFiles = Arrays.asList(examplePdf, exampleBol);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
-            for (ClassPathResource resFile : srcFiles) {
-                try (FileInputStream fis = new FileInputStream(resFile.getFile())) {
-                    ZipEntry zipEntry = new ZipEntry(resFile.getFile().getName());
-                    zipOut.putNextEntry(zipEntry);
-                    zipOut.write(fis.readAllBytes());
+            try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
+                for (File file : srcFiles) {
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        ZipEntry zipEntry = new ZipEntry(file.getName());
+                        zipOut.putNextEntry(zipEntry);
+                        zipOut.write(fis.readAllBytes());
+                    }
                 }
             }
-        } catch (Exception e ) {
+            return baos.toByteArray();
+        } catch (Exception e) {
             log.error("Error creating zip file", e);
             throw new ExternalChannelsMockException("Error creating zip file", e);
         }
-        return baos.toByteArray();
     }
 
-    public static byte[] create7Zip(Integer pages) {
-        ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + ".pdf");
-        ClassPathResource exampleBol = new ClassPathResource(BOL_FILE_NAME);
-        final List<ClassPathResource> srcFiles = Arrays.asList(examplePdf, exampleBol);
+    public static byte[] create7Zip(Integer pages, File bolFile) {
         try {
+            ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + "_pages.pdf");
+            final List<File> srcFiles = Arrays.asList(examplePdf.getFile(), bolFile);
+
             ClassPathResource classPathResource = new ClassPathResource("/");
             File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
-                for (ClassPathResource srcFile : srcFiles) {
+                for (File srcFile : srcFiles) {
                     final SevenZArchiveEntry entry = new SevenZArchiveEntry();
-                    entry.setName(srcFile.getFilename());
+                    entry.setName(srcFile.getName());
                     outArchive.putArchiveEntry(entry);
-                    try (FileInputStream fis = new FileInputStream(srcFile.getFile())) {
+                    try (FileInputStream fis = new FileInputStream(srcFile)) {
                         outArchive.write(fis.readAllBytes());
                     }
                     outArchive.closeArchiveEntry();
@@ -139,9 +127,9 @@ public class ArchivesUtil {
         }
     }
 
-    public static void createZip(byte[] data) {
-        ClassPathResource zipCompleted = new ClassPathResource("attachment_example_completed.zip");
-        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipCompleted.getFile()))) {
+    public static byte[] createZip(byte[] data) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
             try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
                 ZipEntry zipEntry = new ZipEntry("attachment_example.zip.p7m");
                 zipOut.putNextEntry(zipEntry);
@@ -152,6 +140,7 @@ public class ArchivesUtil {
                     zipOut.write(bytes, 0, length);
                 }
             }
+            return baos.toByteArray();
         } catch (Exception e) {
             log.error("Error creating zip file from p7m", e);
             throw new ExternalChannelsMockException("Error creating zip file from p7m", e);
@@ -159,16 +148,16 @@ public class ArchivesUtil {
     }
 
     public static byte[] createP7mFile(byte[] data) {
-        ClassPathResource keyFile = new ClassPathResource("private.key");
-        ClassPathResource certFile = new ClassPathResource("certificate.crt");
+        ClassPathResource keyFile = new ClassPathResource("key/private.key");
+        ClassPathResource certFile = new ClassPathResource("key/certificate.crt");
         try {
-            PEMParser pemParser = new PEMParser(new StringReader(Files.readString(Paths.get(keyFile.getPath()))));
+            PEMParser pemParser = new PEMParser(new StringReader(Files.readString(Paths.get(keyFile.getURI()))));
             final PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
             final byte[] encoded = pemKeyPair.getPrivateKeyInfo().getEncoded();
             KeyFactory kf = KeyFactory.getInstance("RSA");
             PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
 
-            InputStream targetStream = new ByteArrayInputStream((Files.readAllBytes(Paths.get(certFile.getPath()))));
+            InputStream targetStream = new ByteArrayInputStream((Files.readAllBytes(Paths.get(certFile.getURI()))));
             X509Certificate cert = (X509Certificate) CertificateFactory
                     .getInstance("X509")
                     .generateCertificate(targetStream);
