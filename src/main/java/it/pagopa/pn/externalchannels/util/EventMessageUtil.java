@@ -50,12 +50,8 @@ public class EventMessageUtil {
 
     public static final String LEGALFACTS_MEDIATYPE_XML = "application/xml";
     public static final String PN_EXTERNAL_LEGAL_FACTS = "PN_EXTERNAL_LEGAL_FACTS";
-    public static final String CON020_ZIP = "CON020_ZIP";
-    public static final String CON020_7_ZIP = "CON020_7_ZIP";
     public static final String SAVED = "SAVED";
-
     public static final String MOCK_PREFIX = "mock-";
-
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
     public static final String AR = "AR";
@@ -362,7 +358,7 @@ public class EventMessageUtil {
         byte[] zipFileCompleted = createZip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/zip");
-        fileCreationRequest.setDocumentType(CON020_ZIP);
+        fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
         fileCreationRequest.setContent(zipFileCompleted);
         return fileCreationRequest;
@@ -374,7 +370,7 @@ public class EventMessageUtil {
         File outputFile = create7Zip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/x-7z-compressed");
-        fileCreationRequest.setDocumentType(CON020_7_ZIP);
+        fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
         try {
             fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
