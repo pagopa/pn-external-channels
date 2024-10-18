@@ -40,13 +40,15 @@ import java.util.zip.ZipOutputStream;
 public class ArchivesUtil {
 
     public static final String SEVEN_ZIP_EXTENSION = ".7z";
+    public static final String ZIP_EXTENSION = ".zip";
     public static final String TMP_FILE_PREFIX = "tmp_";
-    public static final String BOL_FILE_NAME = "attachment_example.bol";
+    public static final String BOL_FILE_NAME = "attachment_example";
+    public static final String BOL_FILE_EXTENSION = ".bol";
 
     public static File createBolFile(NotificationProgress notificationProgress, Integer pages) {
         try {
             ClassPathResource classPathResource = new ClassPathResource("/");
-            File outputFile = File.createTempFile(BOL_FILE_NAME, SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            File outputFile = File.createTempFile(BOL_FILE_NAME, BOL_FILE_EXTENSION, classPathResource.getFile());
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 fos.write(String.format("attachment_example_%d_pages.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
             }
@@ -127,20 +129,24 @@ public class ArchivesUtil {
         }
     }
 
-    public static byte[] createZip(byte[] data) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
-            try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
-                ZipEntry zipEntry = new ZipEntry("attachment_example.zip.p7m");
-                zipOut.putNextEntry(zipEntry);
+    public static File createZip(byte[] data) {
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("/");
+            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), ZIP_EXTENSION, classPathResource.getFile());
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            try (ZipOutputStream zipOut = new ZipOutputStream(fos)) {
+                try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
+                    ZipEntry zipEntry = new ZipEntry("attachment_example.zip.p7m");
+                    zipOut.putNextEntry(zipEntry);
 
-                byte[] bytes = new byte[1024];
-                int length;
-                while((length = fis.read(bytes)) >= 0) {
-                    zipOut.write(bytes, 0, length);
+                    byte[] bytes = new byte[1024];
+                    int length;
+                    while ((length = fis.read(bytes)) >= 0) {
+                        zipOut.write(bytes, 0, length);
+                    }
                 }
             }
-            return baos.toByteArray();
+            return outputFile;
         } catch (Exception e) {
             log.error("Error creating zip file from p7m", e);
             throw new ExternalChannelsMockException("Error creating zip file from p7m", e);

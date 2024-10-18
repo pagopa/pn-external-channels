@@ -356,12 +356,19 @@ public class EventMessageUtil {
     private static FileCreationWithContentRequest buildCON020ZIPAttachment(NotificationProgress notificationProgress, Integer pages) {
         File bolFile = createBolFile(notificationProgress, pages);
         byte[] zipFile = createZip(pages, bolFile);
-        byte[] zipFileCompleted = createZip(createP7mFile(zipFile));
+        File zipFileCompleted = createZip(createP7mFile(zipFile));
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/octet-stream");
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
         fileCreationRequest.setStatus(SAVED);
-        fileCreationRequest.setContent(zipFileCompleted);
+        try {
+            fileCreationRequest.setContent(Files.readAllBytes(zipFileCompleted.toPath()));
+            Files.deleteIfExists(zipFileCompleted.toPath());
+            Files.deleteIfExists(bolFile.toPath());
+        } catch (IOException e) {
+            log.error("Error reading zip file", e);
+            throw new ExternalChannelsMockException("Error reading zip file", e);
+        }
         return fileCreationRequest;
     }
 
@@ -375,6 +382,8 @@ public class EventMessageUtil {
         fileCreationRequest.setStatus(SAVED);
         try {
             fileCreationRequest.setContent(Files.readAllBytes(outputFile.toPath()));
+            Files.deleteIfExists(outputFile.toPath());
+            Files.deleteIfExists(bolFile.toPath());
         } catch (IOException e) {
             log.error("Error reading 7zip file", e);
             throw new ExternalChannelsMockException("Error reading 7zip file", e);
