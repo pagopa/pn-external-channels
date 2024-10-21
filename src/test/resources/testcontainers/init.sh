@@ -84,7 +84,11 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 				{
 					\"sequenceName\":\"FAIL2-Irreperibile_890\",
 					\"sequence\":\"@sequence.5s-CON996@retry.10s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F\"
-				}
+				},
+				{
+          \"sequenceName\":\"OK_AR-CON020\",
+          \"sequence\":\"@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C\"
+        }
 			]" \
     --overwrite
 
@@ -99,7 +103,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --value "[
 				{
 					\"serviceId\":\"pn-cons-000\",
-					\"endpoint\":\"http://localhost:8080\",
+					\"endpoint\":\"http://localhost:8082\",
 					\"endpointServiceId\":\"pn-extchannel-000\"
 				},
 				{
