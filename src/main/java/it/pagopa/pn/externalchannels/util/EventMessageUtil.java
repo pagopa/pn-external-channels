@@ -62,7 +62,25 @@ public class EventMessageUtil {
 
     private static final String OK_CODE = "C003";
 
-    private static final String ZIP_SUFFIX = "#Z";
+    private enum ZipSuffix {
+        Z("#Z","23L_PN_EXTERNAL_LEGAL_FACTS.zip"),
+        Z1("#Z1","23L_PN_EXTERNAL_LEGAL_FACTS.zip"),
+        Z2("#Z2","");
+        private final String suffix;
+        private final String resources;
+
+        ZipSuffix(String suffix, String resources){
+            this.suffix = suffix;
+            this.resources = resources;
+        }
+
+        public static Optional<ZipSuffix> valueIfEndWithZipSuffix(String documentType){
+            for(ZipSuffix zipSuffix: ZipSuffix.values()){
+                if(documentType.endsWith(zipSuffix.suffix))return Optional.of(zipSuffix);
+            }
+            return Optional.empty();
+        }
+    }
     private static final String ZIP = "ZIP";
     private static final String SEVEN_ZIP = "7ZIP";
 
@@ -299,10 +317,12 @@ public class EventMessageUtil {
     private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages) {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
-            if(documentType.endsWith(ZIP_SUFFIX)) {
+            Optional<ZipSuffix> zipSuffixOptional = ZipSuffix.valueIfEndWithZipSuffix(documentType);
+            if(zipSuffixOptional.isPresent()){
                 log.info("[{}] ZIP attachment found!", iun);
-                documentType = documentType.replace(ZIP_SUFFIX, "");
-                fileCreationRequest = buildZIPAttachment();
+                ZipSuffix zipSuffix = zipSuffixOptional.get();
+                documentType = documentType.replace(zipSuffix.suffix, "");
+                fileCreationRequest = buildZIPAttachment(zipSuffix.resources);
             } else if (documentType.endsWith(SEVEN_ZIP)) {
                 log.info("[{}] CON020 7ZIP for attachment found!", iun);
                 documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
@@ -342,9 +362,9 @@ public class EventMessageUtil {
 
     }
 
-    private static FileCreationWithContentRequest buildZIPAttachment() throws IOException {
+    private static FileCreationWithContentRequest buildZIPAttachment(String resources) throws IOException {
 
-        ClassPathResource classPathResource = new ClassPathResource("23L_PN_EXTERNAL_LEGAL_FACTS.zip");
+        ClassPathResource classPathResource = new ClassPathResource(resources);
         FileCreationWithContentRequest fileCreationRequest = new FileCreationWithContentRequest();
         fileCreationRequest.setContentType("application/zip");
         fileCreationRequest.setDocumentType(PN_EXTERNAL_LEGAL_FACTS);
