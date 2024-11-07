@@ -65,7 +65,9 @@ public class EventMessageUtil {
     private enum ZipSuffix {
         Z1("#Z1","23L_PN_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
         Z2("#Z2","AR_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
-        Z3("#Z3","ARCAD_PN_EXTERNAL_LEGAL_FACTS.zip");
+        Z3("#Z3","ARCAD_PN_EXTERNAL_LEGAL_FACTS.zip"),
+        Z4("#Z4","SP04_23LFD_281526382192_381526382193.zip"),
+        Z5("#Z5","23IFD_ACFD697319802149_697319802149.zip");
         private final String suffix;
         private final String resources;
 
