@@ -63,11 +63,9 @@ public class EventMessageUtil {
     private static final String OK_CODE = "C003";
 
     private enum ZipSuffix {
-        Z("#Z","23L_PN_EXTERNAL_LEGAL_FACTS.zip"),
-        Z1("#Z1","23L_PN_EXTERNAL_LEGAL_FACTS.zip"),
-        Z2("#Z2","23L_PN_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
-        Z3("#Z3","AR_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
-        Z4("#Z4","ARCAD_PN_EXTERNAL_LEGAL_FACTS.zip");
+        Z1("#Z1","23L_PN_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
+        Z2("#Z2","AR_EXTERNAL_LEGAL_FACTS_domicilio.zip"),
+        Z3("#Z3","ARCAD_PN_EXTERNAL_LEGAL_FACTS.zip");
         private final String suffix;
         private final String resources;
 
