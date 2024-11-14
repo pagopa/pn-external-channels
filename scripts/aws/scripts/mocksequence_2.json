@@ -16,19 +16,32 @@
     "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:23I;DELAY:1s].5s-RECRN001C"
   },
   {
-    "sequenceName": "OK_890_ZIP",
-    "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#Z].5s-RECAG001C"
-  },
-  {
-    "sequenceName": "OK_AR_ZIP",
-    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z;DELAY:1s].5s-RECRN001C"
-  },
-  {
     "sequenceName": "OK-REC008_890",
     "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG012.5s-RECAG008C"
   },
   {
     "sequenceName": "OK-REC008_890-E",
     "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG008C.60s-RECAG012"
+  },
+  {
+    "sequenceName": "OK-Giacenza-gt10_890_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD#Z3;DOC:23L#Z5].60s-RECAG005A.5s-RECAG005C"
+  },
+  {
+    "sequenceName": "OK_890_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#Z1].5s-RECAG001C"
+  },
+  {
+    "sequenceName": "OK_AR_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK-Giacenza-lte10_890_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD#Z3;DOC:23L#Z4].5s-RECAG005C"
+  },
+  {
+    "sequenceName": "OK-Giacenza_AR_ZIP",
+    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN003A.5s-RECRN003B[DOC:AR#Z5].5s-RECRN003C"
   }
+
 ]
