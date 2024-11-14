@@ -29,11 +29,11 @@
   },
   {
     "sequenceName": "OK_890_ZIP",
-    "sequence": "@sequence.90s-CON080.90s-RECAG001A.90s-RECAG001B[DOC:23L#Z1].90s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#Z1].5s-RECAG001C"
   },
   {
     "sequenceName": "OK_AR_ZIP",
-    "sequence": " @sequence.5s-CON080.5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
+    "sequence": " @sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "OK-Giacenza-lte10_890_ZIP",
