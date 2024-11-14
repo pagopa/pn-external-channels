@@ -33,7 +33,7 @@
   },
   {
     "sequenceName": "OK_AR_ZIP",
-    "sequence": " @sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "OK-Giacenza-lte10_890_ZIP",
