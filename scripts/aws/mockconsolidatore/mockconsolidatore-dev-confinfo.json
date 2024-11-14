@@ -26,5 +26,8 @@
     "UseDynamodb": "true",
     "PnAddressManagerBaseUrl": "http://internal-EcsA-20230406081307135800000004-20484703.eu-south-1.elb.amazonaws.com:8080",
     "PnAddressManagerCallbackAfterMinutes": "0",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:ffa93c9308d041f46f781e1782ddc6a1236a9d3dabfa45e9c162861c3fcda279"
+    "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
+    "CpuValue": "2048",
+    "MemoryAmount": "4GB",
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:3c8c5dfd41d153a62eef2799c38684db17d31ed210b7b4dff7b2d2044dbaf19a"
 }
