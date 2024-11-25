@@ -29,10 +29,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -46,15 +43,17 @@ public class ArchivesUtil {
     public static final String BOL_FILE_EXTENSION = ".bol";
 
     public static File createBolFile(NotificationProgress notificationProgress, Integer pages) {
+        File outputFile = null;
         try {
             ClassPathResource classPathResource = new ClassPathResource("/");
-            File outputFile = File.createTempFile(BOL_FILE_NAME, BOL_FILE_EXTENSION, classPathResource.getFile());
+            outputFile = File.createTempFile(BOL_FILE_NAME, BOL_FILE_EXTENSION, classPathResource.getFile());
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 fos.write(String.format("attachment_example_%d_pages.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
             }
             return outputFile;
         } catch (Exception e) {
             log.error("Error creating bol file", e);
+            deleteFile(outputFile);
             throw new ExternalChannelsMockException("Error creating bol file", e);
         }
     }
@@ -83,12 +82,13 @@ public class ArchivesUtil {
     }
 
     public static byte[] create7Zip(Integer pages, File bolFile) {
+        File outputFile = null;
         try {
             ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + "_pages.pdf");
             final List<File> srcFiles = Arrays.asList(examplePdf.getFile(), bolFile);
 
             ClassPathResource classPathResource = new ClassPathResource("/");
-            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
@@ -105,14 +105,16 @@ public class ArchivesUtil {
             return Files.readAllBytes(outputFile.toPath());
         } catch (Exception e) {
             log.error("Error creating 7zip file", e);
+            deleteFile(outputFile);
             throw new ExternalChannelsMockException("Error creating 7zip file", e);
         }
     }
 
     public static File create7Zip(byte[] data) {
+        File outputFile = null;
         try {
             ClassPathResource classPathResource = new ClassPathResource("/");
-            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
@@ -125,14 +127,16 @@ public class ArchivesUtil {
             return outputFile;
         } catch (Exception e) {
             log.error("Error creating 7zip file from p7m", e);
+            deleteFile(outputFile);
             throw new ExternalChannelsMockException("Error creating 7zip file from p7m", e);
         }
     }
 
     public static File createZip(byte[] data) {
+        File outputFile = null;
         try {
             ClassPathResource classPathResource = new ClassPathResource("/");
-            File outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), ZIP_EXTENSION, classPathResource.getFile());
             FileOutputStream fos = new FileOutputStream(outputFile);
             try (ZipOutputStream zipOut = new ZipOutputStream(fos)) {
                 try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
@@ -149,6 +153,7 @@ public class ArchivesUtil {
             return outputFile;
         } catch (Exception e) {
             log.error("Error creating zip file from p7m", e);
+            deleteFile(outputFile);
             throw new ExternalChannelsMockException("Error creating zip file from p7m", e);
         }
     }
@@ -188,5 +193,15 @@ public class ArchivesUtil {
             log.error("Error creating p7m file", e);
             throw new ExternalChannelsMockException("Error creating p7m file", e);
         }
+    }
+
+    public static void deleteFile(File fileToDelete) {
+        Optional.of(fileToDelete).ifPresent(file -> {
+            try {
+                Files.deleteIfExists(file.toPath());
+            } catch (IOException e) {
+                throw new ExternalChannelsMockException("Error deleting temp file", e);
+            }
+        });
     }
 }
