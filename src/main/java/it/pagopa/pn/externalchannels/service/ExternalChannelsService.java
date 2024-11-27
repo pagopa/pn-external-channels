@@ -208,7 +208,7 @@ public class ExternalChannelsService {
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
 
-        if(requestSearched.isPresent() && (output != userAttributesChannel) ){
+        if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@failalways")))
                 || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
