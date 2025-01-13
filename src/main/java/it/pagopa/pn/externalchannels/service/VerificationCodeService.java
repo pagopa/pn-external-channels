@@ -31,7 +31,7 @@ public class VerificationCodeService {
     }
 
     private String getVerificationCodeFromHtml(String messageText) {
-        final String inserisciSuSendIlCodiceString = "inserisci su SEND il codice";
+        final String inserisciSuSendIlCodiceString = "inserisci su SEND - Servizio Notifiche Digitali il codice";
         int startIndex = messageText.indexOf(inserisciSuSendIlCodiceString) + inserisciSuSendIlCodiceString.length();
         int endIndex = messageText.indexOf("</h5>");
 
