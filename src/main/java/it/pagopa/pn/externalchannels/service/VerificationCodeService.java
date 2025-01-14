@@ -6,10 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class VerificationCodeService {
+    private static final String VERIFICATION_CODE_REGEX = "il codice[\\s\\S]*?<h5[^>]*>\\s*(.*?)\\s*</h5>";
     private final VerificationCodeDao verificationCodeDao;
 
     public VerificationCodeService(VerificationCodeDao verificationCodeDao) {
@@ -31,12 +34,12 @@ public class VerificationCodeService {
     }
 
     private String getVerificationCodeFromHtml(String messageText) {
-        final String inserisciSuSendIlCodiceString = "inserisci su SEND - Servizio Notifiche Digitali il codice";
-        int startIndex = messageText.indexOf(inserisciSuSendIlCodiceString) + inserisciSuSendIlCodiceString.length();
-        int endIndex = messageText.indexOf("</h5>");
-
-        String subtext = messageText.substring(startIndex , endIndex);
-        return subtext.substring(subtext.length() - 5);
+        Pattern pattern = Pattern.compile(VERIFICATION_CODE_REGEX);
+        Matcher matcher = pattern.matcher(messageText);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return null;
     }
     
     public Optional<VerificationCodeEntity> getVerificationCodeFromDb(String digitalAddress){
