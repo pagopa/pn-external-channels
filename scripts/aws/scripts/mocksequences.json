@@ -1,218 +1,146 @@
 [
   {
     "sequenceName": "OK_RS",
-    "sequence": "@sequence.5s-CON080.5s-RECRS001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS001C"
   },
   {
     "sequenceName": "OK_AR",
-    "sequence": "@sequence.5s-CON080.5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "FAIL_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
   },
   {
     "sequenceName": "FAIL_IndirizzoInesistenteAR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M07].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002A[FAILCAUSE:M07].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
   },
   {
     "sequenceName": "FAIL-Irreperibile_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002D[FAILCAUSE:M04].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002D[FAILCAUSE:M04].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
   },
   {
     "sequenceName": "FAIL-Discovery_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "FAIL-DiscoveryIrreperibile_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-RECRN002D[FAILCAUSE:M03].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002D[DISCOVERY;FAILCAUSE:M01].5s-RECRN002E[DOC:Plico;DOC:Indagine].5s-RECRN002F@discovered.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002D[FAILCAUSE:M03].5s-RECRN002E[DOC:Plico].5s-RECRN002F"
   },
   {
     "sequenceName": "OK-Giacenza_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.5s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
   },
   {
     "sequenceName": "FAIL-Giacenza_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN004A.5s-RECRN004B[DOC:Plico].5s-RECRN004C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.5s-RECRN004A.5s-RECRN004B[DOC:Plico].5s-RECRN004C"
   },
   {
     "sequenceName": "OK-Giacenza-gt10_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.80s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.80s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
   },
   {
     "sequenceName": "FAIL-Giacenza-gt10_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.80s-RECRN004A.5s-RECRN004B[DOC:Plico].5s-RECRN004C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.80s-RECRN004A.5s-RECRN004B[DOC:Plico].5s-RECRN004C"
   },
   {
     "sequenceName": "FAIL-CompiutaGiacenza_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.80s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.80s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
   },
   {
     "sequenceName": "OK-Retry_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN006[FAILCAUSE:F01]@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN006[FAILCAUSE:F01]@retry.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK-NonRendicontabile_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN013@retry.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN013@retry.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK-CausaForzaMaggiore_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN015[FAILCAUSE:C04].5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN015[FAILCAUSE:C04].5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   },
   {
     "sequenceName": "OK-PersonaAbilitata_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG002A.5s-RECAG002B[DOC:23L].5s-RECAG002C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG002A.5s-RECAG002B[DOC:23L].5s-RECAG002C"
   },
   {
     "sequenceName": "FAIL_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
   },
   {
     "sequenceName": "FAIL_IndirizzoInesatto890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M06].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003A[FAILCAUSE:M06].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
   },
   {
     "sequenceName": "FAIL-Irreperibile_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
   },
   {
     "sequenceName": "FAIL-Discovery_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   },
   {
     "sequenceName": "FAIL-DiscoveryIrreperibile_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[DISCOVERY;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
   },
-{
+  {
     "sequenceName": "FAIL-DiscoveryIrreperibileBadCAP_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003D[DISCOVERY:00100;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[DISCOVERY:00100;FAILCAUSE:M03].5s-RECAG003E[DOC:Plico;DOC:Indagine].5s-RECAG003F@discovered.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F"
   },
   {
     "sequenceName": "OK-Retry_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG004[FAILCAUSE:F02]@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG004[FAILCAUSE:F02]@retry.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   },
   {
     "sequenceName": "OK-Giacenza-lte10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD;DOC:23L].5s-RECAG005C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD;DOC:23L].5s-RECAG005C"
   },
   {
     "sequenceName": "OK-Giacenza-gt10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG005A.5s-RECAG005C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG005A.5s-RECAG005C"
   },
   {
     "sequenceName": "OK-Giacenza-gt10-23L_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG005A.5s-RECAG005B[DOC:23L].5s-RECAG005C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG005A.5s-RECAG005B[DOC:23L].5s-RECAG005C"
   },
   {
     "sequenceName": "OK-GiacenzaDelegato-lte10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG006A.5s-RECAG006B[DOC:ARCAD;DOC:23L].5s-RECAG006C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG006A.5s-RECAG006B[DOC:ARCAD;DOC:23L].5s-RECAG006C"
   },
   {
     "sequenceName": "OK-GiacenzaDelegato-gt10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG006A.5s-RECAG006C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG006A.5s-RECAG006C"
   },
   {
     "sequenceName": "OK-GiacenzaDelegato-gt10-23L_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG006A.5s-RECAG006B[DOC:23L].5s-RECAG006C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG006A.5s-RECAG006B[DOC:23L].5s-RECAG006C"
   },
   {
     "sequenceName": "FAIL-Giacenza-lte10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG007A.5s-RECAG007B[DOC:ARCAD;DOC:Plico].5s-RECAG007C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG007A.5s-RECAG007B[DOC:ARCAD;DOC:Plico].5s-RECAG007C"
   },
   {
     "sequenceName": "FAIL-Giacenza-gt10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG007A.5s-RECAG007B[DOC:Plico].5s-RECAG007C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG007A.5s-RECAG007B[DOC:Plico].5s-RECAG007C"
   },
   {
     "sequenceName": "FAIL-Giacenza-gt10-23L_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG007A.5s-RECAG007B[DOC:23L;DOC:Plico].5s-RECAG007C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD].5s-RECAG007A.5s-RECAG007B[DOC:23L;DOC:Plico].5s-RECAG007C"
   },
   {
     "sequenceName": "OK-CompiutaGiacenza_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG008A.5s-RECAG008B[DOC:Plico].5s-RECAG008C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.60s-RECAG012.5s-RECAG011B[DOC:ARCAD;DOC:23L].60s-RECAG008A.5s-RECAG008B[DOC:Plico].5s-RECAG008C"
   },
   {
     "sequenceName": "OK-NonRendicontabile_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG013@retry.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG013@retry.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   },
   {
     "sequenceName": "OK-CausaForzaMaggiore_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG015[FAILCAUSE:C01].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
-  },
-  {
-    "sequenceName": "OK_RIS",
-    "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003C"
-  },
-  {
-    "sequenceName": "FAIL_RIS",
-    "sequence": "@sequence.5s-CON080.5s-RECRSI001.5s-RECRSI002.5s-RECRSI004A.5s-RECRSI004B[DOC:Plico].5s-RECRSI004C"
-  },
-  {
-    "sequenceName": "OK_RIR",
-    "sequence": "@sequence.5s-CON080.5s-RECRI001.5s-RECRI002.5s-RECRI003A.5s-RECRI003B[DOC:AR].5s-RECRI003C"
-  },
-  {
-    "sequenceName": "FAIL_RIR",
-    "sequence": "@sequence.5s-CON080.5s-RECRI001.5s-RECRI002.5s-RECRI004A.5s-RECRI004B[DOC:Plico].5s-RECRI004C"
-  },
-  {
-    "sequenceName": "FAIL_Consolidatore-AR",
-    "sequence": "@sequence.5s-CON996"
-  },
-  {
-    "sequenceName": "FAIL_ConsolidatoreIndirizzo-AR",
-    "sequence": "@sequence.5s-CON997"
-  },
-  {
-    "sequenceName": "OK-WO-011B",
-    "sequence": "@sequence.5s-RECAG011B[DOC:ARCAD].5s-RECAG011B[DOC:23L].5m-RECAG012"
-  },
-  {
-    "sequenceName": "OK-Giacenza-lte10_890-2",
-    "sequence": "@sequence.5s-RECAG011B[DOC:ARCAD].5s-RECAG012.5s-RECAG011B[DOC:23L]"
-  },
-  {
-    "sequenceName": "OK-NO012-lte10",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.35s-RECAG005A.5s-RECAG005B[DOC:ARCAD;DOC:23L].5s-RECAG005C"
-  },
-  {
-    "sequenceName": "OK-NO012-gt10",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.65s-RECAG011B[DOC:ARCAD].60s-RECAG005A.5s-RECAG005B[DOC:23L].5s-RECAG005C"
-  },
-  {
-    "sequenceName": "OK-WO_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG001C.1s-RECAG001B[DOC:23L].1s-RECAG001A"
-  },
-  {
-    "sequenceName": "OK-WO-Giacenza-lte10_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005C.1s-RECAG005B[DOC:ARCAD;DOC:23L].1s-RECAG005A"
-  },
-  {
-    "sequenceName": "FAIL-WO_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002C[FAILCAUSE:M02].1s-RECRN002B[DOC:Plico].1s-RECRN002A"
-  },
-  {
-    "sequenceName": "OK-WO-DoubleRECAG012",
-    "sequence": "@sequence.5s-RECAG012.5s-RECAG012"
-  },
-  {
-    "sequenceName": "OK-WO-Giacenza_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C.5s-RECRN011"
-  },
-  {
-    "sequenceName": "OK-M_AR",
-    "sequence": "@sequence.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
-  },
-  {
-    "sequenceName": "OK_890_SLOW",
-    "sequence": "@sequence.90s-CON080.90s-RECAG001A.90s-RECAG001B[DOC:23L].90s-RECAG001C"
-  },
-  {
-    "sequenceName": "FAIL-Irreperibile_AR_SLOW",
-    "sequence": "@sequence.90s-CON080.90s-RECRN002D[FAILCAUSE:M04].90s-RECRN002E[DOC:Plico].90s-RECRN002F"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG015[FAILCAUSE:C01].5s-RECAG001A.5s-RECAG001B[DOC:23L].5s-RECAG001C"
   }
 ]

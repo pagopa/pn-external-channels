@@ -59,7 +59,10 @@ public class ExternalChannelsService {
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
-    private static final List<String> SEQUENCE_PARAMETER_NAME = Arrays.asList("MapExternalChannelMockSequence","MapExternalChannelMockSequence2");
+    private static final List<String> SEQUENCE_PARAMETER_NAME = Arrays.asList(
+            "MapExternalChannelMockSequence",
+            "MapExternalChannelMockSequence2",
+            "MapExternalChannelMockSequence3");
     private static final String SERVICEID_PARAMETER_NAME = "MapExternalChannelMockServiceIdEndpoint";
 
     private final NotificationProgressDao notificationProgressDao;
