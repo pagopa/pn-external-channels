@@ -14,5 +14,17 @@
   {
     "sequenceName": "FAIL_CompiutaGiacenza_AR_ERR",
     "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.5s-RECRN005A.5s-RECRN005B[DOC:Plico].5s-RECRN005C"
+  },
+  {
+    "sequenceName": "FAIL_RS_IRREPERIBILE_ASSOLUTO",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS002D[FAILCAUSE:M01].5s-RECRS002E.5s-RECRS002F"
+  },
+  {
+    "sequenceName": "FAIL_RS_MANCATA_CONSEGNA_PUNTI_GIACENZA",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS004A.5s-RECRS004B.5s-RECRS004C"
+  },
+  {
+    "sequenceName": "OK_RS_COMPIUTA_GIACENZA",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS011.5s-RECRS005A.5s-RECRS005B.5s-RECRS005C"
   }
 ]
