@@ -235,6 +235,9 @@ public class ExternalChannelsService {
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
             receiverClean = receiverClean.substring(0, receiverClean.length()-3);
 
+        if(receiverClean.toLowerCase(Locale.ROOT).contains("pcretry")) {
+            receiverClean = getSequenceOfPcRetry(receiverClean,requestId);
+        }
         if (receiverClean.toLowerCase(Locale.ROOT).contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
         }
@@ -346,7 +349,15 @@ public class ExternalChannelsService {
                 return attempts[numberOfAttempts];
             }
         }
-        
+
+        return attempts[numberOfAttempts];
+    }
+
+    //example: MOCK-LVRK-202302-G-1;RECINDEX_0;PCRETRY_0;ATTEMPT_1
+    private String getSequenceOfPcRetry(String receiverClean, String requestId) {
+        int pcRetryIndex = requestId.indexOf("PCRETRY_") + 8;
+        int numberOfAttempts = Integer.parseInt(requestId.substring(pcRetryIndex, pcRetryIndex + 1));
+        String[] attempts = receiverClean.split("pcretry");
         return attempts[numberOfAttempts];
     }
 
