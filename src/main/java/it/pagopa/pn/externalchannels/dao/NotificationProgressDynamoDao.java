@@ -152,7 +152,8 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
                 .partitionValue(pk)
                 .sortValue(recipient)
                 .build());
-
+        if (item==null)
+            return 0;
         return item.getNAttempt();
     }
 

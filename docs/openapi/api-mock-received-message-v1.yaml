@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: Mock Received Message API
+  version: 1.0.0
+tags:
+  - name: MockReceivedMessages
+paths:
+  /historical/received-message/{requestId}:
+    get:
+      tags:
+        - MockReceivedMessages
+      operationId: getReceivedMessage
+      summary: Recupero del receivedMessage tramite requestId
+      parameters:
+        - in: path
+          name: requestId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceivedMessage'
+        '404':
+          description: Not Found
+
+  /historical/received-message/{iun}/{recipientIndex}:
+    get:
+      tags:
+        - MockReceivedMessages
+      operationId: getReceivedMessages
+      summary: Recupero del receivedMessage tramite requestId iun e recipientIndex ordinati dal più recente
+      parameters:
+        - in: path
+          name: iun
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: recipientIndex
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReceivedMessage'
+
+components:
+  schemas:
+    ReceivedMessage:
+      type: object
+      properties:
+        requestId:
+          type: string
+        iun:
+          type: string
+        recipientIndex:
+          type: integer
+        created:
+          type: string
+          format: date-time
+        digitalNotificationRequest:
+          $ref: '#/components/schemas/DigitalNotificationRequest'
+        digitalCourtesyMailRequest:
+          $ref: '#/components/schemas/DigitalCourtesyMailRequest'
+        digitalCourtesySmsRequest:
+          $ref: '#/components/schemas/DigitalCourtesySmsRequest'
+        paperEngageRequest:
+          $ref: '#/components/schemas/PaperEngageRequest'
+
+    ### - RIFERIMENTI AD ALTRI FILE
+    ######################################################
+    DigitalNotificationRequest:
+      $ref: 'schemas-digital-v1.yaml#/components/schemas/DigitalNotificationRequest'
+    DigitalCourtesyMailRequest:
+      $ref: 'schemas-digital-v1.yaml#/components/schemas/DigitalCourtesyMailRequest'
+    DigitalCourtesySmsRequest:
+      $ref: 'schemas-digital-v1.yaml#/components/schemas/DigitalCourtesySmsRequest'
+    PaperEngageRequest:
+      $ref: 'schemas-paper-v1.yaml#/components/schemas/PaperEngageRequest'

@@ -23,5 +23,11 @@
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:64e9035cd76991cc761b3718c0daf2ec3eec06535af45a0f391222b662629276"
+    "UseDynamodb": "true",
+    "PnAddressManagerBaseUrl": "http://internal-EcsA-2023050521295416230000000b-242462731.eu-south-1.elb.amazonaws.com:8080",
+    "PnAddressManagerCallbackAfterMinutes": "0",
+    "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
+    "CpuValue": "2048",
+    "MemoryAmount": "4GB",
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:45bb22276e11a204d33ed2fb204ad58522e7709966a76ceefac385cfc20c958c"
 }

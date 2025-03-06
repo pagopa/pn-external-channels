@@ -6,12 +6,13 @@ import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceDTO;
 import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsumer;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
-import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
-import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
+import it.pagopa.pn.externalchannels.dao.*;
 import it.pagopa.pn.externalchannels.dto.AdditionalAction;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
+import it.pagopa.pn.externalchannels.mapper.SmartMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,10 @@ public class ExternalChannelsService {
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
-    private static final String SEQUENCE_PARAMETER_NAME = "MapExternalChannelMockSequence";
+    private static final List<String> SEQUENCE_PARAMETER_NAME = Arrays.asList(
+            "MapExternalChannelMockSequence",
+            "MapExternalChannelMockSequence2",
+            "MapExternalChannelMockSequence3");
     private static final String SERVICEID_PARAMETER_NAME = "MapExternalChannelMockServiceIdEndpoint";
 
     private final NotificationProgressDao notificationProgressDao;
@@ -70,6 +74,8 @@ public class ExternalChannelsService {
     private final VerificationCodeService verificationCodeService;
 
     private final InternalSendClient internalSendClient;
+
+    private final ReceivedMessageEntityDaoDynamo receivedMessageEntityDaoDynamo;
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
@@ -88,16 +94,27 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalNotificationRequest.getRequestId()));
         }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalNotificationRequest));
+        }
 
         internalSendClient.sendNotification(notificationProgress);
     }
 
-    
-
     public void sendDigitalCourtesyMessage(DigitalCourtesyMailRequest digitalCourtesyMailRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
+        log.info("OutputChannel is {}",outputChannel);
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
-            verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+            log.info("start saveVerificationCode");
+            try {
+                // nel caso di messaggi che hanno "pec-rejected" nell'id, non mi interessa recuperare il codice di verifica.
+                if (!digitalCourtesyMailRequest.getRequestId().contains("pec-rejected"))
+                    verificationCodeService.saveVerificationCode(digitalCourtesyMailRequest.getEventType(), digitalCourtesyMailRequest.getMessageText(), digitalCourtesyMailRequest.getReceiverDigitalAddress());
+                else
+                    log.info("skip saveVerificationCode for pec-rejected");
+            } catch (Exception e) {
+                log.warn("Cannot detect verification code", e);
+            }
         }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
@@ -109,6 +126,9 @@ public class ExternalChannelsService {
 
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesyMailRequest.getRequestId()));
+        }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalCourtesyMailRequest));
         }
 
         internalSendClient.sendNotification(notificationProgress);
@@ -125,6 +145,9 @@ public class ExternalChannelsService {
 
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, digitalCourtesySmsRequest.getRequestId()));
+        }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(digitalCourtesySmsRequest));
         }
 
         internalSendClient.sendNotification(notificationProgress);
@@ -167,6 +190,9 @@ public class ExternalChannelsService {
         if (! inserted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(IUN_ALREADY_EXISTS_MESSAGE, paperEngageRequest.getRequestId()));
         }
+        else {
+            receivedMessageEntityDaoDynamo.put(RequestsToReceivedMessagesMapper.map(paperEngageRequest));
+        }
 
         internalSendClient.sendNotification(notificationProgress);
     }
@@ -185,7 +211,7 @@ public class ExternalChannelsService {
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
 
-        if(requestSearched.isPresent() && (output != userAttributesChannel) ){
+        if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@failalways")))
                 || receiverDigitalAddress.replaceFirst("\\+39", "").startsWith("001")) {
@@ -371,10 +397,16 @@ public class ExternalChannelsService {
         return result.charAt(0) == '.' ? result.substring(1) : result;
     }
 
-    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,String parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
-        Optional<EventCodeSequenceDTO[]> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
-        if(sequenceEventCode.isEmpty())return Optional.empty();
-        EventCodeSequenceDTO[] eventCodeSequenceList = sequenceEventCode.get();
+    private Optional<String> selectSequenceInParameter(String receiverAddress,String producType,List<String> parameterStoreName, NotificationProgress.PROGRESS_OUTPUT_CHANNEL source){
+        List<Optional<EventCodeSequenceDTO[]>> sequenceEventCode = eventCodeSequenceParameterConsumer.getParameterValue(parameterStoreName, EventCodeSequenceDTO[].class);
+        List<EventCodeSequenceDTO> eventCodeSequenceMergedList = new ArrayList<>();
+        sequenceEventCode.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(eventCodeSequenceDTOS -> eventCodeSequenceMergedList.addAll(Arrays.asList(eventCodeSequenceDTOS)));
+
+        if(eventCodeSequenceMergedList.isEmpty())  return Optional.empty();
+        EventCodeSequenceDTO[] eventCodeSequenceList = eventCodeSequenceMergedList.toArray(new EventCodeSequenceDTO[]{});
         EventCodeSequenceDTO eventCodeSequenceDTO = null;
         log.info("Search for receiverAddress {}",receiverAddress);
         receiverAddress = receiverAddress.toLowerCase();

@@ -4,27 +4,29 @@
     <parent>
         <groupId>it.pagopa.pn</groupId>
         <artifactId>pn-parent</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.1</version>
         <relativePath/>
     </parent>
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
-    <version>2.0.2</version>
+    <version>2.2.0-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
         <jacoco.min.line.cover.ratio>0.0</jacoco.min.line.cover.ratio>
     </properties>
     <dependencies>
 
+
+
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-commons</artifactId>
-            <version>2.0.0</version>
+            <version>2.2.10</version>
         </dependency>
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-model</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -90,9 +92,34 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>kms</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.7.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.68</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.68</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.tukaani/xz -->
+        <dependency>
+            <groupId>org.tukaani</groupId>
+            <artifactId>xz</artifactId>
+            <version>1.10</version>
+        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -140,11 +167,85 @@
                             </supportingFilesToGenerate>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
-                                <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
                                 <reactive>true</reactive>
                                 <skipDefaultInterface>false</skipDefaultInterface>
-                                <!--								<openApiNullable>false</openApiNullable>-->
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>api-mock-received-message-v1</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/docs/openapi/api-mock-received-message-v1.yaml
+                            </inputSpec>
+                            <library>spring-boot</library>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
+                            <modelPackage>it.pagopa.pn.externalchannels.mockreceivedmessage</modelPackage>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <skipValidateSpec>true</skipValidateSpec>
+                            </additionalProperties>
+                            <supportingFilesToGenerate>
+                                ApiUtil.java
+                            </supportingFilesToGenerate>
+                            <configOptions>
+                                <dateLibrary>java8</dateLibrary>
+                                <delegatePattern>true</delegatePattern>
+                                <interfaceOnly>true</interfaceOnly>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>openapi-mock-postel</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/docs/openapi/api-mock-postel-v1.yaml
+                            </inputSpec>
+                            <library>spring-boot</library>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
+                            <modelPackage>it.pagopa.pn.externalchannels.mock-postel</modelPackage>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <skipValidateSpec>true</skipValidateSpec>
+                            </additionalProperties>
+                            <supportingFilesToGenerate>
+                                ApiUtil.java
+                            </supportingFilesToGenerate>
+                            <configOptions>
+                                <dateLibrary>java11</dateLibrary>
+                                <delegatePattern>true</delegatePattern>
+                                <interfaceOnly>true</interfaceOnly>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>false</skipDefaultInterface>
+                                <useTags>true</useTags>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -175,15 +276,12 @@
                             </supportingFilesToGenerate>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
-                                <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
                                 <reactive>true</reactive>
                                 <skipDefaultInterface>false</skipDefaultInterface>
-                                <!--								<openApiNullable>false</openApiNullable>-->
                             </configOptions>
                         </configuration>
                     </execution>
-                    <!-- OPEN API CLIENT PN-SAFESTORAGE -->
                     <execution>
                         <id>generate-client-pn-safestorage</id>
                         <goals>
@@ -239,6 +337,36 @@
                             </configOptions>
                             <modelPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.dto</modelPackage>
                             <apiPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.api</apiPackage>
+                        </configuration>
+                    </execution>
+                    <!-- OPEN API CLIENT PN-ADDRESS-MANAGER -->
+                    <execution>
+                        <id>generate-client-pn-address-maanger</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/docs/wsclient/pn-address-manager/pn-normalizzatore-webhook-v1.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>resttemplate</library>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.api</apiPackage>
+                                <modelPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model</modelPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <annotationLibrary>none</annotationLibrary>
+                                <documentationProvider>source</documentationProvider>
+                                <openApiNullable>false</openApiNullable>
+                                <useAbstractionForFiles>true</useAbstractionForFiles>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                            <modelPackage>${project.groupId}.pn-delivery.microservice.client.pnaddressmanager.v1.dto</modelPackage>
+                            <apiPackage>${project.groupId}.pn-delivery.microservice.client.pnaddressmanager.v1.api</apiPackage>
                         </configuration>
                     </execution>
                 </executions>

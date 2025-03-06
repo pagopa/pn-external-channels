@@ -16,6 +16,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     ssm put-parameter \
     --name "MapExternalChannelMockSequence" \
     --type String \
+    --tier Advanced \
     --value "[
 				{
 					\"sequenceName\":\"OK_RS\",
@@ -73,6 +74,24 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 			]" \
     --overwrite
 
+echo "### START PARAMETER STORE TWO CREATION FOR EXTERNAL CHANNEL MOCK ###"
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    ssm put-parameter \
+    --name "MapExternalChannelMockSequence2" \
+    --type String \
+    --tier Advanced \
+    --value "[
+				{
+					\"sequenceName\":\"FAIL2-Irreperibile_890\",
+					\"sequence\":\"@sequence.5s-CON996@retry.10s-CON080.5s-RECAG003D[FAILCAUSE:M03].5s-RECAG003E[DOC:Plico].5s-RECAG003F\"
+				},
+				{
+          \"sequenceName\":\"OK_AR-CON020\",
+          \"sequence\":\"@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C\"
+        }
+			]" \
+    --overwrite
+
 
 
 echo "### START PARAMETER STORE CREATION FOR EXTERNAL CHANNEL MOCK ###"
@@ -84,7 +103,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --value "[
 				{
 					\"serviceId\":\"pn-cons-000\",
-					\"endpoint\":\"http://localhost:8080\",
+					\"endpoint\":\"http://localhost:8082\",
 					\"endpointServiceId\":\"pn-extchannel-000\"
 				},
 				{
@@ -126,5 +145,32 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
         AttributeName=pk,KeyType=HASH \
     --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5
+
+
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb create-table \
+    --table-name MockEcReceivedMessageTable \
+    --attribute-definitions \
+        AttributeName=requestId,AttributeType=S \
+        AttributeName=iunRecIndex,AttributeType=S \
+    --key-schema \
+        AttributeName=requestId,KeyType=HASH \
+    --provisioned-throughput \
+        ReadCapacityUnits=10,WriteCapacityUnits=5 \
+    --global-secondary-indexes \
+        "[
+            {
+                \"IndexName\": \"iun-gsi\",
+                \"KeySchema\": [{\"AttributeName\":\"iunRecIndex\",\"KeyType\":\"HASH\"}],
+                \"Projection\":{
+                    \"ProjectionType\":\"ALL\"
+                },
+                \"ProvisionedThroughput\": {
+                    \"ReadCapacityUnits\": 10,
+                    \"WriteCapacityUnits\": 5
+                }
+            }
+        ]"
+
 
 echo "Initialization terminated"

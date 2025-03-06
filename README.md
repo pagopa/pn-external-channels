@@ -73,8 +73,8 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
    1. **@sequence.5s-<codice>[comandi].10s-<codice>[comandi].20s-<codice>[comandi]** : 
       1. 5s: durata di attesa prima di invio del codice
       2. <codice>: il codice da spedire, esempio RECAG003D, senza < e >
-      3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY,DOC:< doctype >,DELAY:< duration >. 
-         1. DISCOVERY invia l'eventuale indirizzo di discovery specificato in @discovered. 
+      3. [comandi]: azioni aggiuntive per il codice, separate da ";". per ora supportate sono: DISCOVERY:< cap >,DOC:< doctype >,DELAY:< duration >. 
+         1. DISCOVERY invia l'eventuale indirizzo di discovery specificato in @discovered. E' opzionale il CAP da usare, esempio DISCOVERY:00100 userà il CAP 00100. DISCOVERY senza :cap userà un cap di default. 
          2. DOC invia un allegato con documentType=< doctype >.
          3. FAILCAUSE invia una deliveryFailureCause popolata con il valore specificato
          4. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
@@ -83,6 +83,11 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
 2. Se il campo receiverAddress contiene la stringa **@fail** o **@ok**, cerca nel parameter store MapExternalChannelMockSequence la 
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
 3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
+
+Inoltre sul doctype, è possibile aggiungere il suffisso **#Z**, che permette di caricare un allegato di tipo ZIP invece che 
+PDF. Lo ZIP conterrà un file XML e un file PDF. \
+Esempio di utilizzo:
+`@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L#Z].5s-RECAG001C`.
 
 
 ## Esempi di utilizzo del campo receiverAddress per l'invio di notifiche cartacee
