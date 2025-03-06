@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.ssm.model.SsmException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,6 +34,7 @@ public abstract class ParameterizedCachedSsmParameterConsumer implements Paramet
     }
 
     private final ConcurrentHashMap<String, ParameterizedCachedSsmParameterConsumer.ExpiringValue> valueCache = new ConcurrentHashMap<>();
+
     public <T> Optional<T> getParameterValue(String parameterName, Class<T> clazz ) {
         Object optValue = valueCache.computeIfAbsent( parameterName, key -> new ParameterizedCachedSsmParameterConsumer.ExpiringValue())
                 .getValueCheckTimestamp();
@@ -43,6 +46,19 @@ public abstract class ParameterizedCachedSsmParameterConsumer implements Paramet
         return (Optional<T>) optValue;
     }
 
+    public <T> List<Optional<T>> getParameterValue(List<String> parametersName, Class<T> clazz ) {
+        List<Optional<T>> optValueList = new ArrayList<>(); //lista di N elementi, N = numero di parameterStore
+        for(String parameterName: parametersName){
+            Optional<T> optValue = (Optional<T>) valueCache.computeIfAbsent(parameterName, key -> new ExpiringValue()).getValueCheckTimestamp();
+            if(optValue == null || optValue.isEmpty()){
+                log.debug("Value for {} not in cache", parameterName);
+                optValue = getParameter(parameterName, clazz);
+                valueCache.put(parameterName, new ParameterizedCachedSsmParameterConsumer.ExpiringValue(optValue, cacheExpiration));
+            }
+            optValueList.add(optValue);
+        }
+        return optValueList;
+    }
 
     public String getParameter(String parameterName) {
         GetParameterRequest parameterRequest = GetParameterRequest.builder()

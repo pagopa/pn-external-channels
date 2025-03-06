@@ -12,6 +12,33 @@ Parameters:
     Type: String
     Description: 'Comma separated list of domains allowed to make cross origin request'
 
+  # Instance parameters
+  # 256 (.25 vCPU) - Available memory values: 0.5GB, 1GB, 2GB
+  # 512 (.5 vCPU) - Available memory values: 1GB, 2GB, 3GB, 4GB
+  # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
+  # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
+  # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
+  CpuValue:
+    Type: Number
+    Default: 1024
+    Description: Fargate virtual CPU quantity 1024 equals one vCPU
+
+  # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
+  # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
+  # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
+  # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
+  # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
+  MemoryAmount:
+    Type: String
+    Default: 2GB
+    Description: memory amount reserved to the task pod.
+    AllowedValues: [ 2GB, 4GB, 6GB, 8GB ]
+
+  JavaToolOptions:
+    Type: String
+    Description: 'System properties and parameters for the JVM'
+    Default: '-XX:MaxDirectMemorySize=128M'
+
   ContainerImageUri:
     Type: String
     Description: 'Exact container image URI with full repository and image digest'
@@ -110,7 +137,15 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing Verification Code for mock'
     Default: 'pn-VerificationCode'
-    
+  MockEcReceivedMessageTableDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing requests'
+
+  MockEcReceivedMessageTableDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing requests'
+
+
   UseDynamodb:
     Type: String
     Description: 'True if you choose dynamodb as storage, false for in-memory storage'
@@ -136,6 +171,16 @@ Parameters:
     Description: 'Cache expiration for SSM Parameter Store'
     Default: "5"
 
+  PnAddressManagerBaseUrl:
+    Type: String
+    Description: 'Address Manager base url'
+    Default: ''
+
+  PnAddressManagerCallbackAfterMinutes:
+    Type: String
+    Description: 'Address Manager Callback delay'
+    Default: '0'
+
 Resources:
 
   # PN-External-Channels microservice
@@ -145,8 +190,8 @@ Resources:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-external-channels'
-        CpuValue: 1024
-        MemoryAmount: 2GB
+        CpuValue: !Ref CpuValue
+        MemoryAmount: !Ref MemoryAmount
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
@@ -164,9 +209,13 @@ Resources:
         ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
         ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
         ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
+        ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
+        ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
+        ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_RECEIVEDMESSAGETABLENAME=${MockEcReceivedMessageTableDynamoTableName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
-        MappedPaths: '/external-channels/*,/external-channel/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*'
+        JavaToolOptions: !Ref JavaToolOptions
+        MappedPaths: '/external-channels/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*,/send-normalizzatore-ingress/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref VpcEgressSubnetsIds
         VpcId: !Ref VpcId
@@ -205,6 +254,8 @@ Resources:
               - ssm:GetParameters
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence2'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence3'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockServiceIdEndpoint'
           - Effect: Allow
             Action:
@@ -217,3 +268,5 @@ Resources:
             Resource:
               - !Sub "${NotificationProgressDynamoTableArn}"
               - !Sub "${VerificationCodeTableDynamoTableArn}"
+              - !Sub "${MockEcReceivedMessageTableDynamoTableArn}"
+              - !Sub "${MockEcReceivedMessageTableDynamoTableArn}/*"
