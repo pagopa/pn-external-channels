@@ -1,5 +1,5 @@
 echo "### CREATE QUEUES ###"
-queues="local-ext-channels-outputs local-ext-channels-to-paper-outputs local-ext-channels-to-user-attributes-outputs local-ext-channels-to-internal-outputs"
+queues="local-ext-channels-to-paper-outputs local-ext-channels-to-user-attributes-outputs local-ext-channels-to-internal-outputs"
 for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo creating queue $qn ...
 
