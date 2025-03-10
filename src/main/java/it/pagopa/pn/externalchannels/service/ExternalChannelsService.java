@@ -261,12 +261,14 @@ public class ExternalChannelsService {
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
             receiverClean = receiverClean.substring(0, receiverClean.length()-3);
 
-        if(receiverClean.toLowerCase(Locale.ROOT).contains("pcretry")) {
-            receiverClean = getSequenceOfPcRetry(receiverClean,requestId);
-        }
         if (receiverClean.toLowerCase(Locale.ROOT).contains("attempt")) {
             receiverClean = getSequenceOfMacroAttempts(receiverClean, requestId);
         }
+
+        if(receiverClean.toLowerCase(Locale.ROOT).contains("pcretry")) {
+            receiverClean = getSequenceOfPcRetry(receiverClean,requestId);
+        }
+
         if (receiverClean.contains("_")) {
             receiverClean = getSequenceOfMicroAttempts(receiverClean, iun, receiverDigitalAddress);
         }
