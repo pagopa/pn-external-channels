@@ -12,7 +12,6 @@ import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
-import it.pagopa.pn.externalchannels.mapper.SmartMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +54,8 @@ public class ExternalChannelsService {
     private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
 
     private static final String DISCOVERED_MARKER = "@discovered";
+
+    private static final String NO_AUTO_DATETIME_MARKER = "@noAutoDatetime";
 
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
@@ -243,7 +244,7 @@ public class ExternalChannelsService {
     private NotificationProgress buildNotification(List<String> codeToSendList) {
         NotificationProgress notificationProgress = new NotificationProgress();
         List<CodeTimeToSend> codeTimeToSends = codeToSendList.stream().map(codeToSend -> new CodeTimeToSend(codeToSend,
-                Duration.ofSeconds(5), null)).toList();
+                Duration.ofSeconds(5), null, false)).toList();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>(codeTimeToSends));
 
 
@@ -289,6 +290,13 @@ public class ExternalChannelsService {
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
 
         for (String timeCodeCouple : timeCodeCoupleArray) {
+            boolean disableAutoBusinessDatetime = false;
+
+            if(timeCodeCouple.contains(NO_AUTO_DATETIME_MARKER)) {
+                disableAutoBusinessDatetime = true;
+                timeCodeCouple = timeCodeCouple.substring(0, receiverClean.indexOf(NO_AUTO_DATETIME_MARKER));
+            }
+
             String[] timeCodeCoupleSplit = timeCodeCouple.split("-");
             String time = "PT" + timeCodeCoupleSplit[0];
             String code = timeCodeCoupleSplit[1];
@@ -304,7 +312,7 @@ public class ExternalChannelsService {
                 if (!documentList.isEmpty())
                     eventCodeDocumentsDao.insert(iun,addressAlias,code,documentList);
             }
-            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
+            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions, disableAutoBusinessDatetime);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 

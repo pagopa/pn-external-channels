@@ -34,10 +34,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -143,11 +140,30 @@ public class EventMessageUtil {
                 }
             }
 
+            OffsetDateTime statusDateTime = getStatusDateTime(codeTimeToSend, notificationProgress);
+
             return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), failcause.get(),
-                    notificationProgress, eventCodeDocumentsDao, safeStorageService, pdfPages.get());
+                    notificationProgress, eventCodeDocumentsDao, safeStorageService, pdfPages.get(), statusDateTime);
         }
 
         return buildDigitalCourtesyMessage(code, requestId, delay.get());
+    }
+
+    private static OffsetDateTime getStatusDateTime(CodeTimeToSend codeTimeToSend,
+                                                    NotificationProgress notificationProgress) {
+        // Genera lo stesso timestamp per gli eventi che fanno parte delle triplette
+        // StatusCode termina con A, B, C, D, E, F e il prodotto è AR
+        String code = codeTimeToSend.getCode();
+        boolean endsWithABCDEF = code.matches(".*[A-F]$");
+        boolean isARChannel = AR.equals(notificationProgress.getChannel());
+
+        if (endsWithABCDEF && isARChannel && !codeTimeToSend.getDisableAutoBusinessDatetime()) {
+            if (notificationProgress.getBusinessStatusDatetime() == null) {
+                notificationProgress.setBusinessStatusDatetime(OffsetDateTime.now());
+            }
+            return notificationProgress.getBusinessStatusDatetime();
+        }
+        return OffsetDateTime.now();
     }
 
     private static SingleStatusUpdate buildLegalMessage(String code, String requestId, Duration delay, String iun, SafeStorageService safeStorageService) {
@@ -232,7 +248,7 @@ public class EventMessageUtil {
                 .eventTimestamp(OffsetDateTime.now());
     }
 
-    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService, Integer pages) {
+    private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService, Integer pages, OffsetDateTime statusDateTime) {
         SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
                 .analogMail(
                         new PaperProgressStatusEvent()
@@ -245,7 +261,7 @@ public class EventMessageUtil {
                                 .attachments(null)
                                 .deliveryFailureCause(failureCause)
                                 .statusCode(code)
-                                .statusDateTime(OffsetDateTime.now().minus(delay))
+                                .statusDateTime(statusDateTime.minus(delay))
                                 .statusDescription("Mock status"))
                 .eventTimestamp(OffsetDateTime.now());
 
