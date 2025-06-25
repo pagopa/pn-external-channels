@@ -84,7 +84,7 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
 3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
 
-Gli eventi che fanno parte delle triplette (es. RECAG001A, RECAG001B, RECAG001C) presentano la stessa businessDatetime. Se nella sequence viene specificato il marker @noAutoDatetime la businessDatetime sarà generata al momento e diversa da quella comune per le triplette.
+Gli eventi che fanno parte delle triplette (es. RECAG001A, RECAG001B, RECAG001C) presentano la stessa businessDatetime. Se nella sequence viene specificato il marker @noAutoDatetime la businessDatetime sarà generata al momento e diversa da quella comune per le triplette (per ora solo prodotto AR).
 
 Inoltre sul doctype, è possibile aggiungere il suffisso **#Z**, che permette di caricare un allegato di tipo ZIP invece che 
 PDF. Lo ZIP conterrà un file XML e un file PDF. \
