@@ -158,6 +158,8 @@ public class EventMessageUtil {
         boolean isARChannel = AR.equals(notificationProgress.getChannel());
 
         if (endsWithABCDEF && isARChannel && !codeTimeToSend.getDisableAutoBusinessDatetime()) {
+            log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
+                    code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
             if (notificationProgress.getBusinessStatusDatetime() == null) {
                 notificationProgress.setBusinessStatusDatetime(OffsetDateTime.now());
             }
