@@ -156,8 +156,10 @@ public class EventMessageUtil {
         String code = codeTimeToSend.getCode();
         boolean endsWithABCDEF = code.matches(".*[A-F]$");
         boolean isARChannel = AR.equals(notificationProgress.getChannel());
+        boolean isAutoDatetimeDisabled = codeTimeToSend.getAdditionalActions().stream()
+                .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NO_AUTO_DATETIME));
 
-        if (endsWithABCDEF && isARChannel && !codeTimeToSend.getDisableAutoBusinessDatetime()) {
+        if (endsWithABCDEF && isARChannel && !isAutoDatetimeDisabled) {
             log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
                     code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
             if (notificationProgress.getBusinessStatusDatetime() == null) {

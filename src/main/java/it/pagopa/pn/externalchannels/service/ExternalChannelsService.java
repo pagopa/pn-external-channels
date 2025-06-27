@@ -55,8 +55,6 @@ public class ExternalChannelsService {
 
     private static final String DISCOVERED_MARKER = "@discovered";
 
-    private static final String NO_AUTO_DATETIME_MARKER = "@noAutoDatetime";
-
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
@@ -244,7 +242,7 @@ public class ExternalChannelsService {
     private NotificationProgress buildNotification(List<String> codeToSendList) {
         NotificationProgress notificationProgress = new NotificationProgress();
         List<CodeTimeToSend> codeTimeToSends = codeToSendList.stream().map(codeToSend -> new CodeTimeToSend(codeToSend,
-                Duration.ofSeconds(5), null, false)).toList();
+                Duration.ofSeconds(5), null)).toList();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>(codeTimeToSends));
 
 
@@ -290,12 +288,6 @@ public class ExternalChannelsService {
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
 
         for (String timeCodeCouple : timeCodeCoupleArray) {
-            boolean disableAutoBusinessDatetime = false;
-
-            if(timeCodeCouple.contains(NO_AUTO_DATETIME_MARKER)) {
-                disableAutoBusinessDatetime = true;
-                timeCodeCouple = timeCodeCouple.substring(0, receiverClean.indexOf(NO_AUTO_DATETIME_MARKER));
-            }
 
             String[] timeCodeCoupleSplit = timeCodeCouple.split("-");
             String time = "PT" + timeCodeCoupleSplit[0];
@@ -312,7 +304,7 @@ public class ExternalChannelsService {
                 if (!documentList.isEmpty())
                     eventCodeDocumentsDao.insert(iun,addressAlias,code,documentList);
             }
-            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions, disableAutoBusinessDatetime);
+            CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 

@@ -21,5 +21,4 @@ public class CodeTimeToSend implements Serializable {
     @Getter(onMethod=@__({@DynamoDbAttribute("code")})) private String code;
     @Getter(onMethod=@__({@DynamoDbAttribute("time")})) private Duration time;
     @Getter(onMethod=@__({@DynamoDbAttribute("additionalActions")})) private List<AdditionalAction> additionalActions;
-    @Getter(onMethod=@__({@DynamoDbAttribute("disableAutoBusinessDatetime")})) private Boolean disableAutoBusinessDatetime = false;
 }
