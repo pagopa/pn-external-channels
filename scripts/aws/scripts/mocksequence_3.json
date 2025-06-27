@@ -5,7 +5,7 @@
   },
   {
     "sequenceName": "FAIL_DECEDUTO_AR",
-    "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+    "sequence": "@sequence.5s-CON080.5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[FAILCAUSE:M02;DOC:Plico].5s-RECRN002C"
   },
   {
     "sequenceName": "FAIL_DECEDUTO_RS",
@@ -26,5 +26,41 @@
   {
     "sequenceName": "OK_RS_COMPIUTA_GIACENZA",
     "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS011.5s-RECRS005A.5s-RECRS005B.5s-RECRS005C"
+  },
+  {
+    "sequenceName": "FAIL_CON996_PCRETRY_AR",
+    "sequence": "@sequence.5s-CON996pcretry5s-CON996"
+  },
+  {
+    "sequenceName": "FAIL_CON996_PCRETRY_FURTO_AR",
+    "sequence": "@sequence.5s-CON996pcretry5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN006[FAILCAUSE:F01]pcretry5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "FAIL-CON996_PCRETRY_DECEDUTO-AR",
+    "sequence": "@sequence.5s-CON996pcretry5s-CON080.5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+  },
+  {
+    "sequenceName": "OK_PCRETRY_CON996_AR",
+    "sequence": "@sequence.5s-CON996pcretry5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002A[FAILCAUSE:M06].5s-RECRN002B[DOC:Plico].5s-RECRN002CattemptCON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK_INESITO_MANUAL_TEST",
+    "sequence": "@sequence.5s-CON080.5s-RECRN010"
+  },
+  {
+    "sequenceName": "OK-GiacenzaCAD-lte10_890",
+    "sequence": "@sequence.5s-CON080.5s-RECAG010.5s-RECAG011A.5s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:CAD;DOC:23L].5s-RECAG005C"
+  },
+  {
+    "sequenceName": "FAIL_DECEDUTO_PROG",
+    "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M02].5s-RECAG003C.5s-RECAG003B[DOC:Plico]"
+  },
+  {
+    "sequenceName": "OK_AR_BLOCKED",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018"
+  },
+  {
+    "sequenceName": "OK_AR_INVALID_DATETIME",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;NO_AUTO_DATETIME].5s-RECRN001C[NO_AUTO_DATETIME]"
   }
 ]
