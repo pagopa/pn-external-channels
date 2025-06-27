@@ -29,5 +29,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:8624b057bea737178c3600e6bcc0fe93979fbc4d516b06c7b7672f900c98149f"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:46770bb096fecfd9b14c952ed3b2ce6e82ea7846813ba6c0454c332b7623b4ea"
 }
