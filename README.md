@@ -79,10 +79,16 @@ Il campo che viene preso in considerazione per l'invio di notifiche cartacee (`/
          3. FAILCAUSE invia una deliveryFailureCause popolata con il valore specificato
          4. DELAY aggiunge al timestamp dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s). NB: lo stesso delay viene aggiunto ai DOC, salvo non sia esplicitato da DELAYDOC.
          5. DELAYDOC aggiunge al timestamp dei DOCUMENTI dell'evento la durata indicata in < duration > (NB: per default le durate sono negative. per aggiungere secondi usare esplicitamente +, quindi es DELAY:+1s)
+         6. NO_AUTO_DATETIME disabilita la generazione coerente dei datetime sulle triplette
    2. se contiene anche la stringa **@discovered**, il suo valore viene inviato come indirizzo nel codice con azione DISCOVERY 
 2. Se il campo receiverAddress contiene la stringa **@fail** o **@ok**, cerca nel parameter store MapExternalChannelMockSequence la 
    sequenza corrispondente. Inoltre, se non specificata, cerca la sequenza per il productType richiesto (quindi ad esempio @fail_ar)
 3. Specificare un indirizzo senza @sequence o @ok/fail, genera implicitamente un @ok
+
+Gli eventi che fanno parte delle triplette (es. RECAG001A, RECAG001B, RECAG001C) presentano la stessa businessDatetime. 
+Se nella sequence viene specificata l'action `NO_AUTO_DATETIME` la businessDatetime sarà generata al momento e diversa da quella comune per le triplette (per ora solo prodotto AR). \
+Esempio di utilizzo:
+`@sequence.5s-CON080.5s-RECAG001A.5s-RECAG001B[DOC:23L,NO_AUTO_DATETIME].5s-RECAG001C[NO_AUTO_DATETIME]`.
 
 Inoltre sul doctype, è possibile aggiungere il suffisso **#Z**, che permette di caricare un allegato di tipo ZIP invece che 
 PDF. Lo ZIP conterrà un file XML e un file PDF. \

@@ -205,6 +205,6 @@
   },
   {
     "sequenceName": "FAIL_DECEDUTO_890",
-    "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M02].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+    "sequence": "@sequence.5s-CON080.5s-RECAG003A[FAILCAUSE:M02].5s-RECAG003B[FAILCAUSE:M02;DOC:Plico].5s-RECAG003C"
   }
 ]

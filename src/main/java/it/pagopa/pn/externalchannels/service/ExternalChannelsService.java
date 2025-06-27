@@ -12,7 +12,6 @@ import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
-import it.pagopa.pn.externalchannels.mapper.SmartMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
@@ -289,6 +288,7 @@ public class ExternalChannelsService {
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
 
         for (String timeCodeCouple : timeCodeCoupleArray) {
+
             String[] timeCodeCoupleSplit = timeCodeCouple.split("-");
             String time = "PT" + timeCodeCoupleSplit[0];
             String code = timeCodeCoupleSplit[1];
