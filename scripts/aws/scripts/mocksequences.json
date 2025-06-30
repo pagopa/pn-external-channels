@@ -9,7 +9,7 @@
   },
   {
     "sequenceName": "FAIL_AR",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002A[FAILCAUSE:M02].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002A[FAILCAUSE:M05].5s-RECRN002B[DOC:Plico].5s-RECRN002C"
   },
   {
     "sequenceName": "FAIL_IndirizzoInesistenteAR",

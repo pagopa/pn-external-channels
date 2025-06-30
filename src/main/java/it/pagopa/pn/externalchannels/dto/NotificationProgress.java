@@ -8,6 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -41,6 +42,7 @@ public class NotificationProgress {
     private static final String COL_DISCOVERED_ADDRESS = "discoveredAddress";
     private static final String COL_N_ATTEMPT = "nAttempt";
     private static final String COL_DOCUMNETS = "documents";
+    private static final String COL_BUSINESS_STATUS_DATETIME = "businessStatusDatetime";
 
 
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_IUN)})) private String iun;
@@ -72,6 +74,8 @@ public class NotificationProgress {
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_N_ATTEMPT)})) private Integer nAttempt;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_DOCUMNETS)}))private List<List<String>> documents;
+
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_BUSINESS_STATUS_DATETIME)})) private OffsetDateTime businessStatusDatetime;
 
 
     public enum PROGRESS_OUTPUT_CHANNEL{
