@@ -761,6 +761,14 @@ components:
           description: >-
             Il codice di tracciatura obbligatorio per i prodotti di corrispondenza tracciata.
           example: '123456789abc'
+        courier:
+          type: string
+          description: >-
+            identificativo del recapitista
+            es.:
+            - Poste
+            - PostAndService
+            - Fulmine
         productType:
           description: >-
             Tipo prodotto di cui viene chiesto il recapito:  <br/>
