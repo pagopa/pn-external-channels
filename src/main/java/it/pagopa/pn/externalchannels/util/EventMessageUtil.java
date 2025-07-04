@@ -34,7 +34,10 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -82,7 +85,10 @@ public class EventMessageUtil {
     }
     private static final String ZIP = "ZIP";
     private static final String SEVEN_ZIP = "7ZIP";
+    public static final String OCR_KO = "OCR#KO";
+    public static final String OCR_PENDING = "OCR#PENDING";
 
+    private static final String OCR_LOGGING_MESSAGE = "[{}] {} found!";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
@@ -340,6 +346,7 @@ public class EventMessageUtil {
     private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages) {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
+            String uriPrefix = SAFE_STORAGE_URL_PREFIX;
             Optional<ZipSuffix> zipSuffixOptional = ZipSuffix.valueIfEndWithZipSuffix(documentType);
             if(zipSuffixOptional.isPresent()){
                 log.info("[{}] ZIP attachment found!", iun);
@@ -354,6 +361,10 @@ public class EventMessageUtil {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
                 documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
+            } else if (documentType.endsWith(OCR_KO) || documentType.endsWith(OCR_PENDING)) {
+                log.info(OCR_LOGGING_MESSAGE, iun, documentType);
+                uriPrefix = documentType + "://";
+                fileCreationRequest = buildPDFAttachment();
             } else {
                 fileCreationRequest = buildPDFAttachment();
             }
@@ -361,8 +372,9 @@ public class EventMessageUtil {
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
+
             return new AttachmentDetails()
-                    .uri(SAFE_STORAGE_URL_PREFIX + response.getKey())
+                    .uri(uriPrefix + response.getKey())
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
