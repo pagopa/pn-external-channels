@@ -3,12 +3,10 @@ package it.pagopa.pn.externalchannels.util;
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
+import it.pagopa.pn.externalchannels.event.OcrEvent;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
@@ -85,10 +83,9 @@ public class EventMessageUtil {
     }
     private static final String ZIP = "ZIP";
     private static final String SEVEN_ZIP = "7ZIP";
-    public static final String OCR_KO = "OCR#KO";
-    public static final String OCR_PENDING = "OCR#PENDING";
+    public static final String OCR_KO = "OCR_KO";
+    public static final String OCR_PENDING = "OCR_PENDING";
 
-    private static final String OCR_LOGGING_MESSAGE = "[{}] {} found!";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
@@ -322,6 +319,19 @@ public class EventMessageUtil {
                 .build();
     }
 
+    public static OcrEvent buildOcrEvent(OcrOutputMessage event) {
+        return OcrEvent.builder()
+                .header(StandardEventHeader.builder()
+                        .iun(event.getCommandId())
+                        .eventId(MOCK_PREFIX + UUID.randomUUID())
+                        .eventType("EXTERNAL_CHANNELS_EVENT")
+                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                        .createdAt(Instant.now())
+                        .build())
+                .payload(event)
+                .build();
+    }
+
 
 
     private static void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun,
@@ -346,7 +356,6 @@ public class EventMessageUtil {
     private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages) {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
-            String uriPrefix = SAFE_STORAGE_URL_PREFIX;
             Optional<ZipSuffix> zipSuffixOptional = ZipSuffix.valueIfEndWithZipSuffix(documentType);
             if(zipSuffixOptional.isPresent()){
                 log.info("[{}] ZIP attachment found!", iun);
@@ -361,10 +370,6 @@ public class EventMessageUtil {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
                 documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
-            } else if (documentType.endsWith(OCR_KO) || documentType.endsWith(OCR_PENDING)) {
-                log.info(OCR_LOGGING_MESSAGE, iun, documentType);
-                uriPrefix = documentType + "://";
-                fileCreationRequest = buildPDFAttachment();
             } else {
                 fileCreationRequest = buildPDFAttachment();
             }
@@ -372,9 +377,8 @@ public class EventMessageUtil {
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
-
             return new AttachmentDetails()
-                    .uri(uriPrefix + response.getKey())
+                    .uri(SAFE_STORAGE_URL_PREFIX + response.getKey())
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
