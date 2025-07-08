@@ -22,7 +22,7 @@ public class AdditionalAction implements Serializable  {
         DELAY,
         DELAYDOC,
         PAGES,
-        NO_AUTO_DATETIME
+        NOAUTODATETIME
     }
 
     @Getter(onMethod=@__({@DynamoDbAttribute("action")})) private ADDITIONAL_ACTIONS action;
