@@ -120,6 +120,14 @@ Parameters:
     Type: String
     Description: 'Send and pull notification progress th this queue'
 
+  MockOcrInputsQueueName:
+    Type: String
+    Description: 'queue name for mock of ocr'
+
+  MockOcrInputsQueueARN:
+    Type: String
+    Description: 'queue ARN for mock of ocr'
+
   NotificationProgressDynamoTableName:
     Type: String
     Description: 'Name of dynamodb table containing Notification Progress for mock'
@@ -207,7 +215,7 @@ Resources:
         ContainerEnvEntry11: !Sub 'PN_EXTERNALCHANNELS_TABLENAME=${NotificationProgressDynamoTableName}'
         ContainerEnvEntry12: !Sub 'PN_EXTERNALCHANNELS_VERIFICATIONCODETABLENAME=${VerificationCodeTableDynamoTableName}'
         ContainerEnvEntry13: !Sub 'PN_EXTERNALCHANNELS_TOPICS_TOINTERNAL=${InternalQueueName}'
-        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName}'
+        ContainerEnvEntry14: !Sub 'SPRING_CLOUD_FUNCTIONROUTER_QUEUES_LIST=${InternalQueueName, MockOcrInputsQueueName}'
         ContainerEnvEntry15: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPSSMMINUTES=${CacheExpSsmMinutes}'
         ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
@@ -248,6 +256,7 @@ Resources:
               - !Ref ExternalChannels2PaperChannelQueueARN
               - !Ref ExternalChannels2UserAttributesQueueARN
               - !Ref InternalQueueARN
+              - !Ref MockOcrInputsQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter
