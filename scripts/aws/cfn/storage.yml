@@ -20,10 +20,6 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
-  AlarmSNSTopicName:
-    Type: String
-    Description: 'Topic alarm'
-
 Conditions:
   Never: !Equals [ 'true', 'false' ]
 
@@ -60,20 +56,15 @@ Resources:
       VisibilityTimeout: 60
       DelaySeconds: 1
 
-  # Mock ocr inputs
-  MockOcrInputQueue:
-    Type: AWS::CloudFormation::Stack
+  MockOcrInputsQueue:
+    Type: AWS::SQS::Queue
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
-      Parameters:
-        QueueName: !Sub '${ProjectName}-mock_ocr_input'
-        AlarmSNSTopicName: !Ref AlarmSNSTopicName
-        VisibilityTimeout: 60
-        MaxReceiveCount: 10
-        DelaySeconds: 1
-  
+      QueueName: "pn-mock_ocr_inputs"
+      VisibilityTimeout: 60
+      DelaySeconds: 1
+
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
@@ -141,13 +132,6 @@ Outputs:
     Description: ARN of dynamodb table containing requests
     Value: !Sub '${MockEcReceivedMessageTable.Arn}'
 
-  MockOcrInputQueueName:
-    Value: !GetAtt MockOcrInputQueue.Outputs.QueueName
-    Description: pn-external-channels mock ocr input queue name
-  MockOcrInputQueueARN:
-    Value: !GetAtt MockOcrInputQueue.Outputs.QueueARN
-    Description: pn-external-channels mock ocr input queue ARN
-
   # Internal Queue
   InternalQueueURL:
     Description: "URL of new Amazon SQS Queue"
@@ -164,4 +148,17 @@ Outputs:
     Value:
       Fn::GetAtt:
         - "InternalQueue"
+        - "QueueName"
+
+  MockOcrInputsQueueARN:
+    Description: "ARN of new AmazonSQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "MockOcrInputsQueue"
+        - "Arn"
+  MockOcrInputsQueueName:
+    Description: "Name of new Amazon SQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "MockOcrInputsQueue"
         - "QueueName"

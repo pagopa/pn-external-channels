@@ -249,7 +249,7 @@ public class ExternalChannelsService {
         return notificationProgress;
     }
 
-    private NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
+    public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
@@ -325,7 +325,7 @@ public class ExternalChannelsService {
         return code;
     }
 
-    private List<AdditionalAction> getAdditionalActionsFromCode(String code) {
+    public List<AdditionalAction> getAdditionalActionsFromCode(String code) {
         List<AdditionalAction> res = new ArrayList<>();
         String additionalActionsRaw = code.substring(code.indexOf("[")+1,code.lastIndexOf("]"));
         for (String addActRaw :

@@ -161,7 +161,7 @@ public class EventMessageUtil {
         boolean isARChannel = AR.equals(notificationProgress.getChannel());
         boolean isAutoDatetimeDisabled = codeTimeToSend.getAdditionalActions() != null &&
                 codeTimeToSend.getAdditionalActions().stream()
-                    .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NO_AUTO_DATETIME));
+                    .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NOAUTODATETIME));
 
         if (endsWithABCDEF && isARChannel && !isAutoDatetimeDisabled) {
             log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",

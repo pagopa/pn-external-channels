@@ -61,7 +61,7 @@
   },
   {
     "sequenceName": "OK-M_AR",
-    "sequence": "@sequence.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_890_SLOW",
@@ -145,27 +145,27 @@
   },
   {
     "sequenceName": "OK_AR-CON020-7Z1P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:1].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:1].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_AR-CON020-ZIP1P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:1].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:1].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_AR-CON020-7Z2P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:2].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:2].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_AR-CON020-ZIP2P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:2].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:2].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_AR-CON020-7Z3P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_AR-CON020-ZIP3P",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   },
   {
     "sequenceName": "OK_890-CON020",
@@ -185,7 +185,7 @@
   },
   {
     "sequenceName": "OK_AR_ZIP",
-    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2;DELAY:1s].5s-RECRN001C"
+    "sequence": "@sequence.5s-CON080.5s-RECRN001A.5s-RECRN001B[DOC:AR#Z2].5s-RECRN001C"
   },
   {
     "sequenceName": "OK-Giacenza-lte10_890_ZIP",
@@ -194,14 +194,6 @@
   {
     "sequenceName": "OK-Giacenza_AR_ZIP",
     "sequence": "@sequence.5s-CON080.5s-RECRN010.5s-RECRN011.5s-RECRN003A.5s-RECRN003B[DOC:AR#Z5].5s-RECRN003C"
-  },
-  {
-    "sequenceName": "OK-AR-ENP",
-    "sequence": "@sequence.1m-CON080.1m-RECRN015[FAILCAUSE:C04].1m-RECRN001A.1m-RECRN001B[DOC:AR;DELAY:14m].1m-RECRN001C"
-  },
-  {
-    "sequenceName": "FAIL-Irreperibile-ENP",
-    "sequence": "@sequence.1m-CON080.1m-CON020[DOC:7ZIP;PAGES:3].1m-RECRN002D[FAILCAUSE:M04].1m-RECRN002E[DOC:Plico;DELAY:14m].1m-RECRN002F"
   },
   {
     "sequenceName": "FAIL_DECEDUTO_890",
