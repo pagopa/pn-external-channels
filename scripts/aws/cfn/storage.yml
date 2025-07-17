@@ -55,7 +55,16 @@ Resources:
       QueueName: "pn-external_channels_to_internal"
       VisibilityTimeout: 60
       DelaySeconds: 1
-  
+
+  MockOcrInputsQueue:
+    Type: AWS::SQS::Queue
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      QueueName: "pn-mock_ocr_inputs"
+      VisibilityTimeout: 60
+      DelaySeconds: 1
+
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
@@ -139,4 +148,17 @@ Outputs:
     Value:
       Fn::GetAtt:
         - "InternalQueue"
+        - "QueueName"
+        -
+  MockOcrInputsQueueARN:
+    Description: "ARN of new AmazonSQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "MockOcrInputsQueue"
+        - "Arn"
+  MockOcrInputsQueueName:
+    Description: "Name of new Amazon SQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "MockOcrInputsQueue"
         - "QueueName"
