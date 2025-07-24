@@ -16,8 +16,6 @@
     </properties>
     <dependencies>
 
-
-
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-commons</artifactId>
@@ -121,6 +119,7 @@
         </dependency>
     </dependencies>
 
+
     <build>
         <plugins>
             <plugin>
@@ -167,6 +166,7 @@
                             </supportingFilesToGenerate>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
+                                <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
                                 <reactive>true</reactive>
                                 <skipDefaultInterface>false</skipDefaultInterface>
@@ -276,12 +276,15 @@
                             </supportingFilesToGenerate>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
+                                <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
                                 <reactive>true</reactive>
                                 <skipDefaultInterface>false</skipDefaultInterface>
+                                <!--								<openApiNullable>false</openApiNullable>-->
                             </configOptions>
                         </configuration>
                     </execution>
+                    <!-- OPEN API CLIENT PN-SAFESTORAGE -->
                     <execution>
                         <id>generate-client-pn-safestorage</id>
                         <goals>
