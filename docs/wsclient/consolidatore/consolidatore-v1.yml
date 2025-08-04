@@ -944,6 +944,10 @@ components:
           format: date-time
           description: >-
             Timestamp della richiesta in UTC
+        courier:
+          type: string
+          description: >-
+            Identificativo del recapitista
 
     ### - LISTA DI EVENTI RELATIVI A UNA STESSA RICHIESTA
     ######################################################
