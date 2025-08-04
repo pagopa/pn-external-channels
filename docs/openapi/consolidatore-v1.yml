@@ -764,11 +764,11 @@ components:
         courier:
           type: string
           description: >-
-            identificativo del recapitista
-            es.:
+            identificativo del recapitista:
             - Poste
             - PostAndService
             - Fulmine
+            - Sailpost
         productType:
           description: >-
             Tipo prodotto di cui viene chiesto il recapito:  <br/>
