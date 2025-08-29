@@ -83,7 +83,6 @@ public class InternalEventHandler {
 
         SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress, safeStorageService, eventCodeDocumentsDao);
 
-
         if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
         {
             extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress, PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
