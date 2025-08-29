@@ -64,7 +64,7 @@ Resources:
       QueueName: "pn-mock_ocr_inputs"
       VisibilityTimeout: 60
       DelaySeconds: 1
-  
+
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain

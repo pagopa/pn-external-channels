@@ -4,6 +4,8 @@ import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.OcrInputMessage;
+import it.pagopa.pn.externalchannels.dto.OcrOutputMessage;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.LinkedList;
+
+import static it.pagopa.pn.externalchannels.util.EventMessageUtil.OCR_KO;
+import static it.pagopa.pn.externalchannels.util.EventMessageUtil.OCR_PENDING;
 
 @Component
 @RequiredArgsConstructor
@@ -62,6 +67,46 @@ public class InternalEventHandler {
             //rimetto in coda
             internalSendClient.sendNotification(notificationProgress);
         }
+    }
+
+    public void handleMessage(OcrInputMessage ocrInputMessage) {
+        OcrOutputMessage ocrOutputMessage = OcrOutputMessage.builder().build();
+        String registeredLetterCode = ocrInputMessage.getData().getDetails().getRegisteredLetterCode();
+        log.trace("[{}] Evaluating ocr message for deliveryDriver", ocrInputMessage.getData().getUnifiedDeliveryDriver());
+        if (registeredLetterCode.contains(OCR_KO)) {
+            log.debug("Creating OCR KO message");
+            ocrOutputMessage = buildKoOcrMessage(ocrInputMessage);
+        } else if (registeredLetterCode.contains(OCR_PENDING)) {
+            log.debug("Creating OCR PENDING message");
+            ocrOutputMessage = buildPendingOcrMessage(ocrInputMessage);
+        }
+        producerHandler.sendToQueue(ocrOutputMessage);
+    }
+
+    private OcrOutputMessage buildPendingOcrMessage(OcrInputMessage ocrInputMessage) {
+        return OcrOutputMessage.builder()
+                .version(ocrInputMessage.getVersion())
+                .commandId(ocrInputMessage.getCommandId())
+                .commandType(ocrInputMessage.getCommandType())
+                .data(OcrOutputMessage.DataField.builder()
+                        .validationType(OcrOutputMessage.ValidationType.ai)
+                        .validationStatus(OcrOutputMessage.ValidationStatus.PENDING)
+                        .description("richiesta in corso")
+                        .build())
+                .build();
+    }
+
+    private OcrOutputMessage buildKoOcrMessage(OcrInputMessage ocrInputMessage) {
+        return OcrOutputMessage.builder()
+                .version(ocrInputMessage.getVersion())
+                .commandId(ocrInputMessage.getCommandId())
+                .commandType(ocrInputMessage.getCommandType())
+                .data(OcrOutputMessage.DataField.builder()
+                        .validationType(OcrOutputMessage.ValidationType.ai)
+                        .validationStatus(OcrOutputMessage.ValidationStatus.KO)
+                        .description("validazione fallita")
+                        .build())
+                .build();
     }
 
     private boolean isTimeToSendMessage(Instant now, NotificationProgress notificationProgress) {

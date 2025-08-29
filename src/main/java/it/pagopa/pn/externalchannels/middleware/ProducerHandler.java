@@ -1,6 +1,8 @@
 package it.pagopa.pn.externalchannels.middleware;
 
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.OcrOutputMessage;
+import it.pagopa.pn.externalchannels.event.OcrEvent;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
@@ -19,6 +21,8 @@ public class ProducerHandler {
     private final PaperChannelSendClient paperChannelSendClient;
 
     private final UserAttributesSendClient userAttributesSendClient;
+
+    private final OcrSendClient ocrSendClient;
 
 
     public void sendToQueue(NotificationProgress notificationProgress, SingleStatusUpdate eventMessage) {
@@ -39,6 +43,13 @@ public class ProducerHandler {
             deliveryPushSendClient.sendNotification(event);
             log.debug("[{}] Message sent to delivery-push", notificationProgress.getIun());
         }
+    }
+
+    public void sendToQueue(OcrOutputMessage ocrOutputMessage) {
+        log.info("[{}] Message to send to ocr: {}", ocrOutputMessage.getCommandId(), ocrOutputMessage);
+        OcrEvent event = EventMessageUtil.buildOcrEvent(ocrOutputMessage);
+        ocrSendClient.sendOcr(event);
+        log.debug("[{}] Message sent to ocr", ocrOutputMessage.getCommandId());
     }
 
 }

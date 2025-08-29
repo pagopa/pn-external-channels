@@ -3,12 +3,10 @@ package it.pagopa.pn.externalchannels.util;
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
+import it.pagopa.pn.externalchannels.event.OcrEvent;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
@@ -332,6 +330,19 @@ public class EventMessageUtil {
         return PaperChannelEvent.builder()
                 .header(StandardEventHeader.builder()
                         .iun(iun)
+                        .eventId(MOCK_PREFIX + UUID.randomUUID())
+                        .eventType("EXTERNAL_CHANNELS_EVENT")
+                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                        .createdAt(Instant.now())
+                        .build())
+                .payload(event)
+                .build();
+    }
+
+    public static OcrEvent buildOcrEvent(OcrOutputMessage event) {
+        return OcrEvent.builder()
+                .header(StandardEventHeader.builder()
+                        .iun(event.getCommandId())
                         .eventId(MOCK_PREFIX + UUID.randomUUID())
                         .eventType("EXTERNAL_CHANNELS_EVENT")
                         .publisher(EventPublisher.EXTERNAL_CHANNELS.name())

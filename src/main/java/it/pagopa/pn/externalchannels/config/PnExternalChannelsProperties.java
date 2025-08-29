@@ -83,6 +83,8 @@ public class PnExternalChannelsProperties {
 
         private String toInternal;
 
+        private String ocrOutput;
+
     }
 
     @Data

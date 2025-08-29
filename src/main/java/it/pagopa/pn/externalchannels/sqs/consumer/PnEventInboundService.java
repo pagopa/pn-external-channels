@@ -25,10 +25,13 @@ public class PnEventInboundService {
 
     private String handleMessage(Message<?> message) {
         String eventType = (String) message.getHeaders().get("eventType");
+        String queueName = (String) message.getHeaders().get("aws_receivedQueue");
         log.debug("Received message from customRouter with eventType={}", eventType);
 
         if (INTERNAL_EVENT.equals(eventType)) {
             return "internalEventConsumer";
+        } else if ("pn-ocr_inputs_mock".equals(queueName)) {
+            return "pnOcrInputsMockConsumer";
         } else {
             throw new ExternalChannelsMockException("EventType " + eventType + " not managed");
         }
