@@ -149,7 +149,6 @@ Outputs:
       Fn::GetAtt:
         - "InternalQueue"
         - "QueueName"
-
   MockOcrInputsQueueARN:
     Description: "ARN of new AmazonSQS Queue"
     Value:
