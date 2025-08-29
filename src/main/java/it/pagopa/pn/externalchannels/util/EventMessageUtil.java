@@ -3,12 +3,10 @@ package it.pagopa.pn.externalchannels.util;
 import it.pagopa.pn.api.dto.events.EventPublisher;
 import it.pagopa.pn.api.dto.events.StandardEventHeader;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.EventCodeMapKey;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationResponseInt;
 import it.pagopa.pn.externalchannels.dto.safestorage.FileCreationWithContentRequest;
+import it.pagopa.pn.externalchannels.event.OcrEvent;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.event.PnDeliveryPushEvent;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
@@ -18,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import software.amazon.awssdk.utils.StringUtils;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -34,7 +33,10 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -82,7 +84,10 @@ public class EventMessageUtil {
     }
     private static final String ZIP = "ZIP";
     private static final String SEVEN_ZIP = "7ZIP";
+    public static final String OCR_KO = "OCR_KO";
+    public static final String OCR_PENDING = "OCR_PENDING";
 
+    private static final String OCR_LOGGING_MESSAGE = "Ocr found with code {}";
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
@@ -99,8 +104,7 @@ public class EventMessageUtil {
         AtomicReference<Duration> delaydoc = new AtomicReference<>(Duration.ZERO);
         AtomicReference<String> failcause = new AtomicReference<>(null);
         AtomicReference<Integer> pdfPages = new AtomicReference<>(1);
-
-
+        AtomicReference<String> ocrCode = new AtomicReference<>(null);
 
         if (codeTimeToSend.getAdditionalActions() != null) {
             Optional<AdditionalAction> additionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAY).findFirst();
@@ -120,6 +124,11 @@ public class EventMessageUtil {
             Optional<AdditionalAction> pagesAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.PAGES).findFirst();
             pagesAction.ifPresent(x -> pdfPages.set(Integer.valueOf(x.getInfo())));
             log.info("found code with PAGES, using pages={}", pagesAction);
+
+            Optional<AdditionalAction> ocrAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.OCR).findFirst();
+            ocrAction.ifPresent(x -> ocrCode.set(x.getInfo()));
+            log.info("found code with OCR, using value={}", ocrCode);
+
         }
 
 
@@ -141,6 +150,20 @@ public class EventMessageUtil {
             }
 
             OffsetDateTime statusDateTime = getStatusDateTime(codeTimeToSend, notificationProgress);
+
+            if (!StringUtils.isEmpty(ocrCode.get())) {
+                log.info(OCR_LOGGING_MESSAGE, ocrCode.get());
+                switch (ocrCode.get()) {
+                    case "KO":
+                        notificationProgress.setRegisteredLetterCode(OCR_KO);
+                        break;
+                    case "PENDING":
+                        notificationProgress.setRegisteredLetterCode(OCR_PENDING);
+                        break;
+                    default:
+                        log.error("[{}] Unknown OCR code", ocrCode.get());
+                }
+            }
 
             return buildPaperMessage(code, notificationProgress.getIun(), requestId, channel, discoveredAddress, delay.get(), delaydoc.get(), failcause.get(),
                     notificationProgress, eventCodeDocumentsDao, safeStorageService, pdfPages.get(), statusDateTime);
@@ -316,6 +339,19 @@ public class EventMessageUtil {
                 .build();
     }
 
+    public static OcrEvent buildOcrEvent(OcrOutputMessage event) {
+        return OcrEvent.builder()
+                .header(StandardEventHeader.builder()
+                        .iun(event.getCommandId())
+                        .eventId(MOCK_PREFIX + UUID.randomUUID())
+                        .eventType("EXTERNAL_CHANNELS_EVENT")
+                        .publisher(EventPublisher.EXTERNAL_CHANNELS.name())
+                        .createdAt(Instant.now())
+                        .build())
+                .payload(event)
+                .build();
+    }
+
 
 
     private static void enrichWithAttachmentDetail(SingleStatusUpdate eventMessage, String iun,
@@ -361,6 +397,7 @@ public class EventMessageUtil {
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
+
             return new AttachmentDetails()
                     .uri(SAFE_STORAGE_URL_PREFIX + response.getKey())
                     .id(iun + "DOCMock_"+id)

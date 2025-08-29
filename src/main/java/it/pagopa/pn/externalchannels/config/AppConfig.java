@@ -1,10 +1,7 @@
 package it.pagopa.pn.externalchannels.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pn.externalchannels.sqs.producer.DeliveryPushProducer;
-import it.pagopa.pn.externalchannels.sqs.producer.InternalProducer;
-import it.pagopa.pn.externalchannels.sqs.producer.PaperChannelProducer;
-import it.pagopa.pn.externalchannels.sqs.producer.UserAttributesProducer;
+import it.pagopa.pn.externalchannels.sqs.producer.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +22,6 @@ public class AppConfig {
         return new DeliveryPushProducer(sqs, properties.getTopics().getToDeliveryPush(), objMapper);
     }
 
-
     @Bean
     UserAttributesProducer userAttributesProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new UserAttributesProducer(sqs, properties.getTopics().getToUserAttributes(), objMapper);
@@ -39,6 +35,11 @@ public class AppConfig {
     @Bean
     InternalProducer internalProducer(SqsClient sqs, ObjectMapper objMapper) {
         return new InternalProducer(sqs, properties.getTopics().getToInternal(), objMapper);
+    }
+
+    @Bean
+    OcrProducer ocrProducer(SqsClient sqs, ObjectMapper objMapper) {
+        return new OcrProducer(sqs, properties.getTopics().getOcrOutput(), objMapper);
     }
 
 }
