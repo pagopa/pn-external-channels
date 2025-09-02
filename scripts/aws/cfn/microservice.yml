@@ -228,6 +228,7 @@ Resources:
         ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
         ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_RECEIVEDMESSAGETABLENAME=${MockEcReceivedMessageTableDynamoTableName}'
+        #Per il mock consolidatore la variabile è stata volutamente impostata alla coda interna, in modo da evitare errori di deploy
         ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUT=${OcrOutputQueueName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
