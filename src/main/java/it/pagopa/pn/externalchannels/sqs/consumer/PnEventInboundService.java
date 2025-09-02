@@ -1,6 +1,8 @@
 package it.pagopa.pn.externalchannels.sqs.consumer;
 
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.function.context.MessageRoutingCallback;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +13,10 @@ import static it.pagopa.pn.externalchannels.event.InternalEvent.INTERNAL_EVENT;
 
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
 public class PnEventInboundService {
+
+    private final PnExternalChannelsProperties config;
 
     @Bean
     public MessageRoutingCallback customRouter() {
@@ -30,7 +35,7 @@ public class PnEventInboundService {
 
         if (INTERNAL_EVENT.equals(eventType)) {
             return "internalEventConsumer";
-        } else if ("pn-ocr_inputs_mock".equals(queueName)) {
+        } else if (config.getTopics().getOcrOutput().equals(queueName)) {
             return "pnOcrInputsMockConsumer";
         } else {
             throw new ExternalChannelsMockException("EventType " + eventType + " not managed");
