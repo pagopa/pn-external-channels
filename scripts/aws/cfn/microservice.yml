@@ -189,6 +189,14 @@ Parameters:
     Description: 'Address Manager Callback delay'
     Default: '0'
 
+  OcrOutputQueueName:
+    Type: String
+    Description: 'Ocr output queue name'
+
+  OcrOutputQueueARN:
+    Type: String
+    Description: 'Ocr output queue ARN'
+
 Resources:
 
   # PN-External-Channels microservice
@@ -220,6 +228,7 @@ Resources:
         ContainerEnvEntry16: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERBASEURL=${PnAddressManagerBaseUrl}'
         ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
         ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_RECEIVEDMESSAGETABLENAME=${MockEcReceivedMessageTableDynamoTableName}'
+        ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUT=${OcrOutputQueueName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
@@ -257,6 +266,7 @@ Resources:
               - !Ref ExternalChannels2UserAttributesQueueARN
               - !Ref InternalQueueARN
               - !Ref MockOcrInputsQueueARN
+              - !Ref OcrOutputQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter

@@ -20,6 +20,8 @@
     "ExternalChannels2PaperChannelQueueARN":"arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "ExternalChannels2UserAttributesQueueName":"pn-mockconsolidatore-dummyqueue",
     "ExternalChannels2UserAttributesQueueARN":"arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
+    "OcrOutputQueueName": "placeholder",
+    "OcrOutputQueueARN": "placeholder",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
