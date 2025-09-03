@@ -43,6 +43,7 @@ public class NotificationProgress {
     private static final String COL_N_ATTEMPT = "nAttempt";
     private static final String COL_DOCUMNETS = "documents";
     private static final String COL_BUSINESS_STATUS_DATETIME = "businessStatusDatetime";
+    private static final String COL_OCR_STATUS = "ocrStatus";
 
 
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_IUN)})) private String iun;
@@ -77,6 +78,7 @@ public class NotificationProgress {
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_BUSINESS_STATUS_DATETIME)})) private OffsetDateTime businessStatusDatetime;
 
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_OCR_STATUS)})) private String ocrStatus;
 
     public enum PROGRESS_OUTPUT_CHANNEL{
         QUEUE_DELIVERY_PUSH,

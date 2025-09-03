@@ -33,11 +33,6 @@ public class PnEventInboundService {
         String queueName = (String) message.getHeaders().get("aws_receivedQueue");
         log.debug("Received message from customRouter with eventType={}", eventType);
 
-        log.info("Received message from customRouter with eventType={}", eventType);
-        log.info(queueName);
-        log.info(config.getTopics().getOcrInputs());
-        log.info(config.getTopics().getOcrOutputs());
-
         if (INTERNAL_EVENT.equals(eventType)) {
             return "internalEventConsumer";
         } else if (config.getTopics().getOcrInputs().equals(queueName)) {
