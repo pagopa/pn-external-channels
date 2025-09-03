@@ -189,11 +189,11 @@ Parameters:
     Description: 'Address Manager Callback delay'
     Default: '0'
 
-  OcrOutputQueueName:
+  OcrOutputsQueueName:
     Type: String
     Description: 'Ocr output queue name'
 
-  OcrOutputQueueARN:
+  OcrOutputsQueueARN:
     Type: String
     Description: 'Ocr output queue ARN'
 
@@ -229,7 +229,8 @@ Resources:
         ContainerEnvEntry17: !Sub 'PN_EXTERNALCHANNELS_ADDRESSMANAGERCALLBACKAFTERMINUTES=${PnAddressManagerCallbackAfterMinutes}'
         ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_RECEIVEDMESSAGETABLENAME=${MockEcReceivedMessageTableDynamoTableName}'
         #Per il mock consolidatore la variabile è stata volutamente impostata alla coda interna, in modo da evitare errori di deploy
-        ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUT=${OcrOutputQueueName}'
+        ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUTS=${OcrOutputsQueueName}'
+        ContainerEnvEntry20: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCRINPUTS=${MockOcrInputsQueueName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
@@ -267,7 +268,7 @@ Resources:
               - !Ref ExternalChannels2UserAttributesQueueARN
               - !Ref InternalQueueARN
               - !Ref MockOcrInputsQueueARN
-              - !Ref OcrOutputQueueARN
+              - !Ref OcrOutputsQueueARN
           - Effect: Allow
             Action:
               - ssm:GetParameter

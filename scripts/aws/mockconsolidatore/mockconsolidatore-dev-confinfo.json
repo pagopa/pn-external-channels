@@ -20,8 +20,8 @@
     "ExternalChannels2PaperChannelQueueARN":"arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "ExternalChannels2UserAttributesQueueName":"pn-mockconsolidatore-dummyqueue",
     "ExternalChannels2UserAttributesQueueARN":"arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
-    "OcrOutputQueueName": "pn-external_channels_to_internal",
-    "OcrOutputQueueARN": "placeholder",
+    "OcrOutputsQueueName": "pn-external_channels_to_internal",
+    "OcrOutputsQueueARN": "placeholder",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
@@ -31,5 +31,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:e3dabc5a7001d60d73108b652a01cd87dbc47e1757efdea154110d20cc73169c"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:05c17312511a73dbcae49fe97343fc52541ceb63c5a6924a90f15c63be2329a9"
 }

@@ -6,7 +6,7 @@
     "UseDynamodb": "true",
     "CacheExpSsmMinutes": "60",
     "PnAddressManagerCallbackAfterMinutes": "0",
-    "OcrOutputQueueName": "pn-ocr_outputs",
-    "OcrOutputQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-ocr_outputs"
+    "OcrOutputsQueueName": "pn-ocr_outputs",
+    "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-ocr_outputs"
   }
 }

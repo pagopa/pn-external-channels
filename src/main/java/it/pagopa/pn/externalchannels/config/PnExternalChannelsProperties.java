@@ -83,7 +83,9 @@ public class PnExternalChannelsProperties {
 
         private String toInternal;
 
-        private String ocrOutput;
+        private String ocrOutputs;
+
+        private String ocrInputs;
 
     }
 
