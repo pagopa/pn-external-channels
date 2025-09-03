@@ -33,10 +33,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -94,7 +91,12 @@ public class EventMessageUtil {
 
         // Check OCR status before polling event
         codeTimeToSends.forEach(codeTimeToSend -> {
-                    Optional<AdditionalAction> ocrAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.OCR).findFirst();
+            Optional<AdditionalAction> ocrAction =
+                    Optional.ofNullable(codeTimeToSend.getAdditionalActions())
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.OCR)
+                            .findFirst();
                     ocrAction.ifPresent(x -> {
                         notificationProgress.setOcrStatus(x.getInfo());
                     });
