@@ -33,13 +33,20 @@ public class PnEventInboundService {
         String queueName = (String) message.getHeaders().get("aws_receivedQueue");
         log.debug("Received message from customRouter with eventType={}", eventType);
 
+        log.info("Received message from customRouter with eventType={}", eventType);
+        log.info(queueName);
+        log.info(config.getTopics().getOcrOutput());
+
         if (INTERNAL_EVENT.equals(eventType)) {
             return "internalEventConsumer";
-        } else if (config.getTopics().getOcrOutput().equals(queueName)) {
-            return "pnOcrInputsMockConsumer";
         } else {
-            throw new ExternalChannelsMockException("EventType " + eventType + " not managed");
+            return "pnOcrInputsMockConsumer";
         }
+//        } else if (config.getTopics().getOcrOutput().equals(queueName)) {
+//            return "pnOcrInputsMockConsumer";
+//        } else {
+//            throw new ExternalChannelsMockException("EventType " + eventType + " not managed");
+//        }
     }
 
 }
