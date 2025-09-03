@@ -33,10 +33,7 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient.SAFE_STORAGE_URL_PREFIX;
@@ -91,6 +88,20 @@ public class EventMessageUtil {
 
     public static SingleStatusUpdate buildMessageEvent(NotificationProgress notificationProgress, SafeStorageService safeStorageService, EventCodeDocumentsDao eventCodeDocumentsDao) {
         LinkedList<CodeTimeToSend> codeTimeToSends = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue());
+
+        // Check OCR status before polling event
+        codeTimeToSends.forEach(codeTimeToSend -> {
+            Optional<AdditionalAction> ocrAction =
+                    Optional.ofNullable(codeTimeToSend.getAdditionalActions())
+                            .orElse(Collections.emptyList())
+                            .stream()
+                            .filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.OCR)
+                            .findFirst();
+                    ocrAction.ifPresent(x -> {
+                        notificationProgress.setOcrStatus(x.getInfo());
+                    });
+                });
+
         CodeTimeToSend codeTimeToSend = codeTimeToSends.poll();
         log.debug("[{}] Processing codeTimeToSend: {}", notificationProgress.getIun(), codeTimeToSend);
         assert codeTimeToSend != null;
@@ -104,7 +115,6 @@ public class EventMessageUtil {
         AtomicReference<Duration> delaydoc = new AtomicReference<>(Duration.ZERO);
         AtomicReference<String> failcause = new AtomicReference<>(null);
         AtomicReference<Integer> pdfPages = new AtomicReference<>(1);
-        AtomicReference<String> ocrCode = new AtomicReference<>(null);
 
         if (codeTimeToSend.getAdditionalActions() != null) {
             Optional<AdditionalAction> additionalAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.DELAY).findFirst();
@@ -125,10 +135,7 @@ public class EventMessageUtil {
             pagesAction.ifPresent(x -> pdfPages.set(Integer.valueOf(x.getInfo())));
             log.info("found code with PAGES, using pages={}", pagesAction);
 
-            Optional<AdditionalAction> ocrAction = codeTimeToSend.getAdditionalActions().stream().filter(x -> x.getAction() == AdditionalAction.ADDITIONAL_ACTIONS.OCR).findFirst();
-            ocrAction.ifPresent(x -> ocrCode.set(x.getInfo()));
-            log.info("found code with OCR, using value={}", ocrCode);
-
+            log.info("found code with OCR, using value={} default: OK", notificationProgress.getOcrStatus());
         }
 
 
@@ -151,9 +158,9 @@ public class EventMessageUtil {
 
             OffsetDateTime statusDateTime = getStatusDateTime(codeTimeToSend, notificationProgress);
 
-            if (!StringUtils.isEmpty(ocrCode.get())) {
-                log.info(OCR_LOGGING_MESSAGE, ocrCode.get());
-                switch (ocrCode.get()) {
+            if (!StringUtils.isEmpty(notificationProgress.getOcrStatus())) {
+                log.info(OCR_LOGGING_MESSAGE, notificationProgress.getOcrStatus());
+                switch (notificationProgress.getOcrStatus()) {
                     case "KO":
                         notificationProgress.setRegisteredLetterCode(OCR_KO);
                         break;
@@ -161,7 +168,7 @@ public class EventMessageUtil {
                         notificationProgress.setRegisteredLetterCode(OCR_PENDING);
                         break;
                     default:
-                        log.error("[{}] Unknown OCR code", ocrCode.get());
+                        log.error("[{}] Unknown OCR code", notificationProgress.getOcrStatus());
                 }
             }
 

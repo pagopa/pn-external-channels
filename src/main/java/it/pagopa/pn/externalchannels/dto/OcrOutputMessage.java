@@ -24,6 +24,6 @@ public class OcrOutputMessage {
     }
 
     public enum ValidationStatus {
-        PENDING, KO
+        PENDING, KO, OK
     }
 }

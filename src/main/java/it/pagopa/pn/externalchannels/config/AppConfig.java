@@ -39,7 +39,7 @@ public class AppConfig {
 
     @Bean
     OcrProducer ocrProducer(SqsClient sqs, ObjectMapper objMapper) {
-        return new OcrProducer(sqs, properties.getTopics().getOcrOutput(), objMapper);
+        return new OcrProducer(sqs, properties.getTopics().getOcrOutputs(), objMapper);
     }
 
 }

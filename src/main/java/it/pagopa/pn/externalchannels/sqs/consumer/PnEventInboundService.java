@@ -35,7 +35,7 @@ public class PnEventInboundService {
 
         if (INTERNAL_EVENT.equals(eventType)) {
             return "internalEventConsumer";
-        } else if (config.getTopics().getOcrOutput().equals(queueName)) {
+        } else if (config.getTopics().getOcrInputs().equals(queueName)) {
             return "pnOcrInputsMockConsumer";
         } else {
             throw new ExternalChannelsMockException("EventType " + eventType + " not managed");

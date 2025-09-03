@@ -70,17 +70,33 @@ public class InternalEventHandler {
     }
 
     public void handleMessage(OcrInputMessage ocrInputMessage) {
-        OcrOutputMessage ocrOutputMessage = OcrOutputMessage.builder().build();
+        OcrOutputMessage ocrOutputMessage;
         String registeredLetterCode = ocrInputMessage.getData().getDetails().getRegisteredLetterCode();
-        log.trace("[{}] Evaluating ocr message for deliveryDriver", ocrInputMessage.getData().getUnifiedDeliveryDriver());
+        log.debug("[{}] Evaluating ocr message for deliveryDriver", ocrInputMessage.getData().getUnifiedDeliveryDriver());
         if (registeredLetterCode.contains(OCR_KO)) {
-            log.debug("Creating OCR KO message");
+            log.info("Creating OCR KO message commandId:{}", ocrInputMessage.getCommandId());
             ocrOutputMessage = buildKoOcrMessage(ocrInputMessage);
         } else if (registeredLetterCode.contains(OCR_PENDING)) {
-            log.debug("Creating OCR PENDING message");
+            log.info("Creating OCR PENDING message commandId:{}", ocrInputMessage.getCommandId());
             ocrOutputMessage = buildPendingOcrMessage(ocrInputMessage);
+        } else { // OK
+            log.info("Creating OCR OK message commandId:{}", ocrInputMessage.getCommandId());
+            ocrOutputMessage = buildOkOcrMessage(ocrInputMessage);
         }
         producerHandler.sendToQueue(ocrOutputMessage);
+    }
+
+    private OcrOutputMessage buildOkOcrMessage(OcrInputMessage ocrInputMessage) {
+        return OcrOutputMessage.builder()
+                .version(ocrInputMessage.getVersion())
+                .commandId(ocrInputMessage.getCommandId())
+                .commandType(ocrInputMessage.getCommandType())
+                .data(OcrOutputMessage.DataField.builder()
+                        .validationType(OcrOutputMessage.ValidationType.ai)
+                        .validationStatus(OcrOutputMessage.ValidationStatus.OK)
+                        .description("OK")
+                        .build())
+                .build();
     }
 
     private OcrOutputMessage buildPendingOcrMessage(OcrInputMessage ocrInputMessage) {

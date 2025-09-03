@@ -26,7 +26,7 @@ public class InternalHandlerConfig {
     @Bean
     Consumer<Message<OcrInputMessage>> pnOcrInputsMockConsumer() {
         return ocrEventMessage -> {
-            System.out.println("INT: " + ocrEventMessage);
+            System.out.println("OCR: " + ocrEventMessage);
             handler.handleMessage(ocrEventMessage.getPayload());
         };
     }
