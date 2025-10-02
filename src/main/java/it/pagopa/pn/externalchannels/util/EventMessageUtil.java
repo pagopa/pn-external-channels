@@ -304,7 +304,7 @@ public class EventMessageUtil {
                 .iun(iun)
                 .recipient(notificationProgress.getDestinationAddress())
                 .code(singleStatusUpdate.getAnalogMail().getStatusCode()).build();
-        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, notificationProgress, safeStorageService, pages);
+        enrichWithAttachmentDetail(singleStatusUpdate, iun, eventCodeMapKey, delaydoc, eventCodeDocumentsDao, notificationProgress, safeStorageService, pages, statusDateTime);
 
         return singleStatusUpdate;
     }
@@ -366,13 +366,14 @@ public class EventMessageUtil {
                                                    EventCodeDocumentsDao eventCodeDocumentsDao,
                                                    NotificationProgress notificationProgress,
                                                    SafeStorageService safeStorageService,
-                                                   Integer pages) {
+                                                   Integer pages,
+                                                   OffsetDateTime attachmentDateTime) {
         Optional<List<String>> eventCodeList = eventCodeDocumentsDao.consumeByKey(eventCodeMapKey);
         log.info("Event code  {} result list {}",eventCodeMapKey,eventCodeList);
         if(eventCodeList.isPresent()) {
             int id = 1;
             for(String documentType: eventCodeList.get()){
-                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, notificationProgress, safeStorageService, pages));
+                eventMessage.getAnalogMail().addAttachmentsItem(buildAttachment(iun, id++, documentType, delaydoc, notificationProgress, safeStorageService, pages, attachmentDateTime));
             }
             eventCodeDocumentsDao.deleteIfEmpty(eventCodeMapKey);
         }
@@ -380,7 +381,7 @@ public class EventMessageUtil {
 
 
 
-    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages) {
+    private static AttachmentDetails buildAttachment(String iun, int id, String documentType, Duration delaydoc, NotificationProgress notificationProgress, SafeStorageService safeStorageService, Integer pages, OffsetDateTime attachmentDateTime) {
         try {
             final FileCreationWithContentRequest fileCreationRequest;
             Optional<ZipSuffix> zipSuffixOptional = ZipSuffix.valueIfEndWithZipSuffix(documentType);
@@ -410,7 +411,7 @@ public class EventMessageUtil {
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
-                    .date(OffsetDateTime.now().minus(delaydoc));
+                    .date(attachmentDateTime.minus(delaydoc));
         } catch (Exception e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
             return null;
