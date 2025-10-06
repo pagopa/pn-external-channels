@@ -52,6 +52,7 @@ public class EventMessageUtil {
     private static final List<String> ERROR_CODES = List.of("C004", "C008", "C009", "C010");
     public static final List<String> LEGAL_CHANNELS = List.of("PEC", "REM");
     public static final String AR = "AR";
+    public static final String RIR = "RIR";
     public static final String _890 = "890";
 
     public static final List<String> PAPER_CHANNELS = List.of(AR, _890, "RIS", "RS","RIR");
@@ -182,15 +183,15 @@ public class EventMessageUtil {
     private static OffsetDateTime getStatusDateTime(CodeTimeToSend codeTimeToSend,
                                                     NotificationProgress notificationProgress) {
         // Genera lo stesso timestamp per gli eventi che fanno parte delle triplette
-        // StatusCode termina con A, B, C, D, E, F e il prodotto è AR
+        // StatusCode termina con A, B, C, D, E, F e il prodotto è abilitato
         String code = codeTimeToSend.getCode();
         boolean endsWithABCDEF = code.matches(".*[A-F]$");
-        boolean isARChannel = AR.equals(notificationProgress.getChannel());
+        boolean isProductEnabled = AR.equals(notificationProgress.getChannel()) || RIR.equals(notificationProgress.getChannel());
         boolean isAutoDatetimeDisabled = codeTimeToSend.getAdditionalActions() != null &&
                 codeTimeToSend.getAdditionalActions().stream()
                     .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NOAUTODATETIME));
 
-        if (endsWithABCDEF && isARChannel && !isAutoDatetimeDisabled) {
+        if (endsWithABCDEF && isProductEnabled && !isAutoDatetimeDisabled) {
             log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
                     code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
             if (notificationProgress.getBusinessStatusDatetime() == null) {
