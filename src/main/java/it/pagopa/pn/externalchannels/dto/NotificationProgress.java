@@ -43,6 +43,7 @@ public class NotificationProgress {
     private static final String COL_N_ATTEMPT = "nAttempt";
     private static final String COL_DOCUMNETS = "documents";
     private static final String COL_BUSINESS_STATUS_DATETIME = "businessStatusDatetime";
+    private static final String COL_BUSINESS_STATUS_DATETIME_890 = "businessStatusDatetime890";
     private static final String COL_OCR_STATUS = "ocrStatus";
 
 
@@ -77,6 +78,8 @@ public class NotificationProgress {
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_DOCUMNETS)}))private List<List<String>> documents;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_BUSINESS_STATUS_DATETIME)})) private OffsetDateTime businessStatusDatetime;
+
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_BUSINESS_STATUS_DATETIME_890)})) private OffsetDateTime businessStatusDatetime890;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_OCR_STATUS)})) private String ocrStatus;
 

@@ -183,22 +183,41 @@ public class EventMessageUtil {
     private static OffsetDateTime getStatusDateTime(CodeTimeToSend codeTimeToSend,
                                                     NotificationProgress notificationProgress) {
         // Genera lo stesso timestamp per gli eventi che fanno parte delle triplette
-        // StatusCode termina con A, B, C, D, E, F e il prodotto è abilitato
+        // (StatusCode che termina con A, B, C, D, E, F e il prodotto è abilitato)
+        // e un differente timestamp ma uguale tra loro per gli eventi RECAG011A e RECAG011B (prodotto 890)
+
         String code = codeTimeToSend.getCode();
         boolean endsWithABCDEF = code.matches(".*[A-F]$");
-        boolean isProductEnabled = AR.equals(notificationProgress.getChannel()) || RIR.equals(notificationProgress.getChannel());
-        boolean isAutoDatetimeDisabled = codeTimeToSend.getAdditionalActions() != null &&
-                codeTimeToSend.getAdditionalActions().stream()
-                    .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NOAUTODATETIME));
+        boolean isProductEnabled = List.of(AR, RIR, _890).contains(notificationProgress.getChannel());
+        boolean isAutoDatetimeDisabled = Optional.ofNullable(codeTimeToSend.getAdditionalActions())
+                .orElse(Collections.emptyList())
+                .stream()
+                .anyMatch(c -> c.getAction().equals(AdditionalAction.ADDITIONAL_ACTIONS.NOAUTODATETIME));
 
-        if (endsWithABCDEF && isProductEnabled && !isAutoDatetimeDisabled) {
-            log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
-                    code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
-            if (notificationProgress.getBusinessStatusDatetime() == null) {
-                notificationProgress.setBusinessStatusDatetime(OffsetDateTime.now());
+        if (isProductEnabled && !isAutoDatetimeDisabled) {
+            if (List.of("RECAG011A", "RECAG011B").contains(code)) {
+                log.info("Setting businessStatusDatetime890 for event. Code: {}, Channel: {}, Previous datetime: {}",
+                        code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime890());
+                return Optional.ofNullable(notificationProgress.getBusinessStatusDatetime890())
+                        .orElseGet(() -> {
+                            OffsetDateTime now = OffsetDateTime.now();
+                            notificationProgress.setBusinessStatusDatetime890(now);
+                            return now;
+                        });
             }
-            return notificationProgress.getBusinessStatusDatetime();
+
+            if (endsWithABCDEF) {
+                log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
+                        code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
+                return Optional.ofNullable(notificationProgress.getBusinessStatusDatetime())
+                        .orElseGet(() -> {
+                            OffsetDateTime now = OffsetDateTime.now();
+                            notificationProgress.setBusinessStatusDatetime(now);
+                            return now;
+                        });
+            }
         }
+
         return OffsetDateTime.now();
     }
 
