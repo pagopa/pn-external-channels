@@ -1,11 +1,14 @@
 package it.pagopa.pn.externalchannels.sqs.consumer.handler.internal;
 
+import io.awspring.cloud.sqs.annotation.SqsListener;
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
 import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.OcrInputMessage;
 import it.pagopa.pn.externalchannels.dto.OcrOutputMessage;
+import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
 import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
@@ -16,11 +19,15 @@ import it.pagopa.pn.externalchannels.service.SafeStorageService;
 import it.pagopa.pn.externalchannels.util.EventMessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.LinkedList;
+import java.util.Map;
 
+import static it.pagopa.pn.externalchannels.event.InternalEvent.INTERNAL_EVENT;
 import static it.pagopa.pn.externalchannels.util.EventMessageUtil.OCR_KO;
 import static it.pagopa.pn.externalchannels.util.EventMessageUtil.OCR_PENDING;
 
@@ -43,7 +50,15 @@ public class InternalEventHandler {
 
     private final InternalSendClient internalSendClient;
 
-    public void handleMessage(NotificationProgress notificationProgress) {
+    private final PnExternalChannelsProperties pnExternalChannelsProperties;
+
+    @SqsListener(value = "${pn.external-channels.topics.to-internal}")
+    public void handleMessage(@Payload NotificationProgress notificationProgress, @Headers Map<String, Object> headers) {
+        String eventType = (String) headers.get("eventType");
+        log.info("received internal event with eventType: {}", eventType);
+        if (!INTERNAL_EVENT.equals(eventType)) {
+            throw new ExternalChannelsMockException("EventType " + eventType + " not managed");
+        }
         Instant now = Instant.now();
         log.trace("[{}] Evaluating if process: {}", notificationProgress.getIun(), notificationProgress);
         if (isTimeToSendMessage(now, notificationProgress)) {
@@ -69,7 +84,9 @@ public class InternalEventHandler {
         }
     }
 
-    public void handleMessage(OcrInputMessage ocrInputMessage) {
+    @SqsListener(value = "${pn.external-channels.topics.ocr-inputs}")
+    public void handleMessage(@Payload OcrInputMessage ocrInputMessage, @Headers Map<String, Object> headers) {
+        log.info("received message with payload: {} and headers: {}", ocrInputMessage, headers);
         OcrOutputMessage ocrOutputMessage;
         String registeredLetterCode = ocrInputMessage.getData().getDetails().getRegisteredLetterCode();
         log.debug("[{}] Evaluating ocr message for deliveryDriver", ocrInputMessage.getData().getUnifiedDeliveryDriver());

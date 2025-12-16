@@ -1,7 +1,7 @@
 package it.pagopa.pn.externalchannels.mapper;
 
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
-import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEventAttachments;
+import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEventAttachmentsInner;
 import it.pagopa.pn.externalchannels.model.AttachmentDetails;
 
 import java.util.ArrayList;
@@ -18,10 +18,10 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
 
         if (input.getAttachments() != null)
         {
-            List<PaperProgressStatusEventAttachments> attachments = new ArrayList<>();
+            List<PaperProgressStatusEventAttachmentsInner> attachments = new ArrayList<>();
             int docId = 0;
             for (AttachmentDetails detail: input.getAttachments()) {
-                PaperProgressStatusEventAttachments paperProgressStatusEventAttachments = new PaperProgressStatusEventAttachments();
+                PaperProgressStatusEventAttachmentsInner paperProgressStatusEventAttachments = new PaperProgressStatusEventAttachmentsInner();
                 paperProgressStatusEventAttachments.setDate(detail.getDate().toInstant());
                 paperProgressStatusEventAttachments.setDocumentType(detail.getDocumentType());
                 paperProgressStatusEventAttachments.setId(Integer.toString(docId++));
