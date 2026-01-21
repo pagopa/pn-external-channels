@@ -12,6 +12,9 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test che serve a creare in locale uno zip firmato in p7m
+ */
 @Disabled
 class ArchivesUtilTest {
 
