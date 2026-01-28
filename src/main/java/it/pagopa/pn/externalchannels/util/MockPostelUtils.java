@@ -6,11 +6,11 @@ import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.
 import it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model.PreLoadRequestData;
 import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Base64Utils;
 
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.UUID;
+import java.util.Base64;
 
 @Component
 public class MockPostelUtils {
@@ -27,7 +27,7 @@ public class MockPostelUtils {
     }
 
     public static String bytesToBase64(byte[] hash) {
-        return Base64Utils.encodeToString(hash);
+        return Base64.getEncoder().encodeToString(hash);
     }
 
     public NormalizzazioneResponse getNormalizzazioneOK(String requestId) {

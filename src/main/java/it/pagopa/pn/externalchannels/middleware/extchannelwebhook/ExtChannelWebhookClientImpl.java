@@ -59,10 +59,10 @@ public class ExtChannelWebhookClientImpl implements ExtChannelWebhookClient {
                      notificationProgress.getOutputEndpoint(), notificationProgress.getOutputServiceId(), LogUtils.maskGeneric(notificationProgress.getOutputApiKey()));
             log.info("presignedUploadRequest - preloadRequest={}", preloadRequest);
 
-            InlineObject preloadRequests = new InlineObject();
+            PresignedUploadRequestRequest preloadRequests = new PresignedUploadRequestRequest();
             preloadRequests.setPreloads(List.of(preloadRequest));
 
-            InlineResponse200 response200 = defaultApi.presignedUploadRequest(notificationProgress.getOutputServiceId(), notificationProgress.getOutputApiKey(), preloadRequests);
+            PresignedUploadRequest200Response response200 = defaultApi.presignedUploadRequest(notificationProgress.getOutputServiceId(), notificationProgress.getOutputApiKey(), preloadRequests);
 
             PreLoadResponse preLoadResponse = response200.getPreloads().get(0);
 

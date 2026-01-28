@@ -4,12 +4,12 @@
     <parent>
         <groupId>it.pagopa.pn</groupId>
         <artifactId>pn-parent</artifactId>
-        <version>2.1.1</version>
+        <version>2.1.3-SPRINGBOOT3</version>
         <relativePath/>
     </parent>
     <groupId>it.pagopa.pn.externalchannels</groupId>
     <artifactId>pn-external-channels</artifactId>
-    <version>2.6.0-SNAPSHOT</version>
+    <version>2.7.0-SNAPSHOT</version>
     <name>pn-external-channels</name>
     <properties>
         <jacoco.min.line.cover.ratio>0.0</jacoco.min.line.cover.ratio>
@@ -19,12 +19,12 @@
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-commons</artifactId>
-            <version>2.2.10</version>
+            <version>2.16.0-SPRINGBOOT3</version>
         </dependency>
         <dependency>
             <groupId>it.pagopa.pn</groupId>
             <artifactId>pn-model</artifactId>
-            <version>2.1.1</version>
+            <version>2.11.0-SPRINGBOOT3</version>
         </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
@@ -32,9 +32,9 @@
             <version>0.2.1</version>
         </dependency>
         <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>3.0.0</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.modelmapper</groupId>
@@ -50,15 +50,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.idealo.spring</groupId>
-            <artifactId>spring-cloud-stream-binder-sqs</artifactId>
-            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -117,11 +108,23 @@
             <artifactId>xz</artifactId>
             <version>1.10</version>
         </dependency>
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-sqs</artifactId>
+        </dependency>
     </dependencies>
 
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -137,7 +140,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>5.4.0</version>
+                <version>7.12.0</version>
                 <executions>
                     <execution>
                         <id>openapi-external-channels</id>
@@ -151,8 +154,6 @@
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
-                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
-                            <modelPackage>it.pagopa.pn.externalchannels.model</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
                             <generateSupportingFiles>true</generateSupportingFiles>
@@ -165,6 +166,11 @@
                                 ApiUtil.java
                             </supportingFilesToGenerate>
                             <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <documentationProvider>none</documentationProvider>
+                                <annotationLibrary>none</annotationLibrary>
+                                <apiPackage>${project.groupId}.api</apiPackage>
+                                <modelPackage>${project.groupId}.model</modelPackage>
                                 <interfaceOnly>true</interfaceOnly>
                                 <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
@@ -185,8 +191,6 @@
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
-                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
-                            <modelPackage>it.pagopa.pn.externalchannels.mockreceivedmessage</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
                             <generateSupportingFiles>true</generateSupportingFiles>
@@ -199,9 +203,13 @@
                                 ApiUtil.java
                             </supportingFilesToGenerate>
                             <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
+                                <modelPackage>it.pagopa.pn.externalchannels.mockreceivedmessage</modelPackage>
                                 <dateLibrary>java8</dateLibrary>
                                 <delegatePattern>true</delegatePattern>
                                 <interfaceOnly>true</interfaceOnly>
+                                <documentationProvider>none</documentationProvider>
                                 <annotationLibrary>none</annotationLibrary>
                                 <documentationProvider>source</documentationProvider>
                                 <openApiNullable>false</openApiNullable>
@@ -223,8 +231,6 @@
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
-                            <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
-                            <modelPackage>it.pagopa.pn.externalchannels.mock-postel</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
                             <generateSupportingFiles>true</generateSupportingFiles>
@@ -237,9 +243,13 @@
                                 ApiUtil.java
                             </supportingFilesToGenerate>
                             <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>
+                                <modelPackage>it.pagopa.pn.externalchannels.mock-postel</modelPackage>
                                 <dateLibrary>java11</dateLibrary>
                                 <delegatePattern>true</delegatePattern>
                                 <interfaceOnly>true</interfaceOnly>
+                                <documentationProvider>none</documentationProvider>
                                 <annotationLibrary>none</annotationLibrary>
                                 <documentationProvider>source</documentationProvider>
                                 <openApiNullable>false</openApiNullable>
@@ -261,8 +271,6 @@
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
-                            <apiPackage>it.pagopa.pn.externalchannels.api.consolidatore</apiPackage>
-                            <modelPackage>it.pagopa.pn.externalchannels.model.consolidatore</modelPackage>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
                             <generateSupportingFiles>true</generateSupportingFiles>
@@ -275,6 +283,11 @@
                                 ApiUtil.java
                             </supportingFilesToGenerate>
                             <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <documentationProvider>none</documentationProvider>
+                                <annotationLibrary>none</annotationLibrary>
+                                <apiPackage>${project.groupId}.api.consolidatore</apiPackage>
+                                <modelPackage>${project.groupId}.model.consolidatore</modelPackage>
                                 <interfaceOnly>true</interfaceOnly>
                                 <!--								<delegatePattern>true</delegatePattern>-->
                                 <dateLibrary>java8</dateLibrary>
@@ -300,8 +313,9 @@
                             <typeMappings><typeMapping>OffsetDateTime=Instant</typeMapping></typeMappings>
                             <importMappings><importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping></importMappings>
                             <configOptions>
-                                <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.api</apiPackage>
-                                <modelPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.safestorage.model</modelPackage>
+                                <useJakartaEe>true</useJakartaEe>
+                                <apiPackage>${project.groupId}.generated.openapi.clients.safestorage.api</apiPackage>
+                                <modelPackage>${project.groupId}.generated.openapi.clients.safestorage.model</modelPackage>
                                 <dateLibrary>java8</dateLibrary>
                                 <annotationLibrary>none</annotationLibrary>
                                 <documentationProvider>source</documentationProvider>
@@ -309,8 +323,6 @@
                                 <useAbstractionForFiles>true</useAbstractionForFiles>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
-                            <modelPackage>${project.groupId}.pn-delivery.microservice.client.safestorage.v1.dto</modelPackage>
-                            <apiPackage>${project.groupId}.pn-delivery.microservice.client.safestorage.v1.api</apiPackage>
                         </configuration>
                     </execution>
                     <!-- OPEN API CLIENT EXT-CHANNEL-WEBHOOK -->
@@ -329,8 +341,9 @@
                             <typeMappings><typeMapping>OffsetDateTime=Instant</typeMapping></typeMappings>
                             <importMappings><importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping></importMappings>
                             <configOptions>
-                                <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.api</apiPackage>
-                                <modelPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model</modelPackage>
+                                <useJakartaEe>true</useJakartaEe>
+                                <apiPackage>${project.groupId}.generated.openapi.clients.extchannelwebhook.api</apiPackage>
+                                <modelPackage>${project.groupId}.generated.openapi.clients.extchannelwebhook.model</modelPackage>
                                 <dateLibrary>java8</dateLibrary>
                                 <annotationLibrary>none</annotationLibrary>
                                 <documentationProvider>source</documentationProvider>
@@ -338,8 +351,6 @@
                                 <useAbstractionForFiles>true</useAbstractionForFiles>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
-                            <modelPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.dto</modelPackage>
-                            <apiPackage>${project.groupId}.pn-delivery.microservice.client.extchannelwebhook.v1.api</apiPackage>
                         </configuration>
                     </execution>
                     <!-- OPEN API CLIENT PN-ADDRESS-MANAGER -->
@@ -358,9 +369,10 @@
                             <generateModelTests>false</generateModelTests>
                             <generateSupportingFiles>true</generateSupportingFiles>
                             <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
                                 <reactive>true</reactive>
-                                <apiPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.api</apiPackage>
-                                <modelPackage>it.pagopa.pn.externalchannels.generated.openapi.clients.pnaddressmanager.model</modelPackage>
+                                <apiPackage>${project.groupId}.generated.openapi.clients.pnaddressmanager.api</apiPackage>
+                                <modelPackage>${project.groupId}.generated.openapi.clients.pnaddressmanager.model</modelPackage>
                                 <dateLibrary>java8</dateLibrary>
                                 <annotationLibrary>none</annotationLibrary>
                                 <documentationProvider>source</documentationProvider>
@@ -368,8 +380,6 @@
                                 <useAbstractionForFiles>true</useAbstractionForFiles>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
-                            <modelPackage>${project.groupId}.pn-delivery.microservice.client.pnaddressmanager.v1.dto</modelPackage>
-                            <apiPackage>${project.groupId}.pn-delivery.microservice.client.pnaddressmanager.v1.api</apiPackage>
                         </configuration>
                     </execution>
                 </executions>

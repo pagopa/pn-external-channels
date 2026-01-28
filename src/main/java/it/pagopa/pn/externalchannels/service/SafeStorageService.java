@@ -12,9 +12,9 @@ import it.pagopa.pn.externalchannels.middleware.extchannelwebhook.ExtChannelWebh
 import it.pagopa.pn.externalchannels.middleware.safestorage.PnSafeStorageClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
 
 import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.UUID;
 
 
@@ -162,6 +162,6 @@ public class SafeStorageService {
     }
 
     private static String bytesToBase64(byte[] hash) {
-        return Base64Utils.encodeToString( hash );
+        return Base64.getEncoder().encodeToString( hash );
     }
 }
