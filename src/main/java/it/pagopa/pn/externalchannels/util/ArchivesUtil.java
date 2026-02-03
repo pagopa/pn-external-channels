@@ -45,8 +45,7 @@ public class ArchivesUtil {
     public static File createBolFile(NotificationProgress notificationProgress, Integer pages) {
         File outputFile = null;
         try {
-            ClassPathResource classPathResource = new ClassPathResource("/");
-            outputFile = File.createTempFile(BOL_FILE_NAME, BOL_FILE_EXTENSION, classPathResource.getFile());
+            outputFile = Files.createTempFile(BOL_FILE_NAME, BOL_FILE_EXTENSION).toFile();
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
                 fos.write(String.format("attachment_example_%d_pages.pdf|||%s|||%s||||||||||||||||||||||||", pages, notificationProgress.getRequestId(), notificationProgress.getRegisteredLetterCode()).getBytes());
             }
@@ -87,8 +86,7 @@ public class ArchivesUtil {
             ClassPathResource examplePdf = new ClassPathResource("attachment_example_" + pages + "_pages.pdf");
             final List<File> srcFiles = Arrays.asList(examplePdf.getFile(), bolFile);
 
-            ClassPathResource classPathResource = new ClassPathResource("/");
-            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = Files.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION).toFile();
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
@@ -113,8 +111,7 @@ public class ArchivesUtil {
     public static File create7Zip(byte[] data) {
         File outputFile = null;
         try {
-            ClassPathResource classPathResource = new ClassPathResource("/");
-            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = Files.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), SEVEN_ZIP_EXTENSION).toFile();
             try (SevenZOutputFile outArchive = new SevenZOutputFile(outputFile)) {
                 outArchive.setContentCompression(SevenZMethod.LZMA);
                 outArchive.setContentMethods(List.of(new SevenZMethodConfiguration(SevenZMethod.LZMA)));
@@ -135,8 +132,7 @@ public class ArchivesUtil {
     public static File createZip(byte[] data) {
         File outputFile = null;
         try {
-            ClassPathResource classPathResource = new ClassPathResource("/");
-            outputFile = File.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), ZIP_EXTENSION, classPathResource.getFile());
+            outputFile = Files.createTempFile(TMP_FILE_PREFIX + UUID.randomUUID(), ZIP_EXTENSION).toFile();
             FileOutputStream fos = new FileOutputStream(outputFile);
             try (ZipOutputStream zipOut = new ZipOutputStream(fos)) {
                 try (ByteArrayInputStream fis = new ByteArrayInputStream(data)) {
