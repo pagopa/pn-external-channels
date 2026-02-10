@@ -70,6 +70,10 @@ Parameters:
   VpcId:
     Type: String
     Description: 'VpcId where the microservice is going to be deployed'
+
+  AlbSecurityGroup:
+    Type: String
+    Description: "Application load balancer security group"
   
   EcsDefaultSecurityGroup:
     Type: String
@@ -238,6 +242,7 @@ Resources:
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref VpcEgressSubnetsIds
         VpcId: !Ref VpcId
+        AlbSecurityGroup: !Ref AlbSecurityGroup
         EcsDefaultSecurityGroup: !Ref EcsDefaultSecurityGroup
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
