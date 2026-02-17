@@ -106,7 +106,7 @@ public class InternalEventHandler {
     private OcrOutputMessage buildOkOcrMessage(OcrInputMessage ocrInputMessage) {
         return OcrOutputMessage.builder()
                 .version(ocrInputMessage.getVersion())
-                .commandId(ocrInputMessage.getCommandId())
+                .CommandId(ocrInputMessage.getCommandId())
                 .commandType(ocrInputMessage.getCommandType())
                 .data(OcrOutputMessage.DataField.builder()
                         .validationType(OcrOutputMessage.ValidationType.ai)
@@ -119,7 +119,7 @@ public class InternalEventHandler {
     private OcrOutputMessage buildPendingOcrMessage(OcrInputMessage ocrInputMessage) {
         return OcrOutputMessage.builder()
                 .version(ocrInputMessage.getVersion())
-                .commandId(ocrInputMessage.getCommandId())
+                .CommandId(ocrInputMessage.getCommandId())
                 .commandType(ocrInputMessage.getCommandType())
                 .data(OcrOutputMessage.DataField.builder()
                         .validationType(OcrOutputMessage.ValidationType.ai)
@@ -132,7 +132,7 @@ public class InternalEventHandler {
     private OcrOutputMessage buildKoOcrMessage(OcrInputMessage ocrInputMessage) {
         return OcrOutputMessage.builder()
                 .version(ocrInputMessage.getVersion())
-                .commandId(ocrInputMessage.getCommandId())
+                .CommandId(ocrInputMessage.getCommandId())
                 .commandType(ocrInputMessage.getCommandType())
                 .data(OcrOutputMessage.DataField.builder()
                         .validationType(OcrOutputMessage.ValidationType.ai)

@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class OcrOutputMessage {
     private String version;
-    private String commandId;
+    private String CommandId;
     private String commandType;
     private DataField data;
 
