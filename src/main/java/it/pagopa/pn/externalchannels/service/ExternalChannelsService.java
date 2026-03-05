@@ -79,6 +79,7 @@ public class ExternalChannelsService {
         }
 
         List<String> sequenceParameters = pnExternalChannelsProperties.getMockSequenceParameterNames();
+        log.info("Mock parameters: {}", sequenceParameters);
         
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
                 digitalNotificationRequest.getReceiverDigitalAddress(), outputChannel,
@@ -178,6 +179,7 @@ public class ExternalChannelsService {
         }
 
         List<String> sequenceParameters = pnExternalChannelsProperties.getMockSequenceParameterNames();
+        log.info("Mock parameters: {}", sequenceParameters);
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
