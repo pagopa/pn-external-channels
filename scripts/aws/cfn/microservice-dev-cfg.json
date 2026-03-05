@@ -7,6 +7,7 @@
     "CacheExpSsmMinutes": "60",
     "PnAddressManagerCallbackAfterMinutes": "0",
     "OcrOutputsQueueName": "pn-paper_tracker_ocr_outputs",
-    "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-paper_tracker_ocr_outputs"
+    "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-paper_tracker_ocr_outputs",
+    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4"
   }
 }

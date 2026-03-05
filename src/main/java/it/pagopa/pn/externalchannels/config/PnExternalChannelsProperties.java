@@ -64,6 +64,8 @@ public class PnExternalChannelsProperties {
 
     private Duration receivedMessagesTtl;
 
+    private List<String> mockSequenceParameterNames = new ArrayList<>();
+
     @Data
     public static class Csv{
 

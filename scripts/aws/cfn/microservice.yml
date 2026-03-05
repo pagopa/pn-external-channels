@@ -197,6 +197,10 @@ Parameters:
     Type: String
     Description: 'Ocr output queue ARN'
 
+  MockSequenceParameterNames:
+    Type: String
+    Description: 'Lista nomi parameter store del mock'
+
 Resources:
 
   # PN-External-Channels microservice
@@ -231,6 +235,7 @@ Resources:
         #Per il mock consolidatore la variabile è stata volutamente impostata alla coda interna, in modo da evitare errori di deploy
         ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUTS=${OcrOutputsQueueName}'
         ContainerEnvEntry20: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCRINPUTS=${MockOcrInputsQueueName}'
+        ContainerEnvEntry21: !Sub 'PN_EXTERNALCHANNELS_MOCKSEQUENCEPARAMETERNAMES=${MockSequenceParameterNames}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
@@ -274,9 +279,7 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParameters
             Resource:
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence'
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence2'
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence3'
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockSequence*'
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MapExternalChannelMockServiceIdEndpoint'
           - Effect: Allow
             Action:
