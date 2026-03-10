@@ -54,8 +54,10 @@ public class EventMessageUtil {
     public static final String AR = "AR";
     public static final String RIR = "RIR";
     public static final String _890 = "890";
+    public static final String RS = "RS";
+    public static final String RIS = "RIS";
 
-    public static final List<String> PAPER_CHANNELS = List.of(AR, _890, "RIS", "RS","RIR");
+    public static final List<String> PAPER_CHANNELS = List.of(AR, _890, RIS, RS, RIR);
 
     private static final String OK_CODE = "C003";
 
@@ -188,7 +190,7 @@ public class EventMessageUtil {
 
         String code = codeTimeToSend.getCode();
         boolean endsWithABCDEF = code.matches(".*[A-F]$");
-        boolean isProductEnabled = List.of(AR, RIR, _890).contains(notificationProgress.getChannel());
+        boolean isProductEnabled = List.of(AR, RIR, _890, RS, RIS).contains(notificationProgress.getChannel());
         boolean isAutoDatetimeDisabled = Optional.ofNullable(codeTimeToSend.getAdditionalActions())
                 .orElse(Collections.emptyList())
                 .stream()

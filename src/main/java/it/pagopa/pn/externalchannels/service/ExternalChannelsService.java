@@ -58,10 +58,6 @@ public class ExternalChannelsService {
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
     private final ServiceIdEndpointParameterConsumer serviceIdEndpointParameterConsumer;
 
-    private static final List<String> SEQUENCE_PARAMETER_NAME = Arrays.asList(
-            "MapExternalChannelMockSequence",
-            "MapExternalChannelMockSequence2",
-            "MapExternalChannelMockSequence3");
     private static final String SERVICEID_PARAMETER_NAME = "MapExternalChannelMockServiceIdEndpoint";
 
     private final NotificationProgressDao notificationProgressDao;
@@ -81,12 +77,15 @@ public class ExternalChannelsService {
         if(QUEUE_USER_ATTRIBUTES.equals(outputChannel)){
             verificationCodeService.saveVerificationCode(digitalNotificationRequest.getEventType(), digitalNotificationRequest.getMessageText(), digitalNotificationRequest.getReceiverDigitalAddress());
         }
+
+        List<String> sequenceParameters = pnExternalChannelsProperties.getMockSequenceParameterNames();
+        log.info("Mock parameters: {}", sequenceParameters);
         
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
                 digitalNotificationRequest.getReceiverDigitalAddress(), outputChannel,
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
-                selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSourceName)));
+                selectSequenceInParameter(digitalNotificationRequest.getReceiverDigitalAddress(),digitalNotificationRequest.getChannel().getValue(),sequenceParameters,getOutputQueueFromSource(appSourceName)));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
@@ -179,10 +178,12 @@ public class ExternalChannelsService {
             });
         }
 
+        List<String> sequenceParameters = pnExternalChannelsProperties.getMockSequenceParameterNames();
+        log.info("Mock parameters: {}", sequenceParameters);
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
-                selectSequenceInParameter(address,paperEngageRequest.getProductType(),SEQUENCE_PARAMETER_NAME,getOutputQueueFromSource(appSource)));
+                selectSequenceInParameter(address,paperEngageRequest.getProductType(),sequenceParameters,getOutputQueueFromSource(appSource)));
 
         boolean inserted = notificationProgressDao.insert(notificationProgress);
 
