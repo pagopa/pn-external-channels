@@ -66,6 +66,8 @@ public class PnExternalChannelsProperties {
 
     private List<String> mockSequenceParameterNames = new ArrayList<>();
 
+    private String eventBusName;
+
     @Data
     public static class Csv{
 
@@ -77,11 +79,7 @@ public class PnExternalChannelsProperties {
     @Data
     public static class Topics {
 
-        private String toDeliveryPush;
-
         private String toPaperChannel;
-
-        private String toUserAttributes;
 
         private String toInternal;
 
