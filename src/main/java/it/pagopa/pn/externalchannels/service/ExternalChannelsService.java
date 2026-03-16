@@ -117,7 +117,8 @@ public class ExternalChannelsService {
         }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, getOutputQueueFromSource(appSourceName),
+                appSourceName,
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_MAIL, OK_REQUEST_CODE_MAIL, Optional.empty());
 
