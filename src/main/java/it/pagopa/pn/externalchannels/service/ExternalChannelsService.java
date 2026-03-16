@@ -82,6 +82,7 @@ public class ExternalChannelsService {
         log.info("Mock parameters: {}", sequenceParameters);
         
         NotificationProgress notificationProgress = buildNotificationProgress(digitalNotificationRequest.getRequestId(),
+                appSourceName,
                 digitalNotificationRequest.getReceiverDigitalAddress(), outputChannel,
                 null,null,null,
                 digitalNotificationRequest.getChannel().name(), FAIL_REQUEST_CODE_DIGITAL, OK_REQUEST_CODE_DIGITAL,
@@ -116,7 +117,7 @@ public class ExternalChannelsService {
         }
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesyMailRequest.getRequestId(),
-                digitalCourtesyMailRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
+                digitalCourtesyMailRequest.getReceiverDigitalAddress(), appSourceName, getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalCourtesyMailRequest.getChannel().name(), FAIL_REQUEST_CODE_MAIL, OK_REQUEST_CODE_MAIL, Optional.empty());
 
@@ -135,6 +136,7 @@ public class ExternalChannelsService {
     public void sendCourtesyShortMessage(DigitalCourtesySmsRequest digitalCourtesySmsRequest, String appSourceName) {
 
         NotificationProgress notificationProgress = buildNotificationProgress(digitalCourtesySmsRequest.getRequestId(),
+                appSourceName,
                 digitalCourtesySmsRequest.getReceiverDigitalAddress(), getOutputQueueFromSource(appSourceName),
                 null,null,null,
                 digitalCourtesySmsRequest.getChannel().name(), FAIL_REQUEST_CODE_SMS, OK_REQUEST_CODE_SMS,Optional.empty());
@@ -182,6 +184,7 @@ public class ExternalChannelsService {
         log.info("Mock parameters: {}", sequenceParameters);
 
         NotificationProgress notificationProgress = buildNotificationProgress(paperEngageRequest.getRequestId(),
+                null,
                 address, output.get(), outputEndpoint.get(), outputServiceId.get(), outputApiKey.get(), paperEngageRequest.getProductType(), FAIL_REQUEST_CODE_PAPER, OK_REQUEST_CODE_PAPER,
                 selectSequenceInParameter(address,paperEngageRequest.getProductType(),sequenceParameters,getOutputQueueFromSource(appSource)));
 
@@ -199,7 +202,7 @@ public class ExternalChannelsService {
 
 
 
-    private NotificationProgress buildNotificationProgress(String requestId, String receiverDigitalAddress,
+    private NotificationProgress buildNotificationProgress(String requestId, String appSourceName, String receiverDigitalAddress,
                                                            NotificationProgress.PROGRESS_OUTPUT_CHANNEL output,
                                                            String outputEndpoint, String outputServiceId, String outputApikey,
                                                            String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
@@ -226,6 +229,7 @@ public class ExternalChannelsService {
         }
 
         notificationProgress.setRequestId(requestId);
+        notificationProgress.setAppSourceName(appSourceName);
         notificationProgress.setDestinationAddress(receiverDigitalAddress);
         notificationProgress.setCreateMessageTimestamp(Instant.now());
         notificationProgress.setOutput(output);

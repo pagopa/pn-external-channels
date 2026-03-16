@@ -144,7 +144,7 @@ public class EventMessageUtil {
 
 
         if (LEGAL_CHANNELS.contains(channel)) {
-            return buildLegalMessage(code, requestId, delay.get(), notificationProgress.getIun(), safeStorageService);
+            return buildLegalMessage(code, requestId, notificationProgress.getAppSourceName(), delay.get(), notificationProgress.getIun(), safeStorageService);
         } else if (PAPER_CHANNELS.contains(channel)) {
 
             if (codeTimeToSend.getAdditionalActions() != null
@@ -179,7 +179,7 @@ public class EventMessageUtil {
                     notificationProgress, eventCodeDocumentsDao, safeStorageService, pdfPages.get(), statusDateTime);
         }
 
-        return buildDigitalCourtesyMessage(code, requestId, delay.get());
+        return buildDigitalCourtesyMessage(code, requestId, notificationProgress.getAppSourceName(), delay.get());
     }
 
     private static OffsetDateTime getStatusDateTime(CodeTimeToSend codeTimeToSend,
@@ -223,9 +223,10 @@ public class EventMessageUtil {
         return OffsetDateTime.now();
     }
 
-    private static SingleStatusUpdate buildLegalMessage(String code, String requestId, Duration delay, String iun, SafeStorageService safeStorageService) {
+    private static SingleStatusUpdate buildLegalMessage(String code, String requestId, String appSourceName, Duration delay, String iun, SafeStorageService safeStorageService) {
 
         SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
+                .clientId(appSourceName)
                 .digitalLegal(
                         new LegalMessageSentDetails()
                                 .eventCode(LegalMessageSentDetails.EventCodeEnum.fromValue(code))
@@ -291,9 +292,10 @@ public class EventMessageUtil {
         }
     }
 
-    private static SingleStatusUpdate buildDigitalCourtesyMessage(String code, String requestId, Duration delay) {
+    private static SingleStatusUpdate buildDigitalCourtesyMessage(String code, String requestId, String appSourceName, Duration delay) {
 
         return new SingleStatusUpdate()
+                .clientId(appSourceName)
                 .digitalCourtesy(
                         new CourtesyMessageProgressEvent()
                                 .eventCode(CourtesyMessageProgressEvent.EventCodeEnum.fromValue(code))
@@ -307,6 +309,7 @@ public class EventMessageUtil {
 
     private static SingleStatusUpdate buildPaperMessage(String code, String iun, String requestId, String productType, DiscoveredAddress discoveredAddress, Duration delay, Duration delaydoc, String failureCause, NotificationProgress notificationProgress, EventCodeDocumentsDao eventCodeDocumentsDao, SafeStorageService safeStorageService, Integer pages, OffsetDateTime statusDateTime) {
         SingleStatusUpdate singleStatusUpdate = new SingleStatusUpdate()
+                .clientId(notificationProgress.getAppSourceName())
                 .analogMail(
                         new PaperProgressStatusEvent()
                                 .iun(iun)

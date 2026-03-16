@@ -35,6 +35,7 @@ public class NotificationProgress {
     private static final String COL_OUTPUT_SERVICE_ID = "outputServiceId";
     private static final String COL_OUTPUT_API_KEY = "outputApiKey";
     private static final String COL_REQUEST_ID = "requestId";
+    private static final String COL_APP_SOURCE_NAME = "appSourceName";
     private static final String COL_CODE_TIME_TO_SEND_QUEUE = "codeTimeToSendQueue";
     private static final String COL_LAST_MESSAGE_SENT_TIMESTAMP = "lastMessageSentTimestamp";
     private static final String COL_CREATE_MESSAGE_TIMESTAMP = "createMessageTimestamp";
@@ -62,6 +63,8 @@ public class NotificationProgress {
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_OUTPUT_API_KEY)})) private String outputApiKey;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_REQUEST_ID)})) private String requestId;
+
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_APP_SOURCE_NAME)})) private String appSourceName;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_CODE_TIME_TO_SEND_QUEUE)})) private List<CodeTimeToSend> codeTimeToSendQueue;
 
