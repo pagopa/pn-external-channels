@@ -66,7 +66,7 @@ public class PnExternalChannelsProperties {
 
     private List<String> mockSequenceParameterNames = new ArrayList<>();
 
-    private String eventBusName;
+    private String coreEventBusName;
 
     @Data
     public static class Csv{

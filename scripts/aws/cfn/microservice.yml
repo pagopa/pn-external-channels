@@ -87,9 +87,9 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
-  PnEcEventBusNameTrackerExternalNotification:
+  PnCoreEventBusName:
     Type: String
-    Description: "Nome del Event Bus per le notifiche verso le piattaforme esterne"
+    Description: "Name of the event bus used to redirect events from external channel to core services"
 
   ExternalChannels2PaperChannelQueueName:
     Type: String
@@ -203,7 +203,7 @@ Resources:
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}'
-        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_EVENTBUSNAME=${PnEcEventBusNameTrackerExternalNotification}'
+        ContainerEnvEntry3: !Sub 'PN_EXTERNALCHANNELS_COREEVENTBUSNAME=${PnCoreEventBusName}'
         ContainerEnvEntry4: !Sub 'PN_EXTERNALCHANNELS_SAFESTORAGEBASEURL=${SandboxSafeStorageBaseUrl}'
         ContainerEnvEntry5: !Sub 'PN_EXTERNALCHANNELS_CACHEEXPIREAFTERDAYS=${CacheExpireDays}'
         ContainerEnvEntry6: !Sub 'PN_EXTERNALCHANNELS_CACHEMAXSIZE=${CacheMaxSize}'

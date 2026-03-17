@@ -30,20 +30,24 @@ public class EventBridgeSendClient {
                     .source("NOTIFICATION TRACKER")
                     .detailType("ExternalChannelOutcomeEvent")
                     .detail(objectMapper.writeValueAsString(singleStatusUpdate))
-                    .eventBusName(properties.getEventBusName())
+                    .eventBusName(properties.getCoreEventBusName())
                     .build();
-            log.info("[EventBridge] Publishing event : {}", entry);
-            PutEventsResponse response = eventBridgeSyncClient.putEvents(r -> r.entries(entry));
-            if (response.failedEntryCount() > 0) {
-                log.error("[EventBridge] Failed to publish {} entr{}: {}",
-                        response.failedEntryCount(),
-                        response.failedEntryCount() == 1 ? "y" : "ies",
-                        response.entries());
-                throw new ExternalChannelsMockException("EventBridge putEvents failed for " + response.failedEntryCount() + " entries");
-            }
-            log.info("[EventBridge] Event published successfully to bus '{}', clientId='{}'", properties.getEventBusName(), singleStatusUpdate.getClientId());
+            publishToEventBus(entry);
         } catch (JsonProcessingException e) {
             throw new ExternalChannelsMockException("Error serializing event for EventBridge", e);
         }
+    }
+
+    private void publishToEventBus(PutEventsRequestEntry entry) {
+        log.info("[EventBridge] Publishing event : {}", entry);
+        PutEventsResponse response = eventBridgeSyncClient.putEvents(r -> r.entries(entry));
+        if (response.failedEntryCount() > 0) {
+            log.error("[EventBridge] Failed to publish {} entr{}: {}",
+                    response.failedEntryCount(),
+                    response.failedEntryCount() == 1 ? "y" : "ies",
+                    response.entries());
+            throw new ExternalChannelsMockException("EventBridge putEvents failed for " + response.failedEntryCount() + " entries");
+        }
+        log.debug("[EventBridge] Event published successfully to bus '{}' : {}", properties.getCoreEventBusName(), entry);
     }
 }
