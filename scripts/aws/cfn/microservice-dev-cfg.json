@@ -9,6 +9,6 @@
     "OcrOutputsQueueName": "pn-paper_tracker_ocr_outputs",
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-paper_tracker_ocr_outputs",
     "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2",
-    "PnEcEventBusNameTrackerExternalNotification": "Pn-Ec-Tracker-Notifications-Bus"
+    "PnEcEventBusNameTrackerExternalNotification": "pn-CoreEventBus"
   }
 }

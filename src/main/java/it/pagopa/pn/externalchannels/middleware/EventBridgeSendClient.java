@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.eventbridge.EventBridgeClient;
 import software.amazon.awssdk.services.eventbridge.model.PutEventsRequestEntry;
+import software.amazon.awssdk.services.eventbridge.model.PutEventsResponse;
 
 import java.time.Instant;
 
@@ -31,7 +32,16 @@ public class EventBridgeSendClient {
                     .detail(objectMapper.writeValueAsString(singleStatusUpdate))
                     .eventBusName(properties.getEventBusName())
                     .build();
-            eventBridgeSyncClient.putEvents(r -> r.entries(entry));
+            log.info("[EventBridge] Publishing event : {}", entry);
+            PutEventsResponse response = eventBridgeSyncClient.putEvents(r -> r.entries(entry));
+            if (response.failedEntryCount() > 0) {
+                log.error("[EventBridge] Failed to publish {} entr{}: {}",
+                        response.failedEntryCount(),
+                        response.failedEntryCount() == 1 ? "y" : "ies",
+                        response.entries());
+                throw new ExternalChannelsMockException("EventBridge putEvents failed for " + response.failedEntryCount() + " entries");
+            }
+            log.info("[EventBridge] Event published successfully to bus '{}', clientId='{}'", properties.getEventBusName(), singleStatusUpdate.getClientId());
         } catch (JsonProcessingException e) {
             throw new ExternalChannelsMockException("Error serializing event for EventBridge", e);
         }
