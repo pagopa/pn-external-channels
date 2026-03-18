@@ -415,7 +415,7 @@ public class ExternalChannelsService {
         receiverAddress = receiverAddress.toLowerCase();
         if(receiverAddress.contains("@fail") && (source != NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES )){
             log.info("Enter in fail");
-            String search = receiverAddress.substring(receiverAddress.lastIndexOf("fail")).trim();
+            String search = receiverAddress.substring(receiverAddress.indexOf("fail")).trim();
             search = search.contains(" ")? search.substring(0,search.indexOf(" ")) : search;
             log.info("Search sequence {}",search);
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("fail")? search + "_" + producType : search);
@@ -423,7 +423,7 @@ public class ExternalChannelsService {
 
         }else if(receiverAddress.contains("@ok") || !receiverAddress.contains("@")){
             log.info("Enter in ok");
-            String search = (receiverAddress.contains("@ok")? receiverAddress.substring(receiverAddress.lastIndexOf("ok")) : "ok").trim();
+            String search = (receiverAddress.contains("@ok")? receiverAddress.substring(receiverAddress.indexOf("ok")) : "ok").trim();
             search = search.contains(" ")? search.substring(0,search.indexOf(" ")) : search;
             log.info("Search sequence {}",search);
             eventCodeSequenceDTO = searchInResult(eventCodeSequenceList, search.equals("ok")? search + "_" + producType : search);
