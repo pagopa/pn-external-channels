@@ -262,7 +262,7 @@ Resources:
             Action:
               - events:PutEvents
             Resource:
-              - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnEcEventBusNameTrackerExternalNotification}'
+              - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnCoreEventBusName}'
           - Effect: Allow
             Action:
               - ssm:GetParameter
