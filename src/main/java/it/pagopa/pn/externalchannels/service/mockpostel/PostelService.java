@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -187,10 +188,23 @@ public class PostelService {
         normalizedAddress.setSViaCompletaSpedizione(input.getIndirizzo());
         normalizedAddress.setSCivicoAltro(input.getIndirizzoAggiuntivo());
         normalizedAddress.setSCap(input.getCap());
-        normalizedAddress.setSComuneSpedizione(input.getLocalita());
+        evaluateCapAndSetComune(input, normalizedAddress);
         normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva());
         normalizedAddress.setSSiglaProv(input.getProvincia());
         normalizedAddress.setSStatoSpedizione(input.getStato());
+    }
+
+    private static void evaluateCapAndSetComune(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
+        if (StringUtils.hasText(input.getCap())) {
+            normalizedAddress.setSComuneSpedizione(
+                    switch (input.getCap()) {
+                        case "39100" -> "BOLZANO / BOZEN";
+                        case "39020" -> "TUBRE / TAUFERS IM MÜNSTERTAL";
+                        case "39010" -> "VERANO / VÖRAN";
+                        default -> input.getLocalita();
+                    }
+            );
+        }
     }
 
     private void evaluateCap(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
@@ -217,7 +231,7 @@ public class PostelService {
                         addressUtils.verifyCapAndCity(input.getCap(), input.getProvincia(), input.getLocalita());
                         normalizedAddress.setFPostalizzabile(1);
                         normalizedAddress.setNRisultatoNorm(1);
-                        normalizedAddress.setNErroreNorm(null);
+                        normalizedAddress.setNErroreNorm(0);
                     } catch (PnInternalException e) {
                         normalizedAddress.setFPostalizzabile(0);
                         normalizedAddress.setNRisultatoNorm(0);
@@ -229,7 +243,7 @@ public class PostelService {
                 addressUtils.searchCountry(input.getStato());
                 normalizedAddress.setFPostalizzabile(1);
                 normalizedAddress.setNRisultatoNorm(1);
-                normalizedAddress.setNErroreNorm(null);
+                normalizedAddress.setNErroreNorm(0);
             } catch (PnInternalException e) {
                 normalizedAddress.setFPostalizzabile(0);
                 normalizedAddress.setNRisultatoNorm(0);

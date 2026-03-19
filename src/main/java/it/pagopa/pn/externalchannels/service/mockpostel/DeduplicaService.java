@@ -46,7 +46,7 @@ public class DeduplicaService {
                 default:
                     try {
                         addressUtils.verifyCapAndCity(slaveIn.getCap(), slaveIn.getProvincia(), slaveIn.getLocalita());
-                        risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, null, null);
+                        risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, 0, null);
                     } catch (PnInternalException e) {
                         risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 0, 19, null);
                     }
@@ -55,7 +55,7 @@ public class DeduplicaService {
         } else {
             try {
                 addressUtils.searchCountry(slaveIn.getStato());
-                risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, null, null);
+                risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 1, 0, null);
             } catch (PnInternalException e) {
                 risultatoDeduplica = createRisultatoDeduplica(slaveIn, masterIn, 0, 601, null);
             }
