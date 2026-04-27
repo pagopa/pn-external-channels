@@ -23,7 +23,7 @@ public class AppConfig {
     private final PnExternalChannelsProperties properties;
 
     @Bean
-    EventBridgeClient eventBridgeSyncClient(@Value("${aws.region-code}") String region, @Value("${aws.endpoint-url}") String endpointUrl) {
+    EventBridgeClient eventBridgeSyncClient(@Value("${aws.region-code:#{null}}") String region, @Value("${aws.endpoint-url:#{null}}") String endpointUrl) {
         EventBridgeClientBuilder builder = EventBridgeClient.builder()
                 .credentialsProvider(DefaultCredentialsProvider.create());
 
