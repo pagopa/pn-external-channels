@@ -1064,7 +1064,7 @@ Resources:
             LogConfiguration:
               LogDriver: awslogs
               Options:
-                awslogs-create-group: 'True'
+                awslogs-create-group: 'true'
                 awslogs-group: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
                 awslogs-region: !Ref 'AWS::Region'
                 awslogs-stream-prefix: ecs
@@ -1084,7 +1084,7 @@ Resources:
             LogConfiguration:
               LogDriver: awslogs
               Options:
-                awslogs-create-group: 'True'
+                awslogs-create-group: 'true'
                 awslogs-group: !If [ RequiresLogGroupCreation, !Ref LogGroup, !Ref EcsLogGroup ]
                 awslogs-region: !Ref 'AWS::Region'
                 awslogs-stream-prefix: ecs
