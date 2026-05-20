@@ -7,12 +7,10 @@ import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsum
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
 import it.pagopa.pn.externalchannels.dao.*;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
+import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +22,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
 
@@ -31,6 +31,8 @@ import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OU
 @RequiredArgsConstructor
 @Slf4j
 public class ExternalChannelsService {
+
+    private static final String CONST_REWORK = "REWORK";
 
     private static final String IUN_ALREADY_EXISTS_MESSAGE = "[%s] Iun already inserted!";
 
@@ -49,6 +51,10 @@ public class ExternalChannelsService {
     private static final List<String> OK_REQUEST_CODE_PAPER = List.of("CON080", "RECRN001A", "RECRN001B", "RECRN001C");
 
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
+
+    private static final Pattern REC_INDEX_PATTERN = Pattern.compile("\\.RECINDEX_([^.]*)\\.");
+
+    private static final Pattern PC_RETRY_PATTERN = Pattern.compile("\\.PCRETRY_([^.]*)\\.");
 
     // ora l'indirizzo può arrivare in maiuscolo
     private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
@@ -71,6 +77,8 @@ public class ExternalChannelsService {
     private final InternalSendClient internalSendClient;
 
     private final ReceivedMessageEntityDaoDynamo receivedMessageEntityDaoDynamo;
+
+    private final ProducerHandler producerHandler;
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
@@ -215,6 +223,16 @@ public class ExternalChannelsService {
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
 
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
+        if (isReworkRequestId && matcher.matches()) {
+            int restartValue = Integer.parseInt(matcher.group(2));
+            producerHandler.sendToQueue(buildReworkRequest(iun, requestId, ReworkRequestType.RESTART, restartValue));
+            receiverDigitalAddress = matcher.group(3);
+        } else {
+            receiverDigitalAddress = matcher.matches() ? matcher.group(1) : receiverDigitalAddress;
+        }
+
         if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@failalways")))
@@ -243,6 +261,21 @@ public class ExternalChannelsService {
 
         return notificationProgress;
 
+    }
+
+    private ReworkRequest buildReworkRequest(String iun, String requestId, ReworkRequestType requestType, int attempt) {
+        ReworkRequest reworkRequest = new ReworkRequest();
+        reworkRequest.setIun(iun);
+        reworkRequest.setAttempt("ATTEMPT_" + attempt);
+        reworkRequest.setRecIndex(extractValue(requestId, REC_INDEX_PATTERN));
+        reworkRequest.setPcRetry(extractValue(requestId, PC_RETRY_PATTERN));
+        reworkRequest.setRequestType(requestType);
+        return reworkRequest;
+    }
+
+    private String extractValue(String text, Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private NotificationProgress buildNotification(List<String> codeToSendList) {
