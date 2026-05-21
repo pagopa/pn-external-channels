@@ -161,3 +161,6 @@ Outputs:
       Fn::GetAtt:
         - "MockOcrInputsQueue"
         - "QueueName"
+
+  StartReworkRequestLambdaName:
+    Value: !Sub ${ProjectName}-external-channels-start-rework-request

@@ -75,6 +75,10 @@ Parameters:
     Type: String
     Description: 'Default security group required by infrastructure'
 
+  ApplicationLoadBalancerDomain:
+    Type: String
+    Description: 'Base URL of the load balancer where the service is going to be reachable'
+
   ApplicationLoadBalancerListenerArn:
     Type: String
     Description: 'Load balancer listener where HTTP endpoints is going to be registered'
@@ -188,6 +192,38 @@ Parameters:
     Type: String
     Description: 'Lista nomi parameter store del mock'
 
+  StartReworkRequestLambdaName:
+    Type: String
+    Description: "StartReworkRequestLambdaName"
+
+  StartReworkRequestLambdaRuntime:
+    Type: String
+    Default: nodejs24.x
+    Description: Runtime of the DataIndexer Lambda.
+
+  StartReworkRequestLambdaTimeout:
+    Type: Number
+    Default: 30
+    Description: Timeout StartReworkRequest Lambda.
+
+  StartReworkRequestLambdaMemorySize:
+    Type: Number
+    Default: 512
+    Description: Memory size StartReworkRequest Lambda.
+
+  EnvironmentName:
+    Type: String
+    Description: 'Evn name'
+    Default: 'core'
+
+  PnCoreAwsAccountId:
+    Type: String
+    Description: Core Account ID (leave blank in Core account)
+    Default: 'core'
+
+Conditions:
+  IsCoreAccount: !Equals [ !Ref PnCoreAwsAccountId , '' ]
+
 Resources:
 
   # PN-External-Channels microservice
@@ -283,3 +319,36 @@ Resources:
               - !Sub "${VerificationCodeTableDynamoTableArn}"
               - !Sub "${MockEcReceivedMessageTableDynamoTableArn}"
               - !Sub "${MockEcReceivedMessageTableDynamoTableArn}/*"
+
+  StartReworkRequestLambdaSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub '${StartMockReworkRequestLambda}-sec-group'
+      VpcId: !Ref VpcId
+
+  StartReworkRequestLambdaLambda:
+    Type: AWS::Lambda::Function
+    Condition: IsCoreAccount
+    Properties:
+      FunctionName: !Ref StartReworkRequestLambda
+      Runtime: !Ref StartReworkRequestLambdaRuntime
+      Handler: "index.handler"
+      Code:
+        S3Bucket: !Ref MicroserviceBucketName
+        S3Key: !Sub "${MicroserviceBucketBaseKey}/functions_zip/startReworkRequestLambda.zip"
+      Role: !GetAtt StartReworkRequestLambdaRole.Arn
+      Environment:
+        Variables:
+          REGION: !Sub ${AWS::Region}
+          DELIVERYPUSH_BASEURL: !Sub http://${ApplicationLoadBalancerDomain}:8080/delivery-push-private/v1'
+      TracingConfig:
+        Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:339249233099:layer:LambdaInsightsExtension:13"
+      Timeout: 30
+      MemorySize:
+      VpcConfig:
+        SubnetIds: !Split [ ",", !Ref VpcEgressSubnetsIds ]
+        SecurityGroupIds:
+          - !GetAtt StartReworkRequestLambdaSecGroup.GroupId
+
