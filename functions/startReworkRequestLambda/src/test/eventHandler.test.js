@@ -1,18 +1,42 @@
-const { handleEvent } = require("./index");
+const assert = require("assert");
+const { handleEvent } = require("../app/eventHandler");
 
 describe("handleEvent", () => {
+  let originalFetch;
+  let originalConsoleLog;
+  let originalConsoleError;
+
+  // Alias per compatibilita' con test() usato nel file originale
+  const test = it;
+
   beforeEach(() => {
     process.env.DELIVERYPUSH_BASEURL = "https://delivery-push.test";
-    global.fetch = jest.fn();
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    jest.spyOn(console, "error").mockImplementation(() => {});
+
+    originalFetch = global.fetch;
+    originalConsoleLog = console.log;
+    originalConsoleError = console.error;
+
+    global.fetch = async () => {
+      throw new Error("fetch stub not configured for this test");
+    };
+
+    console.log = () => {};
+    console.error = () => {};
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    global.fetch = originalFetch;
+    console.log = originalConsoleLog;
+    console.error = originalConsoleError;
   });
 
   test("should skip event if requestType is not RESTART", async () => {
+    let fetchCalled = false;
+    global.fetch = async () => {
+      fetchCalled = true;
+      return {};
+    };
+
     const event = {
       iun: "IUN123",
       attempt: 1,
@@ -22,19 +46,26 @@ describe("handleEvent", () => {
 
     const result = await handleEvent(event);
 
-    expect(result).toEqual({
+    assert.deepStrictEqual(result, {
       handled: false,
       reason: "Request type 'OTHER' not handled"
     });
 
-    expect(fetch).not.toHaveBeenCalled();
+    assert.strictEqual(fetchCalled, false);
   });
 
   test("should call restart-attempt API when requestType is RESTART", async () => {
-    fetch.mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue({ result: "OK" })
-    });
+    let calledUrl = null;
+    let calledOptions = null;
+
+    global.fetch = async (url, options) => {
+      calledUrl = url;
+      calledOptions = options;
+      return {
+        ok: true,
+        json: async () => ({ result: "OK" })
+      };
+    };
 
     const event = {
       iun: "IUN123",
@@ -45,22 +76,24 @@ describe("handleEvent", () => {
 
     const result = await handleEvent(event);
 
-    expect(fetch).toHaveBeenCalledWith(
-      "https://delivery-push.test/notifications/IUN123/restart-attempt",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          attempt: 2,
-          recIndex: 1,
-          reason: "Mock restart request"
-        })
-      }
+    assert.strictEqual(
+      calledUrl,
+      "https://delivery-push.test/notifications/IUN123/restart-attempt"
     );
 
-    expect(result).toEqual({
+    assert.deepStrictEqual(calledOptions, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        attempt: 2,
+        recIndex: 1,
+        reason: "Mock restart request"
+      })
+    });
+
+    assert.deepStrictEqual(result, {
       handled: true,
       requestType: "RESTART",
       response: { result: "OK" }
@@ -68,10 +101,10 @@ describe("handleEvent", () => {
   });
 
   test("should throw error when REST call fails", async () => {
-    fetch.mockResolvedValue({
+    global.fetch = async () => ({
       ok: false,
       status: 500,
-      text: jest.fn().mockResolvedValue("Internal error")
+      text: async () => "Internal error"
     });
 
     const event = {
@@ -81,15 +114,18 @@ describe("handleEvent", () => {
       requestType: "RESTART"
     };
 
-    await expect(handleEvent(event)).rejects.toThrow(
-      "REST call failed with status 500"
+    await assert.rejects(
+      async () => handleEvent(event),
+      /REST call failed with status 500/
     );
   });
 
   test("should return null response if response body is not JSON", async () => {
-    fetch.mockResolvedValue({
+    global.fetch = async () => ({
       ok: true,
-      json: jest.fn().mockRejectedValue(new Error("Invalid JSON"))
+      json: async () => {
+        throw new Error("Invalid JSON");
+      }
     });
 
     const event = {
@@ -101,7 +137,7 @@ describe("handleEvent", () => {
 
     const result = await handleEvent(event);
 
-    expect(result).toEqual({
+    assert.deepStrictEqual(result, {
       handled: true,
       requestType: "RESTART",
       response: null
