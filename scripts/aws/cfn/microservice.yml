@@ -384,6 +384,7 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 
   PnCoreEventBusToExtChStartReworkLambda:
     Type: AWS::Events::Rule
@@ -438,4 +439,3 @@ Resources:
                 Resource:
                   - !GetAtt StartReworkRequestLambda.Arn
                   - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
-
