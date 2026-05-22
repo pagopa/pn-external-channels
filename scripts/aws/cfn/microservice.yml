@@ -332,7 +332,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Condition: IsCoreAndNotProd
     Properties:
-      GroupDescription: !Sub '${StartMockReworkRequestLambda}-sec-group'
+      GroupDescription: !Sub '${StartReworkRequestLambda}-sec-group'
       VpcId: !Ref VpcId
 
   StartReworkRequestLambdaLambda:
