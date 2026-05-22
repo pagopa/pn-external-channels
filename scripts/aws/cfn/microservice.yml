@@ -230,14 +230,9 @@ Parameters:
     Type: String
     Description: 'Evn type'
 
-  PnCoreAwsAccountId:
-    Type: String
-    Description: Core Account ID (leave blank in Core account)
-    Default: 'core'
-
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
-  IsCoreAccount: !Equals [ !Ref PnCoreAwsAccountId , '' ]
+  IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
   IsCoreAndNotProd: !And
     - !Condition IsCoreAccount
     - !Condition IsNotProdAccount
