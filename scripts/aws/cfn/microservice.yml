@@ -144,6 +144,16 @@ Parameters:
     Type: String
     Description: 'Name of dynamodb table containing requests'
 
+  # OpenApi Bucket params
+  MicroserviceBucketName:
+    Type: String
+    Default: ''
+    Description: 'Name of the bucket where the microservice files are copied during deploy'
+
+  MicroserviceBucketBaseKey:
+    Type: String
+    Default: ''
+    Description: 'Base key of the microservice in the s3 bucket'
 
   UseDynamodb:
     Type: String
@@ -151,7 +161,7 @@ Parameters:
     AllowedValues:
       - true
       - false
-    Default: 'false'
+    Default: false
 
   CacheExpireDays:
     Type: String
@@ -332,14 +342,14 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Condition: IsCoreAndNotProd
     Properties:
-      GroupDescription: !Sub '${StartReworkRequestLambda}-sec-group'
+      GroupDescription: !Sub '${StartReworkRequestLambdaName}-sec-group'
       VpcId: !Ref VpcId
 
-  StartReworkRequestLambdaLambda:
+  StartReworkRequestLambda:
     Type: AWS::Lambda::Function
     Condition: IsCoreAndNotProd
     Properties:
-      FunctionName: !Ref StartReworkRequestLambda
+      FunctionName: !Ref StartReworkRequestLambdaName
       Runtime: !Ref StartReworkRequestLambdaRuntime
       Handler: "index.handler"
       Code:
@@ -348,13 +358,13 @@ Resources:
       Role: !GetAtt StartReworkRequestLambdaRole.Arn
       Environment:
         Variables:
-          REGION: !Sub ${AWS::Region}
-          DELIVERYPUSH_BASEURL: !Sub http://${ApplicationLoadBalancerDomain}:8080/delivery-push-private/v1'
+          REGION: !Sub '${AWS::Region}'
+          DELIVERYPUSH_BASEURL: !Sub 'http://${ApplicationLoadBalancerDomain}:8080/delivery-push-private/v1'
       TracingConfig:
         Mode: Active
       Layers:
         - !Sub "arn:aws:lambda:${AWS::Region}:339249233099:layer:LambdaInsightsExtension:13"
-      Timeout: 30
+      Timeout: !Ref StartReworkRequestLambdaTimeout
       MemorySize: !Ref StartReworkRequestLambdaMemorySize
       VpcConfig:
         SubnetIds: !Split [ ",", !Ref VpcEgressSubnetsIds ]
@@ -367,7 +377,7 @@ Resources:
     Type: AWS::IAM::Role
     Condition: IsCoreAndNotProd
     Properties:
-      RoleName: !Sub ${ProjectName}-StartReworkRequestLambdaRole
+      RoleName: !Sub '${ProjectName}-StartReworkRequestLambdaRole'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -386,11 +396,11 @@ Resources:
     Properties:
       Description: Route ExternalChannel Events to StartReworkRequestLambda
       RoleArn: !GetAtt "EventBusEnqueueRole.Arn"
-      EventBusName: !Ref PnCoreEventBus
+      EventBusName: !Ref PnCoreEventBusName
       EventPattern:
         detail-type: [ "ExternalChannelReworkEvent" ]
       Targets:
-        - Arn: !GetAtt MatchedEventsLoggerFunction.Arn
+        - Arn: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
           Id: !Sub ${ProjectName}-Logger-ExtChToDeliveryPush
           InputTransformer:
             InputPathsMap:
@@ -407,5 +417,30 @@ Resources:
           Id: !Sub ${ProjectName}-Logger-ExtChToStartReworkRequestLambda
           InputPath: $.detail
 
-
+  EventBusEnqueueRole:
+    Type: AWS::IAM::Role
+    Condition: IsCoreAndNotProd
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+        Version: '2012-10-17'
+      Policies:
+        - PolicyName: !Sub ${ProjectName}-external-channels-eventBusRuleLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: invokeLambda
+                Action:
+                  - lambda:InvokeFunction
+                Effect: Allow
+                Resource:
+                  - !GetAtt StartReworkRequestLambda.Arn
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
 
