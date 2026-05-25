@@ -78,6 +78,7 @@ Parameters:
   ApplicationLoadBalancerDomain:
     Type: String
     Description: 'Base URL of the load balancer where the service is going to be reachable'
+    Default: ''
 
   ApplicationLoadBalancerListenerArn:
     Type: String
@@ -229,6 +230,7 @@ Parameters:
   EnvironmentType:
     Type: String
     Description: 'Evn type'
+    Default: 'prod'
 
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
