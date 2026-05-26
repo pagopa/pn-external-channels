@@ -225,7 +225,7 @@ public class ExternalChannelsService {
         if (isReworkRequestId && matches) {
             receiverDigitalAddress = matcher.group(3);
         } else {
-            receiverDigitalAddress = matches ? matcher.group(1) + "@restart_" + matcher.group(2) : receiverDigitalAddress;
+            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
         }
 
         if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
@@ -253,6 +253,11 @@ public class ExternalChannelsService {
         notificationProgress.setOutputServiceId(outputServiceId);
         notificationProgress.setOutputApiKey(outputApikey);
         notificationProgress.setRegisteredLetterCode(UUID.randomUUID().toString().replace("-",""));
+
+        if(matches){
+            notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
+        }
 
         return notificationProgress;
 

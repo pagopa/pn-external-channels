@@ -73,11 +73,8 @@ public class InternalEventHandler {
 
             log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
             if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                String destinationAddress = notificationProgress.getDestinationAddress();
-                Matcher matcher = Pattern.compile("^(.*?)@restart_([01])$").matcher(destinationAddress);
-                if (matcher.matches()) {
-                    int restartValue = Integer.parseInt(matcher.group(2));
-                    producerHandler.sendToQueue(buildReworkRequest(notificationProgress.getIun(), notificationProgress.getRequestId(), ReworkRequestType.RESTART, restartValue));
+                if (notificationProgress.getSendRestartEvent()) {
+                    producerHandler.sendToQueue(buildReworkRequest(notificationProgress.getIun(), notificationProgress.getRequestId(), ReworkRequestType.RESTART, notificationProgress.getRestartAttempt()));
                 }
                 dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
                 log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
