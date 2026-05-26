@@ -230,7 +230,6 @@ Parameters:
   EnvironmentType:
     Type: String
     Description: 'Evn type'
-    Default: 'prod'
 
   ExternalChannelsToStartReworkRequestLambdaQueueARN:
     Type: String
