@@ -396,6 +396,25 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
 
+  StartReworkRequestLambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-StartReworkRequestLambdaPolicy
+      Roles:
+        - !Ref StartReworkRequestLambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ChangeMessageVisibility
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+              - sqs:ReceiveMessage
+            Resource:
+              - !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
+
+
   PnCoreEventBusToExtChStartReworkLambda:
     Type: AWS::Events::Rule
     Condition: IsCoreAndNotProd
