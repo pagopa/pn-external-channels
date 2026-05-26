@@ -65,6 +65,15 @@ Resources:
       VisibilityTimeout: 60
       DelaySeconds: 1
 
+  ExternalChannelsToStartReworkRequestLambdaQueue:
+    Type: AWS::SQS::Queue
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      QueueName: "pn-external_channels_to_start_rework_request_lambda"
+      VisibilityTimeout: 60
+      DelaySeconds: 300
+
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
     UpdateReplacePolicy: Retain
@@ -161,6 +170,18 @@ Outputs:
       Fn::GetAtt:
         - "MockOcrInputsQueue"
         - "QueueName"
+
+  ExternalChannelsToStartReworkRequestLambdaQueueURL:
+    Description: "URL of new Amazon SQS Queue"
+    Value:
+      Ref: "ExternalChannelsToStartReworkRequestLambdaQueue"
+
+  ExternalChannelsToStartReworkRequestLambdaQueueARN:
+    Description: "ARN of new AmazonSQS Queue"
+    Value:
+      Fn::GetAtt:
+        - "ExternalChannelsToStartReworkRequestLambdaQueue"
+        - "Arn"
 
   StartReworkRequestLambdaName:
     Value: !Sub ${ProjectName}-external-channels-start-rework-request

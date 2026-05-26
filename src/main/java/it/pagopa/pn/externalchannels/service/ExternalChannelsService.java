@@ -52,10 +52,6 @@ public class ExternalChannelsService {
 
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
 
-    private static final Pattern REC_INDEX_PATTERN = Pattern.compile("\\.RECINDEX_([^.]*)\\.");
-
-    private static final Pattern PC_RETRY_PATTERN = Pattern.compile("\\.PCRETRY_([^.]*)\\.");
-
     // ora l'indirizzo può arrivare in maiuscolo
     private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
 
@@ -225,12 +221,11 @@ public class ExternalChannelsService {
 
         boolean isReworkRequestId = requestId.contains(CONST_REWORK);
         Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
-        if (isReworkRequestId && matcher.matches()) {
-            int restartValue = Integer.parseInt(matcher.group(2));
-            producerHandler.sendToQueue(buildReworkRequest(iun, requestId, ReworkRequestType.RESTART, restartValue));
+        boolean matches = matcher.matches();
+        if (isReworkRequestId && matches) {
             receiverDigitalAddress = matcher.group(3);
         } else {
-            receiverDigitalAddress = matcher.matches() ? matcher.group(1) : receiverDigitalAddress;
+            receiverDigitalAddress = matches ? matcher.group(1) + "@restart_" + matcher.group(2) : receiverDigitalAddress;
         }
 
         if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
@@ -261,21 +256,6 @@ public class ExternalChannelsService {
 
         return notificationProgress;
 
-    }
-
-    private ReworkRequest buildReworkRequest(String iun, String requestId, ReworkRequestType requestType, int attempt) {
-        ReworkRequest reworkRequest = new ReworkRequest();
-        reworkRequest.setIun(iun);
-        reworkRequest.setAttempt("ATTEMPT_" + attempt);
-        reworkRequest.setRecIndex(extractValue(requestId, REC_INDEX_PATTERN));
-        reworkRequest.setPcRetry(extractValue(requestId, PC_RETRY_PATTERN));
-        reworkRequest.setRequestType(requestType);
-        return reworkRequest;
-    }
-
-    private String extractValue(String text, Pattern pattern) {
-        Matcher matcher = pattern.matcher(text);
-        return matcher.find() ? matcher.group(1) : null;
     }
 
     private NotificationProgress buildNotification(List<String> codeToSendList) {

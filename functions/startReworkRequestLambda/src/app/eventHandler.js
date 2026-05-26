@@ -1,6 +1,6 @@
 exports.handleEvent = async (event) => {
   console.log("Received event:", JSON.stringify(event));
-  const { iun, attempt, recIndex, pcRetry, requestType} = event;
+  const { iun, attemptId, recIndex, pcRetry, requestType} = event;
 
   if (requestType !== "RESTART") {
     console.log(`Request type '${requestType}' not handled. Skipping.`);
@@ -10,10 +10,10 @@ exports.handleEvent = async (event) => {
     };
   }
 
-  const payload = { attempt, recIndex, reason: "Mock restart request" };
+  const payload = { attemptId, recIndex, reason: "Mock restart request" };
 
   const response = await fetch(`${process.env.DELIVERYPUSH_BASEURL}/notifications/${iun}/restart-attempt`, {
-    method: "POST",
+    method: "PUT",
     headers: {
       "Content-Type": "application/json"
     },

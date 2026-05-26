@@ -232,6 +232,14 @@ Parameters:
     Description: 'Evn type'
     Default: 'prod'
 
+  ExternalChannelsToStartReworkRequestLambdaQueueARN:
+    Type: String
+    Description: 'ExternalChannelsStartRework queue ARN'
+
+  ExternalChannelsToStartReworkRequestLambdaQueueURL:
+    Type: String
+    Description: 'ExternalChannelsStartRework queue URL'
+
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
@@ -411,9 +419,11 @@ Resources:
                   "ingestionTime": <aws.events.event.ingestion-time>,
                   "originalEvent": <aws.events.event.json>
               }
-        - Arn: !GetAtt StartReworkRequestLambda.Arn
-          Id: !Sub ${ProjectName}-Logger-ExtChToStartReworkRequestLambda
+        - Id: !Sub '${ProjectName}-ExternalChannelsToStartReworkRequest'
+          Arn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
           InputPath: $.detail
+          DeadLetterConfig:
+            Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ
 
   EventBusEnqueueRole:
     Type: AWS::IAM::Role
@@ -439,5 +449,38 @@ Resources:
                   - lambda:InvokeFunction
                 Effect: Allow
                 Resource:
-                  - !GetAtt StartReworkRequestLambda.Arn
                   - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
+              - Sid: putEvents
+                Action:
+                  - sqs:ChangeMessageVisibility
+                  - sqs:GetQueueAttributes
+                  - sqs:GetQueueUrl
+                  - sqs:SendMessage
+                Effect: Allow
+                Resource:
+                  - !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
+
+  StartReworkRequestLambdaEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
+      BatchSize: 1
+      MaximumBatchingWindowInSeconds: 0
+      FunctionName: !GetAtt StartReworkRequestLambda.Arn
+
+  ExternalChannelsToStartReworkRequestLambdaQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref ExternalChannelsToStartReworkRequestLambdaQueueURL
+      PolicyDocument:
+        Statement:
+          - Sid: "SendEventsToDLQ"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+            Action:
+              - "SQS:SendMessage"
+            Resource:
+              - !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN

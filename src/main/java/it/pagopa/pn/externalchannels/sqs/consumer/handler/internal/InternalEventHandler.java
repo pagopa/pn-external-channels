@@ -4,10 +4,7 @@ import io.awspring.cloud.sqs.annotation.SqsListener;
 import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.dao.EventCodeDocumentsDao;
 import it.pagopa.pn.externalchannels.dao.NotificationProgressDao;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
-import it.pagopa.pn.externalchannels.dto.OcrInputMessage;
-import it.pagopa.pn.externalchannels.dto.OcrOutputMessage;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.mapper.PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
@@ -26,6 +23,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static it.pagopa.pn.externalchannels.event.InternalEvent.INTERNAL_EVENT;
 import static it.pagopa.pn.externalchannels.util.EventMessageUtil.OCR_KO;
@@ -52,6 +51,11 @@ public class InternalEventHandler {
 
     private final PnExternalChannelsProperties pnExternalChannelsProperties;
 
+    private static final Pattern REC_INDEX_PATTERN = Pattern.compile("\\.RECINDEX_([^.]*)\\.");
+
+    private static final Pattern PC_RETRY_PATTERN = Pattern.compile("\\.PCRETRY_([^.]*)\\.");
+
+
     @SqsListener(value = "${pn.external-channels.topics.to-internal}")
     public void handleMessage(@Payload NotificationProgress notificationProgress, @Headers Map<String, Object> headers) {
         String eventType = (String) headers.get("eventType");
@@ -69,16 +73,20 @@ public class InternalEventHandler {
 
             log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
             if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
+                String destinationAddress = notificationProgress.getDestinationAddress();
+                Matcher matcher = Pattern.compile("^(.*?)@restart_([01])$").matcher(destinationAddress);
+                if (matcher.matches()) {
+                    int restartValue = Integer.parseInt(matcher.group(2));
+                    producerHandler.sendToQueue(buildReworkRequest(notificationProgress.getIun(), notificationProgress.getRequestId(), ReworkRequestType.RESTART, restartValue));
+                }
                 dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
                 log.info("[{}] Deleted message with requestId: {}", notificationProgress.getIun(), notificationProgress.getRequestId());
-            }
-            else {
+            } else {
                 dao.put(notificationProgress);
                 //metto in coda il nuovo notificationProgress, con un CodeTimeToSend in meno
                 internalSendClient.sendNotification(notificationProgress);
             }
-        }
-        else {
+        } else {
             //rimetto in coda
             internalSendClient.sendNotification(notificationProgress);
         }
@@ -161,12 +169,9 @@ public class InternalEventHandler {
 
         SingleStatusUpdate eventMessage = EventMessageUtil.buildMessageEvent(notificationProgress, safeStorageService, eventCodeDocumentsDao);
 
-        if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL)
-        {
+        if (notificationProgress.getOutput() == NotificationProgress.PROGRESS_OUTPUT_CHANNEL.WEBHOOK_EXT_CHANNEL) {
             extChannelWebhookClient.sendPaperProgressStatusRequest(notificationProgress, PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent.map(eventMessage.getAnalogMail()));
-        }
-        else
-        {
+        } else {
             producerHandler.sendToQueue(notificationProgress, eventMessage);
         }
 
@@ -180,5 +185,21 @@ public class InternalEventHandler {
         CodeTimeToSend codeTimeToSend = new LinkedList<>(notificationProgress.getCodeTimeToSendQueue()).peek();
         assert codeTimeToSend != null;
         historicalRequestService.save(iun, requestId, codeTimeToSend.getCode());
+    }
+
+    private ReworkRequest buildReworkRequest(String iun, String requestId, ReworkRequestType requestType, int attempt) {
+        ReworkRequest reworkRequest = new ReworkRequest();
+        reworkRequest.setIun(iun);
+        reworkRequest.setAttempt("ATTEMPT_" + attempt);
+        reworkRequest.setRecIndex("RECINDEX_" + extractValue(requestId, REC_INDEX_PATTERN));
+        reworkRequest.setPcRetry(extractValue(requestId, PC_RETRY_PATTERN));
+        reworkRequest.setRequestType(requestType);
+        return reworkRequest;
+    }
+
+
+    private String extractValue(String text, Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
+        return matcher.find() ? matcher.group(1) : null;
     }
 }
