@@ -39,7 +39,7 @@ describe("handleEvent", () => {
 
     const event = {
       iun: "IUN123",
-      attempt: 1,
+      attemptId: 1,
       recIndex: 0,
       requestType: "OTHER"
     };
@@ -69,7 +69,7 @@ describe("handleEvent", () => {
 
     const event = {
       iun: "IUN123",
-      attempt: 2,
+      attemptId: 2,
       recIndex: 1,
       requestType: "RESTART"
     };
@@ -82,12 +82,12 @@ describe("handleEvent", () => {
     );
 
     assert.deepStrictEqual(calledOptions, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        attempt: 2,
+        attemptId: 2,
         recIndex: 1,
         reason: "Mock restart request"
       })
@@ -109,7 +109,7 @@ describe("handleEvent", () => {
 
     const event = {
       iun: "IUN123",
-      attempt: 1,
+      attemptId: 1,
       recIndex: 0,
       requestType: "RESTART"
     };
@@ -130,7 +130,7 @@ describe("handleEvent", () => {
 
     const event = {
       iun: "IUN123",
-      attempt: 1,
+      attemptId: 1,
       recIndex: 0,
       requestType: "RESTART"
     };
