@@ -211,6 +211,7 @@ public class ExternalChannelsService {
                                                            NotificationProgress.PROGRESS_OUTPUT_CHANNEL output,
                                                            String outputEndpoint, String outputServiceId, String outputApikey,
                                                            String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
+        log.info("receiverDigitalAddress is {} for requestId: {}", receiverDigitalAddress, requestId);
         NotificationProgress notificationProgress;
         String iun = requestId;
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL userAttributesChannel = NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
@@ -255,6 +256,7 @@ public class ExternalChannelsService {
         notificationProgress.setRegisteredLetterCode(UUID.randomUUID().toString().replace("-",""));
 
         if(matches){
+            log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
             notificationProgress.setSendRestartEvent(Boolean.TRUE);
             notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
         }
