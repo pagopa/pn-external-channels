@@ -397,6 +397,7 @@ Resources:
 
   StartReworkRequestLambdaPolicy:
     Type: AWS::IAM::Policy
+    Condition: IsCoreAndNotProd
     Properties:
       PolicyName: !Sub ${ProjectName}-StartReworkRequestLambdaPolicy
       Roles:
@@ -480,6 +481,7 @@ Resources:
 
   StartReworkRequestLambdaEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
+    Condition: IsCoreAndNotProd
     Properties:
       EventSourceArn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
       BatchSize: 1
@@ -488,6 +490,7 @@ Resources:
 
   ExternalChannelsToStartReworkRequestLambdaQueuePolicy:
     Type: AWS::SQS::QueuePolicy
+    Condition: IsCoreAndNotProd
     Properties:
       Queues:
         - !Ref ExternalChannelsToStartReworkRequestLambdaQueueURL
