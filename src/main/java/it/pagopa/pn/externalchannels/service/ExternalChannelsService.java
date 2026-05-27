@@ -220,15 +220,6 @@ public class ExternalChannelsService {
             iun = iun.contains("IUN_") ? iun.substring(iun.indexOf("IUN_") + 4) : iun;
         }
 
-        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
-        boolean matches = matcher.matches();
-        if (isReworkRequestId && matches) {
-            receiverDigitalAddress = matcher.group(3);
-        } else {
-            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
-        }
-
         if(requestSearched.isPresent() && (output != userAttributesChannel || (receiverDigitalAddress.toUpperCase(Locale.ROOT).contains("PEC-MOCK"))) ){
             notificationProgress = buildNotificationCustomized(requestSearched.get(), iun, requestId,receiverDigitalAddress);
         }else if (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@fail") && (output != userAttributesChannel || (receiverDigitalAddress.toLowerCase(Locale.ROOT).contains("@failalways")))
@@ -255,12 +246,6 @@ public class ExternalChannelsService {
         notificationProgress.setOutputApiKey(outputApikey);
         notificationProgress.setRegisteredLetterCode(UUID.randomUUID().toString().replace("-",""));
 
-        if(matches){
-            log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
-            notificationProgress.setSendRestartEvent(Boolean.TRUE);
-            notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
-        }
-
         return notificationProgress;
 
     }
@@ -276,6 +261,16 @@ public class ExternalChannelsService {
     }
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
+
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
+        boolean matches = matcher.matches();
+        if (isReworkRequestId && matches) {
+            receiverDigitalAddress = matcher.group(3);
+        } else {
+            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
+        }
+
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
@@ -332,6 +327,12 @@ public class ExternalChannelsService {
             }
             CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
+        }
+
+        if(matches){
+            log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
+            notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
         }
 
         return notificationProgress;
