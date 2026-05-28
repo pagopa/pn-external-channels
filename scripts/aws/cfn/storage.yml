@@ -66,13 +66,14 @@ Resources:
       DelaySeconds: 1
 
   ExternalChannelsToStartReworkRequestLambdaQueue:
-    Type: AWS::SQS::Queue
+    Type: AWS::CloudFormation::Stack
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
       QueueName: "pn-external_channels_to_start_rework_request_lambda"
       VisibilityTimeout: 60
-      DelaySeconds: 300
+      DelaySeconds: 720
 
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
