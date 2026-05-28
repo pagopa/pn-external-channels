@@ -190,13 +190,16 @@ Outputs:
         - "QueueName"
 
   ExternalChannelsToStartReworkRequestLambdaQueueURL:
+    Condition: IsCoreAndNotProd
     Description: "URL of new Amazon SQS Queue"
     Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueURL
 
   ExternalChannelsToStartReworkRequestLambdaQueueARN:
+    Condition: IsCoreAndNotProd
     Description: "ARN of new AmazonSQS Queue"
     Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueARN
 
 
   StartReworkRequestLambdaName:
+    Condition: IsCoreAndNotProd
     Value: !Sub ${ProjectName}-external-channels-start-rework-request
