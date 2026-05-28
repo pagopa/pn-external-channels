@@ -46,6 +46,8 @@ public class NotificationProgress {
     private static final String COL_BUSINESS_STATUS_DATETIME = "businessStatusDatetime";
     private static final String COL_BUSINESS_STATUS_DATETIME_890 = "businessStatusDatetime890";
     private static final String COL_OCR_STATUS = "ocrStatus";
+    private static final String COL_SEND_RESTART_EVENT = "sendRestartEvent";
+    private static final String COL_RESTART_ATTEMPT = "restartAttempt";
 
 
     @Getter(onMethod=@__({@DynamoDbPartitionKey, @DynamoDbAttribute(COL_IUN)})) private String iun;
@@ -85,6 +87,10 @@ public class NotificationProgress {
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_BUSINESS_STATUS_DATETIME_890)})) private OffsetDateTime businessStatusDatetime890;
 
     @Getter(onMethod=@__({@DynamoDbAttribute(COL_OCR_STATUS)})) private String ocrStatus;
+
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_SEND_RESTART_EVENT)})) private Boolean sendRestartEvent;
+
+    @Getter(onMethod=@__({@DynamoDbAttribute(COL_RESTART_ATTEMPT)})) private Integer restartAttempt;
 
     public enum PROGRESS_OUTPUT_CHANNEL{
         QUEUE_DELIVERY_PUSH,

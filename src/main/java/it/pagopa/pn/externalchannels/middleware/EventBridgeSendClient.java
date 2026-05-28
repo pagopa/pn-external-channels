@@ -3,6 +3,7 @@ package it.pagopa.pn.externalchannels.middleware;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
+import it.pagopa.pn.externalchannels.dto.ReworkRequest;
 import it.pagopa.pn.externalchannels.exception.ExternalChannelsMockException;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,21 @@ public class EventBridgeSendClient {
                     .source("NOTIFICATION TRACKER")
                     .detailType("ExternalChannelOutcomeEvent")
                     .detail(objectMapper.writeValueAsString(singleStatusUpdate))
+                    .eventBusName(properties.getCoreEventBusName())
+                    .build();
+            publishToEventBus(entry);
+        } catch (JsonProcessingException e) {
+            throw new ExternalChannelsMockException("Error serializing event for EventBridge", e);
+        }
+    }
+
+    public void sendStartReworkEvent(ReworkRequest reworkRequest) {
+        try {
+            PutEventsRequestEntry entry = PutEventsRequestEntry.builder()
+                    .time(Instant.now())
+                    .source("EXTERNAL CHANNEL MOCK")
+                    .detailType("ExternalChannelReworkEvent")
+                    .detail(objectMapper.writeValueAsString(reworkRequest))
                     .eventBusName(properties.getCoreEventBusName())
                     .build();
             publishToEventBus(entry);

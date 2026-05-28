@@ -7,12 +7,10 @@ import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsum
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
 import it.pagopa.pn.externalchannels.dao.*;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
+import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +22,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
 
@@ -31,6 +31,8 @@ import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OU
 @RequiredArgsConstructor
 @Slf4j
 public class ExternalChannelsService {
+
+    private static final String CONST_REWORK = "REWORK";
 
     private static final String IUN_ALREADY_EXISTS_MESSAGE = "[%s] Iun already inserted!";
 
@@ -71,6 +73,8 @@ public class ExternalChannelsService {
     private final InternalSendClient internalSendClient;
 
     private final ReceivedMessageEntityDaoDynamo receivedMessageEntityDaoDynamo;
+
+    private final ProducerHandler producerHandler;
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
@@ -207,6 +211,7 @@ public class ExternalChannelsService {
                                                            NotificationProgress.PROGRESS_OUTPUT_CHANNEL output,
                                                            String outputEndpoint, String outputServiceId, String outputApikey,
                                                            String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
+        log.info("receiverDigitalAddress is {} for requestId: {}", receiverDigitalAddress, requestId);
         NotificationProgress notificationProgress;
         String iun = requestId;
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL userAttributesChannel = NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
@@ -256,6 +261,16 @@ public class ExternalChannelsService {
     }
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
+
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
+        boolean matches = matcher.matches();
+        if (isReworkRequestId && matches) {
+            receiverDigitalAddress = matcher.group(3);
+        } else {
+            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
+        }
+
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
@@ -312,6 +327,14 @@ public class ExternalChannelsService {
             }
             CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
+        }
+
+        if(matches){
+            log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
+            if (!isReworkRequestId) {
+                notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            }
+            notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
         }
 
         return notificationProgress;
