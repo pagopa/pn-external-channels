@@ -331,7 +331,9 @@ public class ExternalChannelsService {
 
         if(matches){
             log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
-            notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            if (!isReworkRequestId) {
+                notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            }
             notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
         }
 
