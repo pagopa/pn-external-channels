@@ -73,7 +73,7 @@ public class InternalEventHandler {
 
             log.info("[{}] Value of queue after message sent: {}", notificationProgress.getIun(), notificationProgress.getCodeTimeToSendQueue());
             if (notificationProgress.getCodeTimeToSendQueue().isEmpty()) {
-                if (notificationProgress.getSendRestartEvent()) {
+                if (Boolean.TRUE.equals(notificationProgress.getSendRestartEvent())) {
                     producerHandler.sendToQueue(buildReworkRequest(notificationProgress.getIun(), notificationProgress.getRequestId(), ReworkRequestType.RESTART, notificationProgress.getRestartAttempt()));
                 }
                 dao.delete(notificationProgress.getIun(), notificationProgress.getDestinationAddress());
