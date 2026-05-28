@@ -176,7 +176,9 @@ Outputs:
   ExternalChannelsToStartReworkRequestLambdaQueueURL:
     Description: "URL of new Amazon SQS Queue"
     Value:
-      Ref: "ExternalChannelsToStartReworkRequestLambdaQueue"
+      Fn::GetAtt:
+        - "ExternalChannelsToStartReworkRequestLambdaQueue"
+        - "Outputs.ExternalChannelsToStartReworkRequestLambdaQueueURL"
 
   ExternalChannelsToStartReworkRequestLambdaQueueARN:
     Description: "ARN of new AmazonSQS Queue"
