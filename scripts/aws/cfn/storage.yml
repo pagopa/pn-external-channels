@@ -175,17 +175,12 @@ Outputs:
 
   ExternalChannelsToStartReworkRequestLambdaQueueURL:
     Description: "URL of new Amazon SQS Queue"
-    Value:
-      Fn::GetAtt:
-        - "ExternalChannelsToStartReworkRequestLambdaQueue"
-        - "Outputs.ExternalChannelsToStartReworkRequestLambdaQueueURL"
+    Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueURL
 
   ExternalChannelsToStartReworkRequestLambdaQueueARN:
     Description: "ARN of new AmazonSQS Queue"
-    Value:
-      Fn::GetAtt:
-        - "ExternalChannelsToStartReworkRequestLambdaQueue"
-        - "Outputs.QueueArn"
+    Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueARN
+
 
   StartReworkRequestLambdaName:
     Value: !Sub ${ProjectName}-external-channels-start-rework-request
