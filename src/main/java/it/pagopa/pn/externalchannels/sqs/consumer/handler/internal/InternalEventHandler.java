@@ -187,7 +187,7 @@ public class InternalEventHandler {
     private ReworkRequest buildReworkRequest(String iun, String requestId, ReworkRequestType requestType, int attempt) {
         ReworkRequest reworkRequest = new ReworkRequest();
         reworkRequest.setIun(iun);
-        reworkRequest.setAttempt("ATTEMPT_" + attempt);
+        reworkRequest.setAttemptId("ATTEMPT_" + attempt);
         reworkRequest.setRecIndex("RECINDEX_" + extractValue(requestId, REC_INDEX_PATTERN));
         reworkRequest.setPcRetry(extractValue(requestId, PC_RETRY_PATTERN));
         reworkRequest.setRequestType(requestType);

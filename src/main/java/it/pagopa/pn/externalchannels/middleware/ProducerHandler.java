@@ -44,7 +44,7 @@ public class ProducerHandler {
     }
 
     public void sendToQueue(ReworkRequest reworkRequest) {
-        log.info("[{}] Message to send to EventBridge to start new rework request for attempt: {} and recIndex: {}", reworkRequest.getIun(), reworkRequest.getAttempt(), reworkRequest.getRecIndex());
+        log.info("[{}] Message to send to EventBridge to start new rework request for attempt: {} and recIndex: {}", reworkRequest.getIun(), reworkRequest.getAttemptId(), reworkRequest.getRecIndex());
         eventBridgeSendClient.sendStartReworkEvent(reworkRequest);
         log.debug("[{}] Message sent to EventBridge to start new rework request", reworkRequest.getIun());
     }
