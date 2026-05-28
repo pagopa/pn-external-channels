@@ -185,7 +185,7 @@ Outputs:
     Value:
       Fn::GetAtt:
         - "ExternalChannelsToStartReworkRequestLambdaQueue"
-        - "Arn"
+        - "Outputs.QueueArn"
 
   StartReworkRequestLambdaName:
     Value: !Sub ${ProjectName}-external-channels-start-rework-request
