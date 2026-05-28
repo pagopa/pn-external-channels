@@ -43,7 +43,7 @@ public class EventBridgeSendClient {
         try {
             PutEventsRequestEntry entry = PutEventsRequestEntry.builder()
                     .time(Instant.now())
-                    .source("EXTERNAL CHANNEL MOCK")
+                    .source("NOTIFICATION TRACKER")
                     .detailType("ExternalChannelReworkEvent")
                     .detail(objectMapper.writeValueAsString(reworkRequest))
                     .eventBusName(properties.getCoreEventBusName())
