@@ -1,43 +1,71 @@
 exports.handleEvent = async (event) => {
   console.log("Received event:", JSON.stringify(event));
-  const { iun, attemptId, recIndex, pcRetry, requestType} = event;
 
-  if (requestType !== "RESTART") {
-    console.log(`Request type '${requestType}' not handled. Skipping.`);
-    return {
-      handled: false,
-      reason: `Request type '${requestType}' not handled`
-    };
-  }
+  const results = [];
 
-  const payload = { attemptId, recIndex, reason: "Mock restart request" };
+  for (const record of event.Records ?? []) {
+    const body = JSON.parse(record.body);
 
-  const response = await fetch(`${process.env.DELIVERYPUSH_BASEURL}/notifications/${iun}/restart-attempt`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+    const { iun, attemptId, recIndex, pcRetry, requestType } = body;
 
-  if (!response.ok) {
-    const responseBody = await response.text();
+    if (requestType !== "RESTART") {
+      console.log(`Request type '${requestType}' not handled. Skipping.`);
 
-    console.error("REST call failed:", {
-      status: response.status,
-      body: responseBody
+      results.push({
+        handled: false,
+        reason: `Request type '${requestType}' not handled`
+      });
+
+      continue;
+    }
+
+    console.log("Processing RESTART request", {
+      iun,
+      attemptId,
+      recIndex,
+      pcRetry
     });
 
-    throw new Error(`REST call failed with status ${response.status}`);
+    const payload = {
+      attemptId,
+      recIndex,
+      reason: "Mock restart request"
+    };
+
+    const response = await fetch(
+      `${process.env.DELIVERYPUSH_BASEURL}/notifications/${iun}/restart-attempt`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    if (!response.ok) {
+      const responseBody = await response.text();
+
+      console.error("REST call failed:", {
+        status: response.status,
+        body: responseBody
+      });
+
+      throw new Error(`REST call failed with status ${response.status}`);
+    }
+
+    const responseBody = await response.json().catch(() => null);
+
+    console.log("REST call completed successfully:", responseBody);
+
+    results.push({
+      handled: true,
+      requestType,
+      response: responseBody
+    });
   }
 
-  const responseBody = await response.json().catch(() => null);
-
-  console.log("REST call completed successfully:", responseBody);
-
   return {
-    handled: true,
-    requestType,
-    response: responseBody
+    results
   };
 };

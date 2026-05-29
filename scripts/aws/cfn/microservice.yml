@@ -483,6 +483,7 @@ Resources:
     Type: AWS::Lambda::EventSourceMapping
     Condition: IsCoreAndNotProd
     Properties:
+      Enabled: true
       EventSourceArn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
       BatchSize: 1
       MaximumBatchingWindowInSeconds: 0
