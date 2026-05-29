@@ -1,5 +1,8 @@
 {
     "ProjectName":"pn",
+    "EnvironmentName": "confinfo",
+    "EnvironmentType": "dev",
+    "CoreAccountId": "830192246553",
     "CorsAllowedDomains":"http://localhost:8090",
     "MicroserviceNumber":"84",
     "TemplateBucketBaseUrl":"",
@@ -23,6 +26,7 @@
     "OcrOutputsQueueName": "pn-mockconsolidatore-dummyqueue",
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "PnCoreEventBusName": "pn-CoreEventBus",
+    "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
     "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
@@ -33,5 +37,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:73d0b5a5ac3b58b573787c032d5b9ea266d68868141dd3d4a69b9cf5ce0c53d4"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:b3f89374489637122161687ec7de5cf4a97a1bf03e26724ba443c19e824d4eb4"
 }

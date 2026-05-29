@@ -43,10 +43,10 @@ public class EventBridgeSendClient {
         try {
             PutEventsRequestEntry entry = PutEventsRequestEntry.builder()
                     .time(Instant.now())
-                    .source("NOTIFICATION TRACKER")
+                    .source("EXTERNAL CHANNELS RESTART")
                     .detailType("ExternalChannelReworkEvent")
                     .detail(objectMapper.writeValueAsString(reworkRequest))
-                    .eventBusName(properties.getCoreEventBusName())
+                    .eventBusName(properties.getConfInfoEventBusName())
                     .build();
             publishToEventBus(entry);
         } catch (JsonProcessingException e) {
@@ -55,15 +55,16 @@ public class EventBridgeSendClient {
     }
 
     private void publishToEventBus(PutEventsRequestEntry entry) {
-        log.info("[EventBridge] Publishing event : {}", entry);
+        log.info("[EventBridge] Publishing event to bus '{}' : {}", entry.eventBusName(), entry);
         PutEventsResponse response = eventBridgeSyncClient.putEvents(r -> r.entries(entry));
         if (response.failedEntryCount() > 0) {
-            log.error("[EventBridge] Failed to publish {} entr{}: {}",
+            log.error("[EventBridge] Failed to publish {} entr{} to bus '{}': {}",
                     response.failedEntryCount(),
                     response.failedEntryCount() == 1 ? "y" : "ies",
+                    entry.eventBusName(),
                     response.entries());
             throw new ExternalChannelsMockException("EventBridge putEvents failed for " + response.failedEntryCount() + " entries");
         }
-        log.debug("[EventBridge] Event published successfully to bus '{}' : {}", properties.getCoreEventBusName(), entry);
+        log.debug("[EventBridge] Event published successfully to bus '{}' : {}", entry.eventBusName(), entry);
     }
 }

@@ -95,6 +95,12 @@ Parameters:
   PnCoreEventBusName:
     Type: String
     Description: "Name of the event bus used to redirect events from external channel to core services"
+    Default: 'pn-CoreEventBus'
+
+  PnConfInfoEventBusName:
+    Type: String
+    Description: "Name of the event bus used to redirect events from external channel to conf services"
+    Default: 'pn-ConfinfoEventBus'
 
   ExternalChannels2PaperChannelQueueName:
     Type: String
@@ -199,6 +205,11 @@ Parameters:
     Type: String
     Description: 'Ocr output queue ARN'
 
+  CoreAccountId:
+    Type: String
+    Description: 'Ocr output queue ARN'
+    Default: ''
+
   MockSequenceParameterNames:
     Type: String
     Description: 'Lista nomi parameter store del mock'
@@ -239,11 +250,16 @@ Parameters:
     Type: String
     Description: 'ExternalChannelsStartRework queue URL'
 
+
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
+  IsConfinfoAccount: !Equals [ !Ref EnvironmentName , 'confinfo' ]
   IsCoreAndNotProd: !And
     - !Condition IsCoreAccount
+    - !Condition IsNotProdAccount
+  IsConfinfoAndNotProd: !And
+    - !Condition IsConfinfoAccount
     - !Condition IsNotProdAccount
 
 Resources:
@@ -280,6 +296,9 @@ Resources:
         ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUTS=${OcrOutputsQueueName}'
         ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCRINPUTS=${MockOcrInputsQueueName}'
         ContainerEnvEntry20: !Sub 'PN_EXTERNALCHANNELS_MOCKSEQUENCEPARAMETERNAMES=${MockSequenceParameterNames}'
+        ContainerEnvEntry21: !Sub 'PN_EXTERNALCHANNELS_CONFINFOEVENTBUSNAME=${PnConfInfoEventBusName}'
+        ContainerEnvEntry22: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTNAME=${EnvironmentName}'
+        ContainerEnvEntry23: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTTYPE=${EnvironmentType}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
@@ -292,7 +311,6 @@ Resources:
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         TaskRoleManagedPolicyArn: !Ref ExternalChannelsMicroserviceTaskManagedPolicy
         LogAlarmStrategyV1: "-"
-
 
   ExternalChannelsMicroserviceTaskManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -321,6 +339,7 @@ Resources:
               - events:PutEvents
             Resource:
               - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnCoreEventBusName}'
+              - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnConfInfoEventBusName}'
           - Effect: Allow
             Action:
               - ssm:GetParameter
@@ -399,7 +418,7 @@ Resources:
     Type: AWS::IAM::Policy
     Condition: IsCoreAndNotProd
     Properties:
-      PolicyName: !Sub ${ProjectName}-StartReworkRequestLambdaPolicy
+      PolicyName: !Sub '${ProjectName}-StartReworkRequestLambdaPolicy'
       Roles:
         - !Ref StartReworkRequestLambdaRole
       PolicyDocument:
@@ -425,8 +444,8 @@ Resources:
       EventPattern:
         detail-type: [ "ExternalChannelReworkEvent" ]
       Targets:
-        - Arn: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
-          Id: !Sub ${ProjectName}-Logger-ExtChToDeliveryPush
+        - Arn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger'
+          Id: !Sub '${ProjectName}-Logger-ExtChToDeliveryPush'
           InputTransformer:
             InputPathsMap:
               "timestamp": "$.time"
@@ -442,7 +461,53 @@ Resources:
           Arn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
           InputPath: $.detail
           DeadLetterConfig:
-            Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ
+            Arn: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ'
+
+  # IAM Role for EventBridge rule to forward events to Core EventBus (cross-account)
+  PnEcRoleForwardToCore:
+    Type: AWS::IAM::Role
+    Condition: IsConfinfoAndNotProd
+    Properties:
+      RoleName: !Sub '${ProjectName}-ext-channels-forward-to-core-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: PutEventsOnCoreEventBus
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'events:PutEvents'
+                Resource: !Sub 'arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}'
+
+  # EventBridge Rule on pn-ConfinfoEventBus forwarding to Core EventBus
+  PnEcEventRuleForwardToCore:
+    Type: AWS::Events::Rule
+    Condition: IsConfinfoAndNotProd
+    Properties:
+      EventBusName: !Ref PnConfInfoEventBusName
+      Description: 'Rule forwarding External Channels events from Confinfo EventBus to Core EventBus'
+      EventPattern:
+        source:
+          - 'EXTERNAL CHANNELS RESTART'
+        account:
+          - !Ref AWS::AccountId
+        region:
+          - !Ref AWS::Region
+      State: 'ENABLED'
+      Targets:
+        - Arn: !Sub 'arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}'
+          Id: 'PnExternalChannelsForwardToCoreTarget'
+          RoleArn: !GetAtt PnEcRoleForwardToCore.Arn
+          DeadLetterConfig:
+            Arn: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-ConfinfoEventBus-DLQ'
+
 
   EventBusEnqueueRole:
     Type: AWS::IAM::Role
@@ -459,7 +524,7 @@ Resources:
                 aws:SourceAccount: !Ref AWS::AccountId
         Version: '2012-10-17'
       Policies:
-        - PolicyName: !Sub ${ProjectName}-external-channels-eventBusRuleLambdaPolicy
+        - PolicyName: !Sub '${ProjectName}-external-channels-eventBusRuleLambdaPolicy'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -468,7 +533,7 @@ Resources:
                   - lambda:InvokeFunction
                 Effect: Allow
                 Resource:
-                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger'
               - Sid: putEvents
                 Action:
                   - sqs:ChangeMessageVisibility
