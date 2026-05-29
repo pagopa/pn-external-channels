@@ -68,6 +68,8 @@ public class PnExternalChannelsProperties {
 
     private String coreEventBusName;
 
+    private String confInfoEventBusName;
+
     @Data
     public static class Csv{
 

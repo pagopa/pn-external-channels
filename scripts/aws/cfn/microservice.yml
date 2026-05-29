@@ -96,6 +96,10 @@ Parameters:
     Type: String
     Description: "Name of the event bus used to redirect events from external channel to core services"
 
+  PnConfInfoEventBusName:
+    Type: String
+    Description: "Name of the event bus used to redirect events from external channel to conf services"
+
   ExternalChannels2PaperChannelQueueName:
     Type: String
     Description: 'Push external-channel messages from this Queue to paper channel'
@@ -280,6 +284,7 @@ Resources:
         ContainerEnvEntry18: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCROUTPUTS=${OcrOutputsQueueName}'
         ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCRINPUTS=${MockOcrInputsQueueName}'
         ContainerEnvEntry20: !Sub 'PN_EXTERNALCHANNELS_MOCKSEQUENCEPARAMETERNAMES=${MockSequenceParameterNames}'
+        ContainerEnvEntry21: !Sub 'PN_EXTERNALCHANNELS_CONFINFOEVENTBUSNAME=${PnConfInfoEventBusName}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions

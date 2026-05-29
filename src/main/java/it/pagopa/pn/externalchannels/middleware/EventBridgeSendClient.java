@@ -46,7 +46,7 @@ public class EventBridgeSendClient {
                     .source("NOTIFICATION TRACKER")
                     .detailType("ExternalChannelReworkEvent")
                     .detail(objectMapper.writeValueAsString(reworkRequest))
-                    .eventBusName(properties.getCoreEventBusName())
+                    .eventBusName(properties.getConfInfoEventBusName())
                     .build();
             publishToEventBus(entry);
         } catch (JsonProcessingException e) {
