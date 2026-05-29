@@ -34,8 +34,12 @@ Conditions:
   Never: !Equals [ 'true', 'false' ]
   IsNotProdAccount: !Not [ !Equals [ !Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
+  IsConfinfoAccount: !Equals [ !Ref EnvironmentName , 'confinfo' ]
   IsCoreAndNotProd: !And
     - !Condition IsCoreAccount
+    - !Condition IsNotProdAccount
+  IsConfinfoAndNotProd: !And
+    - !Condition IsConfinfoAccount
     - !Condition IsNotProdAccount
 
 # dummy (null) resource, never created
@@ -138,6 +142,16 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  # DLQ for EventBridge rule forwarding to Core EventBus
+  PnEcForwardToCoreDLQueue:
+    Type: AWS::SQS::Queue
+    Condition: IsConfinfoAndNotProd
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      QueueName: !Sub '${ProjectName}-ext-channels-forward-to-core-DLQ'
+      MessageRetentionPeriod: 1209600
+
 
 Outputs:
   NotificationProgressDynamoTableName:
@@ -203,3 +217,13 @@ Outputs:
   StartReworkRequestLambdaName:
     Condition: IsCoreAndNotProd
     Value: !Sub ${ProjectName}-external-channels-start-rework-request
+
+  PnEcForwardToCoreDLQueueARN:
+    Condition: IsConfinfoAndNotProd
+    Description: "ARN della DLQ per il forwarding eventi verso Core EventBus"
+    Value: !GetAtt PnEcForwardToCoreDLQueue.Arn
+
+  PnEcForwardToCoreDLQueueName:
+    Condition: IsConfinfoAndNotProd
+    Description: "Nome della DLQ per il forwarding eventi verso Core EventBus"
+    Value: !GetAtt PnEcForwardToCoreDLQueue.QueueName

@@ -243,6 +243,15 @@ Parameters:
     Type: String
     Description: 'ExternalChannelsStartRework queue URL'
 
+  PnCoreTargetEventBusArn:
+    Type: String
+    Description: 'ARN del Event Bus target in account Core'
+    Default: ''
+
+  PnEcDLQueueArnForCoreTargetEventBus:
+    Type: String
+    Description: 'ARN della DLQ per eventi non consegnati al Core EventBus'
+
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
