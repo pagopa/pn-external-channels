@@ -33,5 +33,6 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
+    "CoreAccountId": "830192246553",
     "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:73d0b5a5ac3b58b573787c032d5b9ea266d68868141dd3d4a69b9cf5ce0c53d4"
 }

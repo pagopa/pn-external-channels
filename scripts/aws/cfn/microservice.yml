@@ -203,6 +203,11 @@ Parameters:
     Type: String
     Description: 'Ocr output queue ARN'
 
+  CoreAccountId:
+    Type: String
+    Description: 'Ocr output queue ARN'
+    Default: ''
+
   MockSequenceParameterNames:
     Type: String
     Description: 'Lista nomi parameter store del mock'
@@ -247,10 +252,6 @@ Parameters:
     Type: String
     Description: 'ARN del Event Bus target in account Core'
     Default: ''
-
-  PnEcDLQueueArnForCoreTargetEventBus:
-    Type: String
-    Description: 'ARN della DLQ per eventi non consegnati al Core EventBus'
 
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
@@ -482,7 +483,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'events:PutEvents'
-                Resource: !Ref PnCoreTargetEventBusArn
+                Resource: !Sub arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}
 
   # EventBridge Rule on pn-ConfinfoEventBus forwarding to Core EventBus
   PnEcEventRuleForwardToCore:
@@ -500,11 +501,11 @@ Resources:
           - !Ref AWS::Region
       State: 'ENABLED'
       Targets:
-        - Arn: !Ref PnCoreTargetEventBusArn
+        - Arn: !Sub arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}
           Id: 'PnExternalChannelsForwardToCoreTarget'
           RoleArn: !GetAtt PnEcRoleForwardToCore.Arn
           DeadLetterConfig:
-            Arn: !Ref PnEcDLQueueArnForCoreTargetEventBus
+            Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-ConfinfoEventBus-DLQ
 
 
   EventBusEnqueueRole:
