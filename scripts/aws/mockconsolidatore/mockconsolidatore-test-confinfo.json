@@ -1,5 +1,8 @@
 {
     "ProjectName":"pn",
+    "EnvironmentName": "confinfo",
+    "EnvironmentType": "test",
+    "CoreAccountId": "151559006927",
     "CorsAllowedDomains":"http://localhost:8090",
     "MicroserviceNumber":"84",
     "TemplateBucketBaseUrl":"",
@@ -24,6 +27,7 @@
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
     "PnCoreEventBusName": "pn-CoreEventBus",
+    "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",

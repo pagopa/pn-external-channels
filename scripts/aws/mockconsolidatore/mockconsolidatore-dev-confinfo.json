@@ -2,6 +2,7 @@
     "ProjectName":"pn",
     "EnvironmentName": "confinfo",
     "EnvironmentType": "dev",
+    "CoreAccountId": "830192246553",
     "CorsAllowedDomains":"http://localhost:8090",
     "MicroserviceNumber":"84",
     "TemplateBucketBaseUrl":"",
@@ -36,6 +37,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "CoreAccountId": "830192246553",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:3c5e974f06974a8a0b3b9c38c807e45fd0e01c6078a388547f8cd517d02892d8"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:c90e0260b82fc6cd601273cf9b3387625defbbcee6193f8af458a7194adcc599"
 }
