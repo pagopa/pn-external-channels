@@ -419,7 +419,7 @@ Resources:
     Type: AWS::IAM::Policy
     Condition: IsCoreAndNotProd
     Properties:
-      PolicyName: !Sub ${ProjectName}-StartReworkRequestLambdaPolicy
+      PolicyName: !Sub '${ProjectName}-StartReworkRequestLambdaPolicy'
       Roles:
         - !Ref StartReworkRequestLambdaRole
       PolicyDocument:
@@ -446,7 +446,7 @@ Resources:
         detail-type: [ "ExternalChannelReworkEvent" ]
       Targets:
         - Arn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger'
-          Id: !Sub ${ProjectName}-Logger-ExtChToDeliveryPush
+          Id: !Sub '${ProjectName}-Logger-ExtChToDeliveryPush'
           InputTransformer:
             InputPathsMap:
               "timestamp": "$.time"
@@ -503,11 +503,11 @@ Resources:
           - !Ref AWS::Region
       State: 'ENABLED'
       Targets:
-        - Arn: !Sub arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}
+        - Arn: !Sub 'arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}'
           Id: 'PnExternalChannelsForwardToCoreTarget'
           RoleArn: !GetAtt PnEcRoleForwardToCore.Arn
           DeadLetterConfig:
-            Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-ConfinfoEventBus-DLQ
+            Arn: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-ConfinfoEventBus-DLQ'
 
 
   EventBusEnqueueRole:
@@ -525,7 +525,7 @@ Resources:
                 aws:SourceAccount: !Ref AWS::AccountId
         Version: '2012-10-17'
       Policies:
-        - PolicyName: !Sub ${ProjectName}-external-channels-eventBusRuleLambdaPolicy
+        - PolicyName: !Sub '${ProjectName}-external-channels-eventBusRuleLambdaPolicy'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -534,7 +534,7 @@ Resources:
                   - lambda:InvokeFunction
                 Effect: Allow
                 Resource:
-                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
+                  - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger'
               - Sid: putEvents
                 Action:
                   - sqs:ChangeMessageVisibility
@@ -572,8 +572,3 @@ Resources:
               - "SQS:SendMessage"
             Resource:
               - !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
-
-  PnEcEventRuleForwardToCoreArn:
-    Condition: IsConfinfoAndNotProd
-    Description: 'ARN della regola di forwarding verso Core EventBus'
-    Value: !GetAtt PnEcEventRuleForwardToCore.Arn
