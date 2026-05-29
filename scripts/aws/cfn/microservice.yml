@@ -246,8 +246,12 @@ Parameters:
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
+  IsConfinfoAccount: !Equals [ !Ref EnvironmentName , 'confinfo' ]
   IsCoreAndNotProd: !And
     - !Condition IsCoreAccount
+    - !Condition IsNotProdAccount
+  IsConfinfoAndNotProd: !And
+    - !Condition IsConfinfoAccount
     - !Condition IsNotProdAccount
 
 Resources:
@@ -297,7 +301,6 @@ Resources:
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         TaskRoleManagedPolicyArn: !Ref ExternalChannelsMicroserviceTaskManagedPolicy
         LogAlarmStrategyV1: "-"
-
 
   ExternalChannelsMicroserviceTaskManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -449,6 +452,52 @@ Resources:
           DeadLetterConfig:
             Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ
 
+  # IAM Role for EventBridge rule to forward events to Core EventBus (cross-account)
+  PnEcRoleForwardToCore:
+    Type: AWS::IAM::Role
+    Condition: IsConfinfoAndNotProd
+    Properties:
+      RoleName: !Sub '${ProjectName}-ext-channels-forward-to-core-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: PutEventsOnCoreEventBus
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'events:PutEvents'
+                Resource: !Ref PnCoreTargetEventBusArn
+
+  # EventBridge Rule on pn-ConfinfoEventBus forwarding to Core EventBus
+  PnEcEventRuleForwardToCore:
+    Type: AWS::Events::Rule
+    Condition: IsConfinfoAndNotProd
+    Properties:
+      EventBusName: !Ref PnConfInfoEventBusName
+      Description: 'Rule forwarding External Channels events from Confinfo EventBus to Core EventBus'
+      EventPattern:
+        source:
+          - 'EXTERNAL CHANNELS RESTART'
+        account:
+          - !Ref AWS::AccountId
+        region:
+          - !Ref AWS::Region
+      State: 'ENABLED'
+      Targets:
+        - Arn: !Ref PnCoreTargetEventBusArn
+          Id: 'PnExternalChannelsForwardToCoreTarget'
+          RoleArn: !GetAtt PnEcRoleForwardToCore.Arn
+          DeadLetterConfig:
+            Arn: !Ref PnEcDLQueueArnForCoreTargetEventBus
+
+
   EventBusEnqueueRole:
     Type: AWS::IAM::Role
     Condition: IsCoreAndNotProd
@@ -511,3 +560,8 @@ Resources:
               - "SQS:SendMessage"
             Resource:
               - !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
+
+  PnEcEventRuleForwardToCoreArn:
+    Condition: IsConfinfoAndNotProd
+    Description: 'ARN della regola di forwarding verso Core EventBus'
+    Value: !GetAtt PnEcEventRuleForwardToCore.Arn
