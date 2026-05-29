@@ -339,6 +339,7 @@ Resources:
               - events:PutEvents
             Resource:
               - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnCoreEventBusName}'
+              - !Sub 'arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/${PnConfInfoEventBusName}'
           - Effect: Allow
             Action:
               - ssm:GetParameter
