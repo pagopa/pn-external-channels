@@ -1,5 +1,7 @@
 {
     "ProjectName":"pn",
+    "EnvironmentName": "confinfo",
+    "EnvironmentType": "dev",
     "CorsAllowedDomains":"http://localhost:8090",
     "MicroserviceNumber":"84",
     "TemplateBucketBaseUrl":"",

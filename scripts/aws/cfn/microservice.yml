@@ -250,7 +250,7 @@ Parameters:
     Type: String
     Description: 'ExternalChannelsStartRework queue URL'
 
- 
+
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
   IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
@@ -297,6 +297,8 @@ Resources:
         ContainerEnvEntry19: !Sub 'PN_EXTERNALCHANNELS_TOPICS_OCRINPUTS=${MockOcrInputsQueueName}'
         ContainerEnvEntry20: !Sub 'PN_EXTERNALCHANNELS_MOCKSEQUENCEPARAMETERNAMES=${MockSequenceParameterNames}'
         ContainerEnvEntry21: !Sub 'PN_EXTERNALCHANNELS_CONFINFOEVENTBUSNAME=${PnConfInfoEventBusName}'
+        ContainerEnvEntry22: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTNAME=${EnvironmentName}'
+        ContainerEnvEntry23: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTTYPE=${EnvironmentType}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
