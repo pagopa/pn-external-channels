@@ -95,10 +95,12 @@ Parameters:
   PnCoreEventBusName:
     Type: String
     Description: "Name of the event bus used to redirect events from external channel to core services"
+    Default: 'pn-CoreEventBus'
 
   PnConfInfoEventBusName:
     Type: String
     Description: "Name of the event bus used to redirect events from external channel to conf services"
+    Default: 'pn-ConfinfoEventBus'
 
   ExternalChannels2PaperChannelQueueName:
     Type: String
@@ -443,7 +445,7 @@ Resources:
       EventPattern:
         detail-type: [ "ExternalChannelReworkEvent" ]
       Targets:
-        - Arn: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger
+        - Arn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:PnCoreEventBusMatchedEventLogger'
           Id: !Sub ${ProjectName}-Logger-ExtChToDeliveryPush
           InputTransformer:
             InputPathsMap:
@@ -460,7 +462,7 @@ Resources:
           Arn: !Ref ExternalChannelsToStartReworkRequestLambdaQueueARN
           InputPath: $.detail
           DeadLetterConfig:
-            Arn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ
+            Arn: !Sub 'arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:pn-CoreEventBus-DLQ'
 
   # IAM Role for EventBridge rule to forward events to Core EventBus (cross-account)
   PnEcRoleForwardToCore:
@@ -483,7 +485,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'events:PutEvents'
-                Resource: !Sub arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}
+                Resource: !Sub 'arn:aws:events:${AWS::Region}:${CoreAccountId}:event-bus/${PnCoreEventBusName}'
 
   # EventBridge Rule on pn-ConfinfoEventBus forwarding to Core EventBus
   PnEcEventRuleForwardToCore:
