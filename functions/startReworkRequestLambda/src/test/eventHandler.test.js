@@ -6,7 +6,6 @@ describe("handleEvent", () => {
   let originalConsoleLog;
   let originalConsoleError;
 
-  // Alias per compatibilita' con test() usato nel file originale
   const test = it;
 
   beforeEach(() => {
@@ -32,6 +31,7 @@ describe("handleEvent", () => {
 
   test("should skip event if requestType is not RESTART", async () => {
     let fetchCalled = false;
+
     global.fetch = async () => {
       fetchCalled = true;
       return {};
@@ -44,11 +44,21 @@ describe("handleEvent", () => {
       requestType: "OTHER"
     };
 
-    const result = await handleEvent(event);
+    const result = await handleEvent({
+      Records: [
+        {
+          body: JSON.stringify(event)
+        }
+      ]
+    });
 
     assert.deepStrictEqual(result, {
-      handled: false,
-      reason: "Request type 'OTHER' not handled"
+      results: [
+        {
+          handled: false,
+          reason: "Request type 'OTHER' not handled"
+        }
+      ]
     });
 
     assert.strictEqual(fetchCalled, false);
@@ -61,6 +71,7 @@ describe("handleEvent", () => {
     global.fetch = async (url, options) => {
       calledUrl = url;
       calledOptions = options;
+
       return {
         ok: true,
         json: async () => ({ result: "OK" })
@@ -74,7 +85,13 @@ describe("handleEvent", () => {
       requestType: "RESTART"
     };
 
-    const result = await handleEvent(event);
+    const result = await handleEvent({
+      Records: [
+        {
+          body: JSON.stringify(event)
+        }
+      ]
+    });
 
     assert.strictEqual(
       calledUrl,
@@ -94,9 +111,13 @@ describe("handleEvent", () => {
     });
 
     assert.deepStrictEqual(result, {
-      handled: true,
-      requestType: "RESTART",
-      response: { result: "OK" }
+      results: [
+        {
+          handled: true,
+          requestType: "RESTART",
+          response: { result: "OK" }
+        }
+      ]
     });
   });
 
@@ -115,7 +136,14 @@ describe("handleEvent", () => {
     };
 
     await assert.rejects(
-      async () => handleEvent(event),
+      async () =>
+        handleEvent({
+          Records: [
+            {
+              body: JSON.stringify(event)
+            }
+          ]
+        }),
       /REST call failed with status 500/
     );
   });
@@ -135,12 +163,22 @@ describe("handleEvent", () => {
       requestType: "RESTART"
     };
 
-    const result = await handleEvent(event);
+    const result = await handleEvent({
+      Records: [
+        {
+          body: JSON.stringify(event)
+        }
+      ]
+    });
 
     assert.deepStrictEqual(result, {
-      handled: true,
-      requestType: "RESTART",
-      response: null
+      results: [
+        {
+          handled: true,
+          requestType: "RESTART",
+          response: null
+        }
+      ]
     });
   });
 });
