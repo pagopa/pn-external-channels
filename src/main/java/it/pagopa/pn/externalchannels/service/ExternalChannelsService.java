@@ -272,9 +272,12 @@ public class ExternalChannelsService {
         boolean isRestartSplittedReceiverAddress = false;
         if(matches && !matcher.group(1).contains(DISCOVERED_MARKER)) {
             isRestartSplittedReceiverAddress = true;
+            log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
             if (isReworkRequestId) {
+                log.info("Rework requestId detected for requestId={}, receiverDigitalAddress={}", requestId, matcher.group(3));
                 receiverDigitalAddress = matcher.group(3);
             } else  {
+                log.info("Rework requestId not detected for requestId={}, receiverDigitalAddress={}", requestId, matcher.group(1));
                 receiverDigitalAddress = matcher.group(1);
             }
         }
