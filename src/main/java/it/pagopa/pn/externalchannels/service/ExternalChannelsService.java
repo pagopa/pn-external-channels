@@ -53,8 +53,7 @@ public class ExternalChannelsService {
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
 
     // ora l'indirizzo può arrivare in maiuscolo
-    private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
-
+    private static final String SEQUENCE_REGEXP = "(?i)^.*?@sequence\\.";
     private static final String DISCOVERED_MARKER = "@discovered";
 
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
@@ -274,10 +273,8 @@ public class ExternalChannelsService {
             isRestartSplittedReceiverAddress = true;
             log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
             if (isReworkRequestId) {
-                log.info("Rework requestId detected for requestId={}, receiverDigitalAddress={}", requestId, matcher.group(3));
                 receiverDigitalAddress = matcher.group(3);
             } else  {
-                log.info("Rework requestId not detected for requestId={}, receiverDigitalAddress={}", requestId, matcher.group(1));
                 receiverDigitalAddress = matcher.group(1);
             }
         }
