@@ -262,15 +262,6 @@ public class ExternalChannelsService {
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
 
-        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
-        boolean matches = matcher.matches();
-        if (isReworkRequestId && matches) {
-            receiverDigitalAddress = matcher.group(3);
-        } else {
-            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
-        }
-
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
@@ -306,6 +297,20 @@ public class ExternalChannelsService {
             receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
         }
 
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        boolean isRestartSequence = false;
+        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverClean);
+        boolean matches = matcher.matches();
+        if(matches){
+            if (isReworkRequestId) {
+                receiverClean = matcher.group(3);
+            } else {
+                receiverClean = matcher.group(1);
+            }
+            isRestartSequence = true;
+        }
+
+
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
 
         for (String timeCodeCouple : timeCodeCoupleArray) {
@@ -329,7 +334,7 @@ public class ExternalChannelsService {
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 
-        if(matches){
+        if(matches && isRestartSequence){
             log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
             if (!isReworkRequestId) {
                 notificationProgress.setSendRestartEvent(Boolean.TRUE);
