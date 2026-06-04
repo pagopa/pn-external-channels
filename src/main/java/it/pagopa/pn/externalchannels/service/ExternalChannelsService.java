@@ -268,6 +268,7 @@ public class ExternalChannelsService {
         boolean isReworkRequestId = requestId.contains(CONST_REWORK);
         Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
         boolean matches = matcher.matches();
+        log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
         boolean isRestartSplittedReceiverAddress = false;
         if(matches && !matcher.group(1).contains(DISCOVERED_MARKER)) {
             isRestartSplittedReceiverAddress = true;
