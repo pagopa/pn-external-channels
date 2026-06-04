@@ -266,7 +266,7 @@ public class ExternalChannelsService {
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
         boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
+        Matcher matcher = Pattern.compile("^(.*?)@restart([01])(.*)$").matcher(receiverDigitalAddress);
         boolean matches = matcher.matches();
         log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
         boolean isRestartSplittedReceiverAddress = false;
@@ -280,6 +280,7 @@ public class ExternalChannelsService {
         }
 
         String receiverClean = receiverDigitalAddress.replaceFirst(SEQUENCE_REGEXP, "");
+        log.info("Clean receiver address is {} for requestId: {}", receiverClean, requestId);
 
         // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
