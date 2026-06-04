@@ -262,20 +262,23 @@ public class ExternalChannelsService {
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
 
-        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
-        boolean matches = matcher.matches();
-        if (isReworkRequestId && matches) {
-            receiverDigitalAddress = matcher.group(3);
-        } else {
-            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
-        }
-
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
-        String receiverClean = receiverDigitalAddress
-                .replaceFirst(SEQUENCE_REGEXP, "");
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
+        boolean matches = matcher.matches();
+        boolean isRestartSplittedReceiverAddress = false;
+        if(matches && !receiverDigitalAddress.contains(DISCOVERED_MARKER)) {
+            isRestartSplittedReceiverAddress = true;
+            if (isReworkRequestId) {
+                receiverDigitalAddress = matcher.group(3);
+            } else  {
+                receiverDigitalAddress = matcher.group(1);
+            }
+        }
+
+        String receiverClean = receiverDigitalAddress.replaceFirst(SEQUENCE_REGEXP, "");
 
         // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
@@ -329,7 +332,7 @@ public class ExternalChannelsService {
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 
-        if(matches){
+        if(isRestartSplittedReceiverAddress){
             log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
             if (!isReworkRequestId) {
                 notificationProgress.setSendRestartEvent(Boolean.TRUE);
