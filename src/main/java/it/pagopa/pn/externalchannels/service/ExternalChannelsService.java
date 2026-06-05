@@ -311,7 +311,7 @@ public class ExternalChannelsService {
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
             
-            receiverClean = receiverClean.substring(0, receiverClean.indexOf(discoveredIndex));
+            receiverClean = receiverClean.substring(0, discoveredIndex);
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
