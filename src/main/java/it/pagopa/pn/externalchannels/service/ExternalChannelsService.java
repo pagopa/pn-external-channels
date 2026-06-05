@@ -304,7 +304,9 @@ public class ExternalChannelsService {
         if(receiverClean.toLowerCase(Locale.ROOT).contains(DISCOVERED_MARKER)) {
             int discoveredIndex = receiverClean.toLowerCase(Locale.ROOT).indexOf(DISCOVERED_MARKER);
             String discoveredSequence = receiverClean.substring(discoveredIndex);
-            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence").replace(DISCOVERED_MARKER.toUpperCase(Locale.ROOT), "@sequence");
+            discoveredSequence = discoveredSequence.replaceFirst(
+                    "(?i)" + Pattern.quote(DISCOVERED_MARKER),
+                    "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
