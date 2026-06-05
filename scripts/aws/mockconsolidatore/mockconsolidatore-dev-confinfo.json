@@ -27,7 +27,7 @@
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "PnCoreEventBusName": "pn-CoreEventBus",
     "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
-    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
+    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4,MapExternalChannelMockSequence5",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",

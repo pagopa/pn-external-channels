@@ -25,7 +25,7 @@
     "ExternalChannels2UserAttributesQueueARN":"arn:aws:sqs:eu-south-1:956319218727:pn-mockconsolidatore-dummyqueue",
     "OcrOutputsQueueName": "pn-mockconsolidatore-dummyqueue",
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
-    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
+    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4,MapExternalChannelMockSequence5",
     "PnCoreEventBusName": "pn-CoreEventBus",
     "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
     "CacheExpireDays":"90",
