@@ -269,7 +269,7 @@ public class ExternalChannelsService {
         boolean matches = matcher.matches();
         log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
         boolean isRestartSplittedReceiverAddress = false;
-        if(matches && !matcher.group(1).contains(DISCOVERED_MARKER) && !matcher.group(1).contains(DISCOVERED_MARKER.toUpperCase())) {
+        if(matches && (isReworkRequestId || (!matcher.group(1).contains(DISCOVERED_MARKER) && !matcher.group(1).contains(DISCOVERED_MARKER.toUpperCase())))) {
             isRestartSplittedReceiverAddress = true;
             log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
             if (isReworkRequestId) {
