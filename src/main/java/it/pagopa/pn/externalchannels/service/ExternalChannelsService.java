@@ -265,11 +265,11 @@ public class ExternalChannelsService {
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
         boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart([01])(.*)$").matcher(receiverDigitalAddress);
+        Matcher matcher = Pattern.compile("(?i)^(.*?)@restart([01])(.*)$").matcher(receiverDigitalAddress);
         boolean matches = matcher.matches();
         log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
         boolean isRestartSplittedReceiverAddress = false;
-        if(matches && !matcher.group(1).contains(DISCOVERED_MARKER)) {
+        if(matches && !matcher.group(1).contains(DISCOVERED_MARKER) && !matcher.group(1).contains(DISCOVERED_MARKER.toUpperCase())) {
             isRestartSplittedReceiverAddress = true;
             log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
             if (isReworkRequestId) {
@@ -301,14 +301,15 @@ public class ExternalChannelsService {
             receiverClean = getSequenceOfRetry(receiverClean,requestId);
         }
 
-        if(receiverClean.contains(DISCOVERED_MARKER)) {
-            String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
+        if(receiverClean.toLowerCase(Locale.ROOT).contains(DISCOVERED_MARKER)) {
+            int discoveredIndex = receiverClean.toLowerCase(Locale.ROOT).indexOf(DISCOVERED_MARKER);
+            String discoveredSequence = receiverClean.substring(discoveredIndex);
             discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence").replace(DISCOVERED_MARKER.toUpperCase(Locale.ROOT), "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
             
-            receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
+            receiverClean = receiverClean.substring(0, receiverClean.indexOf(discoveredIndex));
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
