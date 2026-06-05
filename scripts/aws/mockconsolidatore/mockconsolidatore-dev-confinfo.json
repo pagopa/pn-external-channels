@@ -27,7 +27,7 @@
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "PnCoreEventBusName": "pn-CoreEventBus",
     "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
-    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
+    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4,MapExternalChannelMockSequence5",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
@@ -37,5 +37,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:b3f89374489637122161687ec7de5cf4a97a1bf03e26724ba443c19e824d4eb4"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:1c032c2d8e57c4d293ea0df5cabec15b03c6fefc4cbf4c02a40237b4005769de"
 }

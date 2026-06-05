@@ -53,8 +53,7 @@ public class ExternalChannelsService {
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
 
     // ora l'indirizzo può arrivare in maiuscolo
-    private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
-
+    private static final String SEQUENCE_REGEXP = "(?i)^.*?@sequence\\.";
     private static final String DISCOVERED_MARKER = "@discovered";
 
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
@@ -262,20 +261,26 @@ public class ExternalChannelsService {
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
 
-        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
-        Matcher matcher = Pattern.compile("^(.*?)@restart_([01])(.*)$").matcher(receiverDigitalAddress);
-        boolean matches = matcher.matches();
-        if (isReworkRequestId && matches) {
-            receiverDigitalAddress = matcher.group(3);
-        } else {
-            receiverDigitalAddress = matches ? matcher.group(1) : receiverDigitalAddress;
-        }
-
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
-        String receiverClean = receiverDigitalAddress
-                .replaceFirst(SEQUENCE_REGEXP, "");
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("(?i)^(.*?)@restart([01])(.*)$").matcher(receiverDigitalAddress);
+        boolean matches = matcher.matches();
+        log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
+        boolean isRestartSplittedReceiverAddress = false;
+        if(matches && (isReworkRequestId || (!matcher.group(1).contains(DISCOVERED_MARKER) && !matcher.group(1).contains(DISCOVERED_MARKER.toUpperCase())))) {
+            isRestartSplittedReceiverAddress = true;
+            log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
+            if (isReworkRequestId) {
+                receiverDigitalAddress = matcher.group(3);
+            } else  {
+                receiverDigitalAddress = matcher.group(1);
+            }
+        }
+
+        String receiverClean = receiverDigitalAddress.replaceFirst(SEQUENCE_REGEXP, "");
+        log.info("Clean receiver address is {} for requestId: {}", receiverClean, requestId);
 
         // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
@@ -296,14 +301,17 @@ public class ExternalChannelsService {
             receiverClean = getSequenceOfRetry(receiverClean,requestId);
         }
 
-        if(receiverClean.contains(DISCOVERED_MARKER)) {
-            String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
-            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence").replace(DISCOVERED_MARKER.toUpperCase(Locale.ROOT), "@sequence");
+        if(receiverClean.toLowerCase(Locale.ROOT).contains(DISCOVERED_MARKER)) {
+            int discoveredIndex = receiverClean.toLowerCase(Locale.ROOT).indexOf(DISCOVERED_MARKER);
+            String discoveredSequence = receiverClean.substring(discoveredIndex);
+            discoveredSequence = discoveredSequence.replaceFirst(
+                    "(?i)" + Pattern.quote(DISCOVERED_MARKER),
+                    "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
             
-            receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
+            receiverClean = receiverClean.substring(0, discoveredIndex);
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
@@ -329,7 +337,7 @@ public class ExternalChannelsService {
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
         }
 
-        if(matches){
+        if(isRestartSplittedReceiverAddress){
             log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
             if (!isReworkRequestId) {
                 notificationProgress.setSendRestartEvent(Boolean.TRUE);
