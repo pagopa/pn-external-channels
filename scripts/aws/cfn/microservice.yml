@@ -217,6 +217,7 @@ Parameters:
   StartReworkRequestLambdaName:
     Type: String
     Description: "StartReworkRequestLambdaName"
+    Default: ''
 
   StartReworkRequestLambdaRuntime:
     Type: String
@@ -245,10 +246,12 @@ Parameters:
   ExternalChannelsToStartReworkRequestLambdaQueueARN:
     Type: String
     Description: 'ExternalChannelsStartRework queue ARN'
+    Default: ''
 
   ExternalChannelsToStartReworkRequestLambdaQueueURL:
     Type: String
     Description: 'ExternalChannelsStartRework queue URL'
+    Default: ''
 
 
 Conditions:
