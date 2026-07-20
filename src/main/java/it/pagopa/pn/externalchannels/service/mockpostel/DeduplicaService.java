@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class DeduplicaService {
 
+    public static final String CAP_95059 = "95059";
     private final AddressUtils addressUtils;
 
     public Mono<DeduplicaResponse> deduplica(DeduplicaRequest request) {
@@ -62,7 +63,9 @@ public class DeduplicaService {
         }
 
         boolean areEquals = addressUtils.compareAddress(masterIn, slaveIn, isItalian);
-        if (areEquals) {
+        boolean isSuccessful = areEquals && !CAP_95059.equals(slaveIn.getCap());
+
+        if (isSuccessful) {
             setSuccessfulResult(risultatoDeduplica);
         } else {
             setFailedResult(risultatoDeduplica);
