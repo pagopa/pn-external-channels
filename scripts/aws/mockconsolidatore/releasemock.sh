@@ -40,7 +40,10 @@ aws $_AWSCLI_CMD_PREFIX \
     --stack-name $_STACK_INFRA \
     --template-file "$_WORKDIR/storage.yml" \
     --capabilities CAPABILITY_NAMED_IAM \
-    --parameter-overrides ProjectName=pn \
+    --parameter-overrides \
+         ProjectName=pn \
+         EnvironmentName=confinfo \
+         EnvironmentType="$_ENV" \
     MicroserviceNumber=0 \
     TemplateBucketBaseUrl=- \
     Version=-

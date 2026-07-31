@@ -2,6 +2,7 @@ package it.pagopa.pn.externalchannels.middleware;
 
 import it.pagopa.pn.externalchannels.dto.NotificationProgress;
 import it.pagopa.pn.externalchannels.dto.OcrOutputMessage;
+import it.pagopa.pn.externalchannels.dto.ReworkRequest;
 import it.pagopa.pn.externalchannels.event.OcrEvent;
 import it.pagopa.pn.externalchannels.event.PaperChannelEvent;
 import it.pagopa.pn.externalchannels.model.SingleStatusUpdate;
@@ -40,6 +41,12 @@ public class ProducerHandler {
         OcrEvent event = EventMessageUtil.buildOcrEvent(ocrOutputMessage);
         ocrSendClient.sendOcr(event);
         log.debug("[{}] Message sent to ocr", ocrOutputMessage.getCommandId());
+    }
+
+    public void sendToQueue(ReworkRequest reworkRequest) {
+        log.info("[{}] Message to send to EventBridge to start new rework request for attempt: {} and recIndex: {}", reworkRequest.getIun(), reworkRequest.getAttemptId(), reworkRequest.getRecIndex());
+        eventBridgeSendClient.sendStartReworkEvent(reworkRequest);
+        log.debug("[{}] Message sent to EventBridge to start new rework request", reworkRequest.getIun());
     }
 
 }

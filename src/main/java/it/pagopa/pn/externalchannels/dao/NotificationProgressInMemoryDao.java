@@ -78,12 +78,6 @@ public class NotificationProgressInMemoryDao implements NotificationProgressDao 
     }
 
     @Override
-    public boolean iunWithRecipientAlreadyExists(String iun, String recipient) {
-        var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
-        return iunNumberOfAttempts.containsKey(iunRecipientPair);
-    }
-
-    @Override
     public void incrementNumberOfAttempt(String iun, String recipient) {
         var iunRecipientPair = IunRecipientPair.builder().iun(iun).recipient(recipient).build();
         iunNumberOfAttempts.merge(iunRecipientPair, 1, Integer::sum);

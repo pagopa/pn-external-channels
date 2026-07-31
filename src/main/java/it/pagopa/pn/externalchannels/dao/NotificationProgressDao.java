@@ -12,8 +12,6 @@ public interface NotificationProgressDao {
     Optional<NotificationProgress> findByIunAndRecipient(String iun, String recipient);
     void delete(String iun, String recipient);
 
-    boolean iunWithRecipientAlreadyExists(String iun, String recipient);
-
     void incrementNumberOfAttempt(String iun, String recipient);
 
     Integer getNumberOfAttemptsByIun(String iun, String recipient);

@@ -20,8 +20,23 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
+  EnvironmentName:
+    Type: String
+    Description: 'Evn name'
+    Default: 'core'
+
+  EnvironmentType:
+    Type: String
+    Description: 'Evn type'
+
+
 Conditions:
   Never: !Equals [ 'true', 'false' ]
+  IsNotProdAccount: !Not [ !Equals [ !Ref EnvironmentType, prod ] ]
+  IsCoreAccount: !Equals [ !Ref EnvironmentName , 'core' ]
+  IsCoreAndNotProd: !And
+    - !Condition IsCoreAccount
+    - !Condition IsNotProdAccount
 
 # dummy (null) resource, never created
 Resources:
@@ -64,6 +79,18 @@ Resources:
       QueueName: "pn-mock_ocr_inputs"
       VisibilityTimeout: 60
       DelaySeconds: 1
+
+  ExternalChannelsToStartReworkRequestLambdaQueue:
+    Type: AWS::CloudFormation::Stack
+    Condition: IsCoreAndNotProd
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/sqs-queue.yaml"
+      Parameters:
+        QueueName: "pn-external_channels_to_start_rework_request_lambda"
+        VisibilityTimeout: 60
+        DelaySeconds: 720
 
   VerificationCodeTable:
     Type: AWS::DynamoDB::Table
@@ -161,3 +188,18 @@ Outputs:
       Fn::GetAtt:
         - "MockOcrInputsQueue"
         - "QueueName"
+
+  ExternalChannelsToStartReworkRequestLambdaQueueURL:
+    Condition: IsCoreAndNotProd
+    Description: "URL of new Amazon SQS Queue"
+    Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueURL
+
+  ExternalChannelsToStartReworkRequestLambdaQueueARN:
+    Condition: IsCoreAndNotProd
+    Description: "ARN of new AmazonSQS Queue"
+    Value: !GetAtt ExternalChannelsToStartReworkRequestLambdaQueue.Outputs.QueueARN
+
+
+  StartReworkRequestLambdaName:
+    Condition: IsCoreAndNotProd
+    Value: !Sub ${ProjectName}-external-channels-start-rework-request

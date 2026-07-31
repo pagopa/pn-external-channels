@@ -34,6 +34,7 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
     public static final String ATTRIBUTE_NOT_EXISTS = "attribute_not_exists";
 
     private static final String ATTEMPT_PK_PREFIX = "ATTEMPT##";
+    public static final String RESTART = "RESTART";
 
     private final DynamoDbTable<NotificationProgress> dynamoDbTable;
 
@@ -46,30 +47,31 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
     @Override
     public boolean insert(NotificationProgress notificationProgress) {
 
-        String expression = String.format(
-                "%s(%s) AND %s(%s)",
-                ATTRIBUTE_NOT_EXISTS,
-                NotificationProgress.COL_IUN,
-                ATTRIBUTE_NOT_EXISTS,
-                NotificationProgress.COL_DESTINATION_ADDRESS
-        );
+        PutItemEnhancedRequest.Builder<NotificationProgress> builder = PutItemEnhancedRequest.builder(NotificationProgress.class)
+                .item(notificationProgress);
 
-        Expression conditionExpressionPut = Expression.builder()
-                .expression(expression)
-                .build();
+        if (!notificationProgress.getDestinationAddress().contains(RESTART)) {
+            String expression = String.format(
+                    "%s(%s) AND %s(%s)",
+                    ATTRIBUTE_NOT_EXISTS,
+                    NotificationProgress.COL_IUN,
+                    ATTRIBUTE_NOT_EXISTS,
+                    NotificationProgress.COL_DESTINATION_ADDRESS
+            );
 
 
-        PutItemEnhancedRequest<NotificationProgress> request = PutItemEnhancedRequest.builder( NotificationProgress.class )
-                .item(notificationProgress )
-                .conditionExpression( conditionExpressionPut )
-                .build();
+            Expression conditionExpressionPut = Expression.builder()
+                    .expression(expression)
+                    .build();
+
+            builder.conditionExpression(conditionExpressionPut);
+        }
 
         try {
-            dynamoDbTable.putItem(request);
+            dynamoDbTable.putItem(builder.build());
             log.info("NotificationProgress saved: {}", notificationProgress);
             return true;
-        }
-        catch (ConditionalCheckFailedException ex) {
+        } catch (ConditionalCheckFailedException ex) {
             log.warn("[{}] NotificationProgress did not insert because already exists for recipient {}", notificationProgress.getIun(),
                     notificationProgress.getDestinationAddress());
             return false;
@@ -100,7 +102,7 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
                 .sortValue(recipient)
                 .build());
 
-        if(item == null) {
+        if (item == null) {
             return Optional.empty();
         }
 
@@ -116,16 +118,6 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
     }
 
     @Override
-    public boolean iunWithRecipientAlreadyExists(String iun, String recipient) {
-        String pk = ATTEMPT_PK_PREFIX + iun;
-        NotificationProgress item = dynamoDbTable.getItem(Key.builder()
-                .partitionValue(pk)
-                .sortValue(recipient)
-                .build());
-        return item != null;
-    }
-
-    @Override
     public void incrementNumberOfAttempt(String iun, String recipient) {
         String pk = ATTEMPT_PK_PREFIX + iun;
         NotificationProgress item = dynamoDbTable.getItem(Key.builder()
@@ -133,13 +125,12 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
                 .sortValue(recipient)
                 .build());
 
-        if(item == null) {
+        if (item == null) {
             item = new NotificationProgress();
             item.setIun(pk);
             item.setDestinationAddress(recipient);
             item.setNAttempt(1);
-        }
-        else {
+        } else {
             item.setNAttempt(item.getNAttempt() + 1);
         }
         dynamoDbTable.putItem(item);
@@ -152,7 +143,7 @@ public class NotificationProgressDynamoDao implements NotificationProgressDao {
                 .partitionValue(pk)
                 .sortValue(recipient)
                 .build());
-        if (item==null)
+        if (item == null)
             return 0;
         return item.getNAttempt();
     }

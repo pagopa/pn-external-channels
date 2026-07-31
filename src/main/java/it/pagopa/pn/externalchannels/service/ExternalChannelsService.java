@@ -7,12 +7,10 @@ import it.pagopa.pn.externalchannels.config.aws.EventCodeSequenceParameterConsum
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointDTO;
 import it.pagopa.pn.externalchannels.config.aws.ServiceIdEndpointParameterConsumer;
 import it.pagopa.pn.externalchannels.dao.*;
-import it.pagopa.pn.externalchannels.dto.AdditionalAction;
-import it.pagopa.pn.externalchannels.dto.CodeTimeToSend;
-import it.pagopa.pn.externalchannels.dto.DiscoveredAddressEntity;
-import it.pagopa.pn.externalchannels.dto.NotificationProgress;
+import it.pagopa.pn.externalchannels.dto.*;
 import it.pagopa.pn.externalchannels.mapper.RequestsToReceivedMessagesMapper;
 import it.pagopa.pn.externalchannels.middleware.InternalSendClient;
+import it.pagopa.pn.externalchannels.middleware.ProducerHandler;
 import it.pagopa.pn.externalchannels.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +22,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
 
@@ -31,6 +31,8 @@ import static it.pagopa.pn.externalchannels.dto.NotificationProgress.PROGRESS_OU
 @RequiredArgsConstructor
 @Slf4j
 public class ExternalChannelsService {
+
+    private static final String CONST_REWORK = "REWORK";
 
     private static final String IUN_ALREADY_EXISTS_MESSAGE = "[%s] Iun already inserted!";
 
@@ -51,8 +53,7 @@ public class ExternalChannelsService {
     private static final List<String> FAIL_REQUEST_CODE_PAPER = List.of("CON080", "RECRN002A", "RECRN002B", "RECRN002C");
 
     // ora l'indirizzo può arrivare in maiuscolo
-    private static final String SEQUENCE_REGEXP = "(?i).*@sequence\\.";
-
+    private static final String SEQUENCE_REGEXP = "(?i)^.*?@sequence\\.";
     private static final String DISCOVERED_MARKER = "@discovered";
 
     private final EventCodeSequenceParameterConsumer eventCodeSequenceParameterConsumer;
@@ -71,6 +72,8 @@ public class ExternalChannelsService {
     private final InternalSendClient internalSendClient;
 
     private final ReceivedMessageEntityDaoDynamo receivedMessageEntityDaoDynamo;
+
+    private final ProducerHandler producerHandler;
 
     public void sendDigitalLegalMessage(DigitalNotificationRequest digitalNotificationRequest, String appSourceName) {
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL outputChannel = getOutputQueueFromSource(appSourceName);
@@ -207,6 +210,7 @@ public class ExternalChannelsService {
                                                            NotificationProgress.PROGRESS_OUTPUT_CHANNEL output,
                                                            String outputEndpoint, String outputServiceId, String outputApikey,
                                                            String channel, List<String> failRequests, List<String> okRequests,Optional<String> requestSearched) {
+        log.info("receiverDigitalAddress is {} for requestId: {}", receiverDigitalAddress, requestId);
         NotificationProgress notificationProgress;
         String iun = requestId;
         NotificationProgress.PROGRESS_OUTPUT_CHANNEL userAttributesChannel = NotificationProgress.PROGRESS_OUTPUT_CHANNEL.QUEUE_USER_ATTRIBUTES;
@@ -256,11 +260,27 @@ public class ExternalChannelsService {
     }
 
     public NotificationProgress buildNotificationCustomized(String receiverDigitalAddress, String iun, String requestId,String addressAlias) {
+
         NotificationProgress notificationProgress = new NotificationProgress();
         notificationProgress.setCodeTimeToSendQueue(new LinkedList<>());
 
-        String receiverClean = receiverDigitalAddress
-                .replaceFirst(SEQUENCE_REGEXP, "");
+        boolean isReworkRequestId = requestId.contains(CONST_REWORK);
+        Matcher matcher = Pattern.compile("(?i)^(.*?)@restart([01])(.*)$").matcher(receiverDigitalAddress);
+        boolean matches = matcher.matches();
+        log.info("Check restart sequence for requestId={}, receiverDigitalAddress={}, matches={}", requestId, receiverDigitalAddress, matches);
+        boolean isRestartSplittedReceiverAddress = false;
+        if(matches && (isReworkRequestId || (!matcher.group(1).contains(DISCOVERED_MARKER) && !matcher.group(1).contains(DISCOVERED_MARKER.toUpperCase())))) {
+            isRestartSplittedReceiverAddress = true;
+            log.info("Check restart sequence for requestId={}, isRestartSplittedReceiverAddress={}", requestId, isRestartSplittedReceiverAddress);
+            if (isReworkRequestId) {
+                receiverDigitalAddress = matcher.group(3);
+            } else  {
+                receiverDigitalAddress = matcher.group(1);
+            }
+        }
+
+        String receiverClean = receiverDigitalAddress.replaceFirst(SEQUENCE_REGEXP, "");
+        log.info("Clean receiver address is {} for requestId: {}", receiverClean, requestId);
 
         // per supportare le sequence, ora che è stata aggiunta una regexp stringente, tolgo l'eventuale .it finale
         if (receiverClean.toLowerCase(Locale.ROOT).endsWith(".it"))
@@ -281,14 +301,17 @@ public class ExternalChannelsService {
             receiverClean = getSequenceOfRetry(receiverClean,requestId);
         }
 
-        if(receiverClean.contains(DISCOVERED_MARKER)) {
-            String discoveredSequence = receiverClean.substring(receiverClean.indexOf(DISCOVERED_MARKER));
-            discoveredSequence = discoveredSequence.replace(DISCOVERED_MARKER, "@sequence").replace(DISCOVERED_MARKER.toUpperCase(Locale.ROOT), "@sequence");
+        if(receiverClean.toLowerCase(Locale.ROOT).contains(DISCOVERED_MARKER)) {
+            int discoveredIndex = receiverClean.toLowerCase(Locale.ROOT).indexOf(DISCOVERED_MARKER);
+            String discoveredSequence = receiverClean.substring(discoveredIndex);
+            discoveredSequence = discoveredSequence.replaceFirst(
+                    "(?i)" + Pattern.quote(DISCOVERED_MARKER),
+                    "@sequence");
 
             notificationProgress.setDiscoveredAddress(buildMockDiscoveredAddress(discoveredSequence));
             log.info("discovered address will be address={}", notificationProgress.getDiscoveredAddress().getAddress());
             
-            receiverClean = receiverClean.substring(0, receiverClean.indexOf(DISCOVERED_MARKER));
+            receiverClean = receiverClean.substring(0, discoveredIndex);
         }
 
         String[] timeCodeCoupleArray = receiverClean.split("\\.");
@@ -312,6 +335,14 @@ public class ExternalChannelsService {
             }
             CodeTimeToSend codeTimeToSend = new CodeTimeToSend(code, Duration.parse(time), additionalActions);
             notificationProgress.getCodeTimeToSendQueue().add(codeTimeToSend);
+        }
+
+        if(isRestartSplittedReceiverAddress){
+            log.info("Restart sequence detected for requestId={}, receiverDigitalAddress={}, restartAttempt={}", requestId, receiverDigitalAddress, matcher.group(2));
+            if (!isReworkRequestId) {
+                notificationProgress.setSendRestartEvent(Boolean.TRUE);
+            }
+            notificationProgress.setRestartAttempt(Integer.parseInt(matcher.group(2)));
         }
 
         return notificationProgress;

@@ -1,5 +1,8 @@
 {
     "ProjectName":"pn",
+    "EnvironmentName": "confinfo",
+    "EnvironmentType": "dev",
+    "CoreAccountId": "830192246553",
     "CorsAllowedDomains":"http://localhost:8090",
     "MicroserviceNumber":"84",
     "TemplateBucketBaseUrl":"",
@@ -22,7 +25,9 @@
     "ExternalChannels2UserAttributesQueueARN":"arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
     "OcrOutputsQueueName": "pn-mockconsolidatore-dummyqueue",
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:089813480515:pn-mockconsolidatore-dummyqueue",
-    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4",
+    "PnCoreEventBusName": "pn-CoreEventBus",
+    "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
+    "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2,MapExternalChannelMockSequence3,MapExternalChannelMockSequence4,MapExternalChannelMockSequence5",
     "CacheExpireDays":"90",
     "CacheMaxSize":"100000",
     "JobCronExpression":"*/5 * * * * *",
@@ -32,5 +37,5 @@
     "JavaToolOptions": "-XX:MaxDirectMemorySize=1G",
     "CpuValue": "2048",
     "MemoryAmount": "4GB",
-    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:9b27cc3fda2bd846b02413bcd483619160cb2451201d878a3d369d8cbb95d917"
+    "ContainerImageUri":"911845998067.dkr.ecr.eu-south-1.amazonaws.com/pn-external-channels@sha256:227796c492ab2c0d3dfa4f5b5621f0598f7e39d4e5181cde882f19f3619f414c"
 }
