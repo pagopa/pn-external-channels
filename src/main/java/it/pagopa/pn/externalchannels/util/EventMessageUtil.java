@@ -208,6 +208,17 @@ public class EventMessageUtil {
                         });
             }
 
+            if (code.equals("RECAG012")) {
+                log.info("Setting businessStatusDatetime890Recag012 for event. Code: {}, Channel: {}, Previous datetime: {}",
+                        code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime890Recag012());
+                return Optional.ofNullable(notificationProgress.getBusinessStatusDatetime890Recag012())
+                        .orElseGet(() -> {
+                            OffsetDateTime now = OffsetDateTime.now();
+                            notificationProgress.setBusinessStatusDatetime890Recag012(now);
+                            return now;
+                        });
+            }
+
             if (endsWithABCDEF) {
                 log.info("Setting businessStatusDatetime for event. Code: {}, Channel: {}, Previous datetime: {}",
                         code, notificationProgress.getChannel(), notificationProgress.getBusinessStatusDatetime());
