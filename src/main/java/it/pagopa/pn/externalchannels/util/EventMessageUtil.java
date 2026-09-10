@@ -438,6 +438,21 @@ public class EventMessageUtil {
                 fileCreationRequest = buildPDFAttachment();
             }
 
+            // supporta il formato esteso "<documentType>:<sourceType>:<originType>", es. AR:SCANNED:ORIGINAL
+            // (il suffisso #Zn è già stato tolto sopra, quindi resta sempre in coda al pezzo giusto)
+            AttachmentDetails.SourceTypeEnum sourceType = null;
+            AttachmentDetails.OriginTypeEnum originType = null;
+            if (documentType.contains(":")) {
+                String[] docTypeParts = documentType.split(":");
+                documentType = docTypeParts[0];
+
+                if (docTypeParts.length > 1 && !"SOURCENULL".equalsIgnoreCase(docTypeParts[1]))
+                    sourceType = AttachmentDetails.SourceTypeEnum.fromValue(docTypeParts[1]);
+
+                if (docTypeParts.length > 2 && !"ORIGINNULL".equalsIgnoreCase(docTypeParts[2]))
+                    originType = AttachmentDetails.OriginTypeEnum.fromValue(docTypeParts[2]);
+            }
+
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
@@ -447,6 +462,8 @@ public class EventMessageUtil {
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
+                    .sourceType(sourceType)
+                    .originType(originType)
                     .date(attachmentDateTime.minus(delaydoc));
         } catch (Exception e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
