@@ -440,17 +440,23 @@ public class EventMessageUtil {
 
             // supporta il formato esteso "<documentType>:<sourceType>:<originType>", es. AR:SCANNED:ORIGINAL
             // (il suffisso #Zn è già stato tolto sopra, quindi resta sempre in coda al pezzo giusto)
-            AttachmentDetails.SourceTypeEnum sourceType = null;
-            AttachmentDetails.OriginTypeEnum originType = null;
-            if (documentType.contains(":")) {
-                String[] docTypeParts = documentType.split(":");
-                documentType = docTypeParts[0];
+            AttachmentDetails.SourceTypeEnum sourceType = AttachmentDetails.SourceTypeEnum.SCANNED;
+            AttachmentDetails.OriginTypeEnum originType = AttachmentDetails.OriginTypeEnum.ORIGINAL;
 
-                if (docTypeParts.length > 1 && !"SOURCENULL".equalsIgnoreCase(docTypeParts[1]))
-                    sourceType = AttachmentDetails.SourceTypeEnum.fromValue(docTypeParts[1]);
+            String[] docTypeParts = documentType.split(":");
+            documentType = docTypeParts[0];
 
-                if (docTypeParts.length > 2 && !"ORIGINNULL".equalsIgnoreCase(docTypeParts[2]))
-                    originType = AttachmentDetails.OriginTypeEnum.fromValue(docTypeParts[2]);
+            for (int i = 1; i < docTypeParts.length; i++) {
+                String part = docTypeParts[i];
+                if (part.equalsIgnoreCase("SCANNED") || part.equalsIgnoreCase("DIGITAL")) {
+                    sourceType = AttachmentDetails.SourceTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("ORIGINAL") || part.equalsIgnoreCase("DUPLICATED")) {
+                    originType = AttachmentDetails.OriginTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("SOURCENULL")) {
+                    sourceType = null;
+                } else if (part.equalsIgnoreCase("ORIGINNULL")) {
+                    originType = null;
+                }
             }
 
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
