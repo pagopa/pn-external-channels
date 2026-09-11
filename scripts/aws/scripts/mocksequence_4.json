@@ -1,0 +1,90 @@
+[
+  {
+    "sequenceName": "OK_RIR_DECEDUTO",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRI001.5s-RECRI002.5s-RECRI003A[FAILCAUSE:M02].5s-RECRI003B[FAILCAUSE:M02;DOC:AR].5s-RECRI003C"
+  },
+  {
+    "sequenceName": "OK_RS_CONSEGNA_PGIACENZA",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS010.5s-RECRS011.5s-RECRS003C"
+  },
+  {
+    "sequenceName": "OK_AR-EventAfterC",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C.10s-RECRN001A[NOAUTODATETIME]"
+  },
+  {
+    "sequenceName": "OK_AR-EventNotMatchProduct",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECAG001A.10s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK_890-NoAttachment",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B.5s-RECAG001C"
+  },
+  {
+    "sequenceName": "FAIL_890-BadAttachment",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico;DOC:AR].5s-RECAG003C"
+  },
+  {
+    "sequenceName": "OK-Giacenza-lte10-NoARCAD_890",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:23L].5s-RECAG005C"
+  },
+  {
+    "sequenceName": "FAIL_RECRN006_MAX_PCRETRY_AR",
+    "sequence": "@sequence.5s-RECRN006pcretry10s-RECRN006pcretry10s-RECRN006pcretry10s-RECRN006pcretry10s-RECRN006"
+  },
+  {
+    "sequenceName": "OK_AR-NoDemat",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK_890-OCR-FAIL",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG001A.5s-RECAG001B[DOC:23L;OCR:KO].5s-RECAG001C"
+  },
+  {
+    "sequenceName": "OK_890_INVALID_DATETIME",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECAG001A.5s-RECAG001B[DOC:23L;NOAUTODATETIME].5s-RECAG001C[NOAUTODATETIME]"
+  },
+  {
+    "sequenceName": "OK-NonRendicontabile_RS",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS013@retry.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS001C"
+  },
+  {
+    "sequenceName": "OK-CausaForzaMaggiore_RS",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRS015[FAILCAUSE:C04].5s-RECRS001C"
+  },
+  {
+    "sequenceName": "OK-Giacenza-lte10_890-OCR-FAIL",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG011B[DOC:23L;OCR:KO].5s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD].15s-RECAG005C"
+  },
+  {
+    "sequenceName": "OK_AR-NoDemat",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001C"
+  },
+  {
+    "sequenceName": "OK-GiacenzaCorrected_AR",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN010.5s-RECRN011.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN003A.5s-RECRN003B[DOC:AR].5s-RECRN003C"
+  },
+  {
+    "sequenceName": "OK-TimestampCorrected_AR",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN001A[NOAUTODATETIME].5s-RECRN001B[DOC:AR;NOAUTODATETIME].5s-RECRN001C.30s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
+  },
+  {
+    "sequenceName": "FAIL_FailureCauseCorrected_890",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG003A[FAILCAUSE:M03].5s-RECAG003B[DOC:Plico].5s-RECAG003C.5s-RECAG003A[FAILCAUSE:M05].5s-RECAG003B[DOC:Plico].5s-RECAG003C"
+  },
+  {
+    "sequenceName": "OK-Giacenza-INVALID_DATETIME_890",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A[NOAUTODATETIME].5s-RECAG005B[DOC:ARCAD;DOC:23L;NOAUTODATETIME].5s-RECAG005C"
+  },
+  {
+    "sequenceName": "OK_AR_EVENTS_AFTER",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C.5s-RECRN001A[NOAUTODATETIME].5s-RECRN001B[DOC:AR;NOAUTODATETIME]"
+  },
+  {
+    "sequenceName": "FAIL_AR_EVENTS_AFTER",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRN002D[FAILCAUSE:M04].5s-RECRN002E[DOC:Plico].5s-RECRN002F.5s-RECRN002E[DOC:Plico;NOAUTODATETIME].5s-RECRN002D[FAILCAUSE:M04;NOAUTODATETIME]"
+  },
+  {
+    "sequenceName": "OK_890_GIACENZA_EVENTS_AFTER",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG012.5s-RECAG005A.5s-RECAG005B[DOC:ARCAD;DOC:23L].5s-RECAG005C.10s-RECAG011B[DOC:23L].5s-RECAG011A[NOAUTODATETIME].5s-RECAG005B[DOC:ARCAD]"
+  }
+]

@@ -1,7 +1,7 @@
 [
   {
     "sequenceName": "OK_RIS",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI001.5s-RECRSI002.5s-RECRSI003"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI001.5s-RECRSI002.5s-RECRSI003C"
   },
   {
     "sequenceName": "FAIL_RIS",
@@ -129,11 +129,11 @@
   },
   {
     "sequenceName": "OK-REC008_890",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG012.5s-RECAG008C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG011B[DOC:23L].5s-RECAG008A.5s-RECAG008B[DOC:ARCAD].5s-RECAG012.5s-RECAG008C"
   },
   {
     "sequenceName": "OK-REC008_890-E",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG008A.5s-RECAG008B[DOC:ARCAD;DOC:23L].5s-RECAG008C.60s-RECAG012"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG011B[DOC:23L].5s-RECAG008A.5s-RECAG008B[DOC:ARCAD].5s-RECAG008C.60s-RECAG012"
   },
   {
     "sequenceName": "OK-GiacenzaDelegato-lte10_890_redrive",
@@ -173,7 +173,7 @@
   },
   {
     "sequenceName": "OK_RS-CON020",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:1]-RECRS001C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:ZIP;PAGES:1].5s-RECRS001C"
   },
   {
     "sequenceName": "OK-Giacenza-gt10_890_ZIP",

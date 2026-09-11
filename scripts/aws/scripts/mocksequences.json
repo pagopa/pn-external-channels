@@ -121,7 +121,7 @@
   },
   {
     "sequenceName": "FAIL-Giacenza-lte10_890",
-    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.30s-RECAG007A.5s-RECAG007B[DOC:ARCAD;DOC:Plico].5s-RECAG007C"
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECAG010.5s-RECAG011A.5s-RECAG011B[DOC:23L].30s-RECAG007A.5s-RECAG012.30s-RECAG007B[DOC:ARCAD;DOC:Plico;DOC:23L].5s-RECAG007C"
   },
   {
     "sequenceName": "FAIL-Giacenza-gt10_890",
