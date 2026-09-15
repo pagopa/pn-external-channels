@@ -3,10 +3,12 @@ package it.pagopa.pn.externalchannels.mapper;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEvent;
 import it.pagopa.pn.externalchannels.generated.openapi.clients.extchannelwebhook.model.PaperProgressStatusEventAttachmentsInner;
 import it.pagopa.pn.externalchannels.model.AttachmentDetails;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
 
     private PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent(){}
@@ -22,11 +24,15 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
             int docId = 0;
             for (AttachmentDetails detail: input.getAttachments()) {
                 PaperProgressStatusEventAttachmentsInner paperProgressStatusEventAttachments = new PaperProgressStatusEventAttachmentsInner();
+                String attachmentId = Integer.toString(docId++);
                 paperProgressStatusEventAttachments.setDate(detail.getDate().toInstant());
                 paperProgressStatusEventAttachments.setDocumentType(detail.getDocumentType());
-                paperProgressStatusEventAttachments.setId(Integer.toString(docId++));
+                paperProgressStatusEventAttachments.setId(attachmentId);
                 paperProgressStatusEventAttachments.setUri(detail.getUri());
                 paperProgressStatusEventAttachments.setSha256(detail.getSha256());
+
+                log.info("for attachmentID= {} detailSource={} detailOrigin={}", attachmentId, detail.getSourceType(), detail.getOriginType());
+
                 paperProgressStatusEventAttachments.setSourceType(detail.getSourceType() == null ? null : PaperProgressStatusEventAttachmentsInner.SourceTypeEnum.fromValue(detail.getSourceType().getValue()));
                 paperProgressStatusEventAttachments.setOriginType(detail.getOriginType() == null ? null : PaperProgressStatusEventAttachmentsInner.OriginTypeEnum.fromValue(detail.getOriginType().getValue()));
                 attachments.add(paperProgressStatusEventAttachments);
