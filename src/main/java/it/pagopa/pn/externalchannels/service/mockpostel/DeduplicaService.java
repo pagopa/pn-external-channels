@@ -102,6 +102,10 @@ public class DeduplicaService {
         return addressOut;
     }
 
+    public AddressOut addressInToAddressOut(AddressIn addressIn, Integer postalizzabile, Integer error) {
+        return buildAddressOut(addressIn, postalizzabile, error);
+    }
+
     private void setSuccessfulResult(DeduplicaResponse risultatoDeduplica) {
         risultatoDeduplica.setRisultatoDedu(Boolean.TRUE);
     }

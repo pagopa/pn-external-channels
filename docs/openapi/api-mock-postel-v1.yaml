@@ -71,6 +71,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
 
+
+  /send-normalizzatore-ingress/v1/normalizzazionesync:
+    post:
+      operationId: normalizzazioneSync
+#      tags:
+#        - Normalizzatore
+#        - FASE2
+      summary: PN richiede la normalizzazione sincrona.
+      parameters:
+        - $ref: '#/components/parameters/xPagopaAddrManCxId'
+        - $ref: '#/components/parameters/xPagopaAddrManApiKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NormalizzazioneSyncRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizzazioneSyncResponse'
+        '400':
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
   /send-normalizzatore-ingress/v1/deduplica:
     post:
       operationId: deduplica
@@ -353,3 +390,25 @@ components:
           example: Parameter not valid
           maxLength: 1024
           type: string
+
+    NormalizzazioneSyncRequest:
+      type: object
+      required:
+        - addressIn
+      properties:
+        addressIn:
+          $ref: '#/components/schemas/AddressIn'
+
+
+    NormalizzazioneSyncResponse:
+      type: object
+      description: >-
+        addressOut: obbligatorio in caso di risposta di successo
+        errore: valorizzato in caso di risposta con errore
+      properties:
+        addressOut:
+          $ref: '#/components/schemas/AddressOut'
+        errore:
+          type: string
+          description: >-
+            identificativo dell'errore, da definire in fase di implementazione

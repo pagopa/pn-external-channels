@@ -1,9 +1,7 @@
 package it.pagopa.pn.externalchannels.api;
 
-import it.pagopa.pn.externalchannels.mock_postel.DeduplicaRequest;
-import it.pagopa.pn.externalchannels.mock_postel.DeduplicaResponse;
-import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneRequest;
-import it.pagopa.pn.externalchannels.mock_postel.NormalizzazioneResponse;
+import it.pagopa.pn.externalchannels.mock_postel.*;
+import it.pagopa.pn.externalchannels.service.mockpostel.AddressUtils;
 import it.pagopa.pn.externalchannels.service.mockpostel.DeduplicaService;
 import it.pagopa.pn.externalchannels.service.mockpostel.PostelService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,12 +18,15 @@ public class PostelMockController implements DefaultApi {
     private final Scheduler scheduler;
     private final PostelService postelService;
     private final DeduplicaService deduplicaService;
+    private final AddressUtils addressUtils;
+
 
     public PostelMockController(@Qualifier("externalChannelsScheduler") Scheduler scheduler,
-                                PostelService postelService, DeduplicaService deduplicaService) {
+                                PostelService postelService, DeduplicaService deduplicaService, AddressUtils addressUtils) {
         this.scheduler = scheduler;
         this.postelService = postelService;
         this.deduplicaService = deduplicaService;
+        this.addressUtils = addressUtils;
     }
 
     /**
@@ -69,5 +70,19 @@ public class PostelMockController implements DefaultApi {
                 .flatMap(deduplicaService::deduplica)
                 .map(deduplicateResponse -> ResponseEntity.ok().body(deduplicateResponse))
                 .publishOn(scheduler);
+    }
+
+    @Override
+    public Mono<ResponseEntity<NormalizzazioneSyncResponse>> normalizzazioneSync(
+         String pnAddressManagerCxId,
+         String xApiKey,
+         Mono<NormalizzazioneSyncRequest> request,
+         ServerWebExchange exchange) {
+
+             return request
+                 .map(NormalizzazioneSyncRequest::getAddressIn)
+                 .map(addressUtils::normalizeAddress)
+                 .map(address -> new NormalizzazioneSyncResponse().addressOut(deduplicaService.addressInToAddressOut(address, 1, null)))
+                 .map(ResponseEntity::ok);
     }
 }
