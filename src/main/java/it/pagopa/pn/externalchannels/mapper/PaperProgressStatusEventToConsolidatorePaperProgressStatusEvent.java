@@ -31,8 +31,6 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
                 paperProgressStatusEventAttachments.setUri(detail.getUri());
                 paperProgressStatusEventAttachments.setSha256(detail.getSha256());
 
-                log.info("for attachmentID= {} detailSource={} detailOrigin={} assignedSourceType={} assignedOriginType={}", attachmentId, detail.getSourceType(), detail.getOriginType(), PaperProgressStatusEventAttachmentsInner.SourceTypeEnum.fromValue(detail.getSourceType().getValue()), PaperProgressStatusEventAttachmentsInner.OriginTypeEnum.fromValue(detail.getOriginType().getValue()));
-
                 paperProgressStatusEventAttachments.setSourceType(detail.getSourceType() == null ? null : PaperProgressStatusEventAttachmentsInner.SourceTypeEnum.fromValue(detail.getSourceType().getValue()));
                 paperProgressStatusEventAttachments.setOriginType(detail.getOriginType() == null ? null : PaperProgressStatusEventAttachmentsInner.OriginTypeEnum.fromValue(detail.getOriginType().getValue()));
                 attachments.add(paperProgressStatusEventAttachments);
