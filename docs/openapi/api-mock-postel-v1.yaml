@@ -38,6 +38,7 @@ paths:
             - SVIACOMPLETAUFF : via completa normalizzata (DUG+COMPL+TOPONIMO+CIVICO POSTALE) ;
             - SVIACOMPLETAABB: via completa normalizzata abbreviata (DUG+COMPL+TOPONIMO+CIVICO POSTALE ABBREVIATA) ;
             - SVIACOMPLETASPEDIZIONE : Indirizzo di Stampa;
+            - SCODICECATASTALECOMUNE : Codice catastale del comune;
 
             NERRORENORM può contenere i seguenti valori
               - //FIXME: aggiungere codifica errori
@@ -334,6 +335,8 @@ components:
         sViaCompletaAbb:
           type: string
         sViaCompletaSpedizione:
+          type: string
+        sCodiceCatastaleComune:
           type: string
 
     Problem:
