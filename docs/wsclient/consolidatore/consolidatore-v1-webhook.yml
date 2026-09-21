@@ -440,6 +440,12 @@ components:
                 format: date-time
                 description: >-
                   Data di produzione del documento.
+              sourceType:
+                type: string
+                enum: [ SCANNED, DIGITAL ]
+              originType:
+                type: string
+                enum: [ ORIGINAL, DUPLICATED ]
         discoveredAddress:
           description: >-
             Indirizzo del destinatario desunto dalle indagini del personale postale.

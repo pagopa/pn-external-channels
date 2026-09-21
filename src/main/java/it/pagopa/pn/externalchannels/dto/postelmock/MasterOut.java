@@ -28,7 +28,8 @@ import lombok.Data;
         MasterOut.JSON_PROPERTY_S_PRESSO,
         MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_UFF,
         MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_ABB,
-        MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE
+        MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE,
+        MasterOut.JSON_PROPERTY_S_CODICE_CATASTALE_COMUNE
 })
 @JsonTypeName("MasterOut")
 public class MasterOut {
@@ -91,5 +92,7 @@ public class MasterOut {
 
     public static final String JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE = "sViaCompletaSpedizione";
     private String sViaCompletaSpedizione;
-}
 
+    public static final String JSON_PROPERTY_S_CODICE_CATASTALE_COMUNE = "sCodiceCatastaleComune";
+    private String sCodiceCatastaleComune;
+}

@@ -438,6 +438,27 @@ public class EventMessageUtil {
                 fileCreationRequest = buildPDFAttachment();
             }
 
+            // supporta il formato esteso "<documentType>:<sourceType>:<originType>", es. AR:SCANNED:ORIGINAL
+            // (il suffisso #Zn è già stato tolto sopra, quindi resta sempre in coda al pezzo giusto)
+            AttachmentDetails.SourceTypeEnum sourceType = AttachmentDetails.SourceTypeEnum.SCANNED;
+            AttachmentDetails.OriginTypeEnum originType = AttachmentDetails.OriginTypeEnum.ORIGINAL;
+
+            String[] docTypeParts = documentType.split(":");
+            documentType = docTypeParts[0];
+
+            for (int i = 1; i < docTypeParts.length; i++) {
+                String part = docTypeParts[i];
+                if (part.equalsIgnoreCase("SCANNED") || part.equalsIgnoreCase("DIGITAL")) {
+                    sourceType = AttachmentDetails.SourceTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("ORIGINAL") || part.equalsIgnoreCase("DUPLICATED")) {
+                    originType = AttachmentDetails.OriginTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("SOURCENULL")) {
+                    sourceType = null;
+                } else if (part.equalsIgnoreCase("ORIGINNULL")) {
+                    originType = null;
+                }
+            }
+
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
             FileCreationResponseInt response = safeStorageService.createAndUploadContent(notificationProgress, fileCreationRequest);
             log.info("[{}] Message sent to Safe Storage", iun);
@@ -447,6 +468,8 @@ public class EventMessageUtil {
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
+                    .sourceType(sourceType)
+                    .originType(originType)
                     .date(attachmentDateTime.minus(delaydoc));
         } catch (Exception e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
