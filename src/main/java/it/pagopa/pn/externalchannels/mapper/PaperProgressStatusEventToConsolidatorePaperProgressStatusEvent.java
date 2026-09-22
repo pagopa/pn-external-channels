@@ -17,7 +17,8 @@ public class PaperProgressStatusEventToConsolidatorePaperProgressStatusEvent {
         PaperProgressStatusEvent output = SmartMapper.mapToClass(input, PaperProgressStatusEvent.class );
         output.setStatusDateTime(input.getStatusDateTime().toInstant());
         output.setClientRequestTimeStamp(input.getClientRequestTimeStamp().toInstant());
-
+        output.setPrinter("PN_PRINTER");
+        output.setDu("PN_DU");
         if (input.getAttachments() != null)
         {
             List<PaperProgressStatusEventAttachmentsInner> attachments = new ArrayList<>();
