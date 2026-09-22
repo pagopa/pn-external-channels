@@ -328,6 +328,8 @@ public class EventMessageUtil {
                                 .discoveredAddress(discoveredAddress)
                                 .requestId(requestId)
                                 .productType(productType)
+                                .printer("PN_PRINTER")
+                                .du("PN_DU")
                                 .clientRequestTimeStamp(OffsetDateTime.now())
                                 .attachments(null)
                                 .deliveryFailureCause(failureCause)
