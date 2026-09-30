@@ -38,6 +38,7 @@ public class PostelService {
     private final CsvService csvService;
     private final PnExternalChannelsProperties pnExternalChannelsProperties;
     private final AddressUtils addressUtils;
+    public static final String CODICE_CATASTALE = "H501";
 
     @Qualifier("addressManagerScheduler")
     private final Scheduler scheduler;
@@ -192,6 +193,7 @@ public class PostelService {
         normalizedAddress.setSFrazioneSpedizione(input.getLocalitaAggiuntiva());
         normalizedAddress.setSSiglaProv(input.getProvincia());
         normalizedAddress.setSStatoSpedizione(input.getStato());
+        normalizedAddress.setSCodiceCatastaleComune(CODICE_CATASTALE);
     }
 
     private static void evaluateCapAndSetComune(NormalizeRequestPostelInput input, NormalizedAddress normalizedAddress) {
