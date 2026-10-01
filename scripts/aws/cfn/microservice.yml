@@ -47,6 +47,16 @@ Parameters:
     Type: Number
     Description: 'Disambiguation useful for load balancer rules'
 
+  MinTasksNumber:
+    Default: 1
+    Type: Number
+    Description: minimum autoscaling number of tasks
+
+  MaxTasksNumber:
+    Default: 1
+    Type: Number
+    Description: maximum autoscaling number of tasks
+
   TemplateBucketBaseUrl:
     Type: String
     Description: 'The S3 bucket from which to fetch the templates used by this stack.'
@@ -275,6 +285,8 @@ Resources:
       Parameters:
         MicroServiceUniqueName: !Sub '${ProjectName}-external-channels'
         CpuValue: !Ref CpuValue
+        MinTasksNumber: !Ref MinTasksNumber
+        MaxTasksNumber: !Ref MaxTasksNumber
         MemoryAmount: !Ref MemoryAmount
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
