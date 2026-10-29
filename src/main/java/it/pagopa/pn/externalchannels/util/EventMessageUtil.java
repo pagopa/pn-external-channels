@@ -86,6 +86,7 @@ public class EventMessageUtil {
     private static final String SEVEN_ZIP = "7ZIP";
     public static final String OCR_KO = "OCR_KO";
     public static final String OCR_PENDING = "OCR_PENDING";
+    private static final String PDF = "PDF";
 
     private static final String OCR_LOGGING_MESSAGE = "Ocr found with code {}";
 
@@ -436,6 +437,10 @@ public class EventMessageUtil {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
                 documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
+            } else if (documentType.endsWith(PDF)) {
+                log.info("[{}] CON020 PDF for attachment found!", iun);
+                documentType = documentType.replace(PDF, CON020_DOCUMENT_TYPE);
+                fileCreationRequest = buildPDFAttachment();
             } else {
                 fileCreationRequest = buildPDFAttachment();
             }
