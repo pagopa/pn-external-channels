@@ -54,5 +54,9 @@
   {
     "sequenceName": "OK-Retry_RIS",
     "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI005[FAILCAUSE:F03]@retry.5s-CON080.5s-RECRSI001"
+  },
+  {
+    "sequenceName":"OK-AR-CON020-PDF",
+    "sequence":"@sequence.5s-CON080.5s-CON020[DOC:PDF;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR].5s-RECRN001C"
   }
 ]
