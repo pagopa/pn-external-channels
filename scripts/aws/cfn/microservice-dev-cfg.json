@@ -12,6 +12,7 @@
     "PnCoreEventBusName": "pn-CoreEventBus",
     "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
     "MinTasksNumber": "1",
-    "MaxTasksNumber": "1"
+    "MaxTasksNumber": "1",
+    "KafkaBootstrapServers": "10.1.41.75:9092"
   }
 }

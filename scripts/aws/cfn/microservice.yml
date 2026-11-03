@@ -263,6 +263,11 @@ Parameters:
     Description: 'ExternalChannelsStartRework queue URL'
     Default: ''
 
+  KafkaBootstrapServers:
+    Type: String
+    Description: 'Kafka bootstrap servers'
+    Default: ''
+
 
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
@@ -314,6 +319,7 @@ Resources:
         ContainerEnvEntry21: !Sub 'PN_EXTERNALCHANNELS_CONFINFOEVENTBUSNAME=${PnConfInfoEventBusName}'
         ContainerEnvEntry22: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTNAME=${EnvironmentName}'
         ContainerEnvEntry23: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTTYPE=${EnvironmentType}'
+        ContainerEnvEntry24: !Sub 'SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=${KafkaBootstrapServers}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
