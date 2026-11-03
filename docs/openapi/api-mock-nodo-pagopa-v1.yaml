@@ -6,7 +6,52 @@ tags:
     - name: Payment
       description: Endpoint per la simulazione della pubblicazione di un pagamento verso il Nodo dei pagamenti
 paths:
-  /nodo-pagopa-ingress/v1/payment:
+  /external-channels/nodo-pagopa/kafka/connection:
+    get:
+      summary: Verifica connessione con il mock del nodo dei pagamenti
+      description: Endpoint per la verifica della connessione con il mock del nodo dei pagamenti
+      tags:
+        - Payment
+      operationId: checkNodoPagopaConnection
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KafkaConnection'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    post:
+      summary: Regola la connessione con il mock kafka del nodo dei pagamenti
+      description: Endpoint per la regolazione della connessione con il mock kafka del nodo dei pagamenti
+      tags:
+        - Payment
+      operationId: setNodoPagopaConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KafkaConnection'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KafkaConnection'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /external-channels/nodo-pagopa/v1/payment:
     post:
       operationId: producePayment
       tags:
@@ -42,6 +87,15 @@ paths:
 
 components:
   schemas:
+
+    KafkaConnection:
+      type: object
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: Flag per abilitare/disabilitare la connessione con il mock kafka del nodo dei pagamenti
 
     NoticePaymentRequest:
       type: object
