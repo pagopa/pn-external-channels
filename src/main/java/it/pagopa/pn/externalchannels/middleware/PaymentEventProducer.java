@@ -1,5 +1,6 @@
 package it.pagopa.pn.externalchannels.middleware;
 
+import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
 import it.pagopa.pn.externalchannels.dto.kafka.Creditor;
 import it.pagopa.pn.externalchannels.dto.kafka.DebtorPosition;
 import it.pagopa.pn.externalchannels.dto.kafka.PaymentEvent;
@@ -21,10 +22,9 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class PaymentEventProducer {
 
-    private static final String TOPIC = "payment_events";
-
     private final KafkaTemplate<String, PaymentEvent> kafkaTemplate;
     private final KafkaKillSwitch killSwitch;
+    private final PnExternalChannelsProperties properties;
 
     public Mono<NoticePaymentResponse> send(NoticePaymentRequest request) {
         PaymentEvent event = toPaymentEvent(request);
@@ -33,12 +33,12 @@ public class PaymentEventProducer {
             return Mono.error(new KafkaUnavailableException());
         }
         return Mono.defer(() -> Mono.fromFuture(
-                                kafkaTemplate.send(
-                                        TOPIC,
-                                        event.getId(),
-                                        event
-                                )
-                        ))
+                        kafkaTemplate.send(
+                                properties.getKafkaTopics().getPayments(),
+                                event.getId(),
+                                event
+                        )
+                ))
                 .doOnSuccess(result ->
                         log.info(
                                 "Payment event published. PaymentId={}, Partition={}, Offset={}",

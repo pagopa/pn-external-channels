@@ -70,6 +70,8 @@ public class PnExternalChannelsProperties {
 
     private String confInfoEventBusName;
 
+    private KafkaTopics kafkaTopics;
+
     @Data
     public static class Csv{
 
@@ -98,6 +100,11 @@ public class PnExternalChannelsProperties {
 
         private String apiKey;
 
+    }
+
+    @Data
+    public static class KafkaTopics {
+        private String payments;
     }
 
     private List<WebhookApikeys>  parsedApiKeys = new ArrayList<>();
