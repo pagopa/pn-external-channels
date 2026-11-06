@@ -3,6 +3,30 @@
     "sequenceName": "OK_RIS",
     "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI001.5s-RECRSI002.5s-RECRSI003C"
   },
+
+  {
+    "sequenceName": "OK_RIS",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI001.5s-RECRSI002.5s-RECRSI003C"
+  },
+
+
+  {
+    "sequenceName": "OK_RIS",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI002.5s-RECRSI003@waitError.5s-RECRSI001.5s-RECRSI002.5s-RECRSI003"
+  },
+
+  {
+    "sequenceName": "OK_AR",
+    "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-CON018.5s-RECRN001A.5s-RECRN001B[DOC:AR:SCANNED:ORIGINAL].5s-RECRN001C"
+  },
+
+
+
+
+
+
+
+
   {
     "sequenceName": "FAIL_RIS",
     "sequence": "@sequence.5s-CON080.5s-CON020[DOC:7ZIP;PAGES:3].5s-RECRSI001.5s-RECRSI002.5s-RECRSI004A.5s-RECRSI004B[DOC:Plico].5s-RECRSI004C"
