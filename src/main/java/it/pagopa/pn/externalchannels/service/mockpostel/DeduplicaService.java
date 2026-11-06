@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class DeduplicaService {
 
     public static final String CAP_95059 = "95059";
+    public static final String CODICE_CATASTALE = "H501";
     private final AddressUtils addressUtils;
 
     public Mono<DeduplicaResponse> deduplica(DeduplicaRequest request) {
@@ -99,7 +100,12 @@ public class DeduplicaService {
         addressOut.setsCivicoAltro(addressIn.getIndirizzoAggiuntivo());
         addressOut.setsSiglaProv(addressIn.getProvincia());
         addressOut.setsStatoSpedizione(addressIn.getStato());
+        addressOut.setsCodiceCatastaleComune(CODICE_CATASTALE);
         return addressOut;
+    }
+
+    public AddressOut addressInToAddressOut(AddressIn addressIn, Integer postalizzabile, Integer error) {
+        return buildAddressOut(addressIn, postalizzabile, error);
     }
 
     private void setSuccessfulResult(DeduplicaResponse risultatoDeduplica) {

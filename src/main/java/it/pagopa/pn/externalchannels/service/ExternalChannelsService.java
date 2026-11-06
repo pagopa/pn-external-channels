@@ -367,10 +367,11 @@ public class ExternalChannelsService {
         String additionalActionsRaw = code.substring(code.indexOf("[")+1,code.lastIndexOf("]"));
         for (String addActRaw :
                 additionalActionsRaw.split(";")) {
-            if (addActRaw.contains(":"))
-                res.add(new AdditionalAction(AdditionalAction.ADDITIONAL_ACTIONS.valueOf(addActRaw.split(":")[0]),
-                        addActRaw.split(":")[1]));
-            else
+            if (addActRaw.contains(":")) {
+                String[] additionalActionParts = addActRaw.split(":", 2);
+                res.add(new AdditionalAction(AdditionalAction.ADDITIONAL_ACTIONS.valueOf(additionalActionParts[0]),
+                        additionalActionParts[1]));
+            } else
                 res.add(new AdditionalAction(AdditionalAction.ADDITIONAL_ACTIONS.valueOf(addActRaw), null));
         }
         return res;

@@ -10,6 +10,8 @@
     "OcrOutputsQueueARN": "arn:aws:sqs:eu-south-1:830192246553:pn-paper_tracker_ocr_outputs",
     "MockSequenceParameterNames": "MapExternalChannelMockSequence,MapExternalChannelMockSequence2",
     "PnCoreEventBusName": "pn-CoreEventBus",
-    "PnConfInfoEventBusName": "pn-ConfinfoEventBus"
+    "PnConfInfoEventBusName": "pn-ConfinfoEventBus",
+    "MinTasksNumber": "1",
+    "MaxTasksNumber": "1"
   }
 }

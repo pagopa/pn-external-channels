@@ -236,6 +236,10 @@ components:
           description: >-
             Identificativo Unico della Notifica. Proviene dalla richiesta originaria di PN.
           example: 'ABCD-HILM-YKWX-202202-1'
+        printer:
+          type: string
+        du:
+          type: string
         statusCode:
           type: string
           description: >-
@@ -320,6 +324,12 @@ components:
           format: date-time
           description: >-
             Data di produzione del documento.
+        sourceType:
+          type: string
+          enum: [ SCANNED, DIGITAL ]
+        originType:
+          type: string
+          enum: [ ORIGINAL, DUPLICATED ]
 
     DiscoveredAddress:
       description: >-

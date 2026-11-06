@@ -26,7 +26,8 @@ import lombok.Data;
         MasterOut.JSON_PROPERTY_S_PRESSO,
         MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_UFF,
         MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_ABB,
-        MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE
+        MasterOut.JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE,
+        MasterOut.JSON_PROPERTY_S_CODICE_CATASTALE_COMUNE,
 })
 @JsonTypeName("NormalizedAddress")
 public class NormalizedAddress {
@@ -110,4 +111,8 @@ public class NormalizedAddress {
     public static final String JSON_PROPERTY_S_VIA_COMPLETA_SPEDIZIONE = "sViaCompletaSpedizione";
     @CsvBindByPosition(position = 19)
     private String sViaCompletaSpedizione;
+
+    public static final String JSON_PROPERTY_S_CODICE_CATASTALE_COMUNE = "sCodiceCatastaleComune";
+    @CsvBindByPosition(position = 20)
+    private String sCodiceCatastaleComune;
 }

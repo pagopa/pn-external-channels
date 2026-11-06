@@ -86,6 +86,7 @@ public class EventMessageUtil {
     private static final String SEVEN_ZIP = "7ZIP";
     public static final String OCR_KO = "OCR_KO";
     public static final String OCR_PENDING = "OCR_PENDING";
+    private static final String PDF = "PDF";
 
     private static final String OCR_LOGGING_MESSAGE = "Ocr found with code {}";
 
@@ -328,6 +329,8 @@ public class EventMessageUtil {
                                 .discoveredAddress(discoveredAddress)
                                 .requestId(requestId)
                                 .productType(productType)
+                                .printer("PN_PRINTER")
+                                .du("PN_DU")
                                 .clientRequestTimeStamp(OffsetDateTime.now())
                                 .attachments(null)
                                 .deliveryFailureCause(failureCause)
@@ -434,8 +437,33 @@ public class EventMessageUtil {
                 log.info("[{}] CON020 ZIP for attachment found!", iun);
                 documentType = documentType.replace(ZIP, CON020_DOCUMENT_TYPE);
                 fileCreationRequest = buildCON020ZIPAttachment(notificationProgress, pages);
+            } else if (documentType.endsWith(PDF)) {
+                log.info("[{}] CON020 PDF for attachment found!", iun);
+                documentType = documentType.replace(PDF, CON020_DOCUMENT_TYPE);
+                fileCreationRequest = buildPDFAttachment();
             } else {
                 fileCreationRequest = buildPDFAttachment();
+            }
+
+            // supporta il formato esteso "<documentType>:<sourceType>:<originType>", es. AR:SCANNED:ORIGINAL
+            // (il suffisso #Zn è già stato tolto sopra, quindi resta sempre in coda al pezzo giusto)
+            AttachmentDetails.SourceTypeEnum sourceType = AttachmentDetails.SourceTypeEnum.SCANNED;
+            AttachmentDetails.OriginTypeEnum originType = AttachmentDetails.OriginTypeEnum.ORIGINAL;
+
+            String[] docTypeParts = documentType.split(":");
+            documentType = docTypeParts[0];
+
+            for (int i = 1; i < docTypeParts.length; i++) {
+                String part = docTypeParts[i];
+                if (part.equalsIgnoreCase("SCANNED") || part.equalsIgnoreCase("DIGITAL")) {
+                    sourceType = AttachmentDetails.SourceTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("ORIGINAL") || part.equalsIgnoreCase("DUPLICATED")) {
+                    originType = AttachmentDetails.OriginTypeEnum.fromValue(part);
+                } else if (part.equalsIgnoreCase("SOURCENULL")) {
+                    sourceType = null;
+                } else if (part.equalsIgnoreCase("ORIGINNULL")) {
+                    originType = null;
+                }
             }
 
             log.info("[{}] Receipt message sending to Safe Storage: {}", iun, fileCreationRequest);
@@ -447,6 +475,8 @@ public class EventMessageUtil {
                     .id(iun + "DOCMock_"+id)
                     .sha256(response.getSha256())
                     .documentType(documentType)
+                    .sourceType(sourceType)
+                    .originType(originType)
                     .date(attachmentDateTime.minus(delaydoc));
         } catch (Exception e) {
             log.error(String.format("Error in buildAttachment with iun: %s", iun), e);
