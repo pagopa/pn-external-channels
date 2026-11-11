@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-import java.time.Instant;
-
 @Data
 public class OnboardingSelfCareMessage {
 
@@ -19,12 +17,12 @@ public class OnboardingSelfCareMessage {
     @Valid
     private Institution institution;
 
-    private String internalInstitutionId;
+    private String internalIstitutionID;
     private String onboardingTokenId;
     private String product;
     private String state;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private String createdAt;
+    private String updatedAt;
     private String pricingPlan;
     private String zipCode;
 

@@ -79,8 +79,9 @@ public class OnboardingEventProducer {
         event.setState(request.getState() != null ? request.getState() : "ACTIVE");
         event.setPricingPlan(request.getPricingPlan() != null ? request.getPricingPlan() : "free");
         event.setZipCode(request.getZipCode() != null ? request.getZipCode() : "00100");
-        event.setCreatedAt(request.getCreatedAt() != null ? request.getCreatedAt().toInstant() : Instant.now());
-        event.setUpdatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt().toInstant() : Instant.now());
+        Instant now = Instant.now();
+        event.setCreatedAt(request.getCreatedAt() != null ? request.getCreatedAt().toInstant().toString() : now.toString());
+        event.setUpdatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt().toInstant().toString() : now.toString());
 
         if (request.getBilling() != null) {
             OnboardingBilling billing = request.getBilling();
@@ -97,35 +98,27 @@ public class OnboardingEventProducer {
             event.setBilling(defaultBilling);
         }
 
-        OnboardingInstitution requestInstitution = request.getInstitution();
-        if (requestInstitution != null) {
-            OnboardingSelfCareMessage.Institution institution = new OnboardingSelfCareMessage.Institution();
-            institution.setAddress(requestInstitution.getAddress());
-            institution.setDescription(requestInstitution.getDescription());
-            institution.setDigitalAddress(requestInstitution.getDigitalAddress());
-            institution.setInstitutionType(requestInstitution.getInstitutionType() != null ? requestInstitution.getInstitutionType() : "PA");
-            institution.setOrigin(requestInstitution.getOrigin() != null ? requestInstitution.getOrigin() : "IPA");
-            institution.setOriginId(requestInstitution.getOriginId());
-            institution.setTaxCode(requestInstitution.getTaxCode() != null ? requestInstitution.getTaxCode() : "12345678901");
+        OnboardingInstitution requestInstitution = request.getInstitution() != null ? request.getInstitution() : new OnboardingInstitution();
+        OnboardingSelfCareMessage.Institution institution = new OnboardingSelfCareMessage.Institution();
+        institution.setAddress(requestInstitution.getAddress() != null ? requestInstitution.getAddress() : "Default Address");
+        institution.setDescription(requestInstitution.getDescription() != null ? requestInstitution.getDescription() : "Default Description");
+        institution.setDigitalAddress(requestInstitution.getDigitalAddress() != null ? requestInstitution.getDigitalAddress() : "default-address@test.it");
+        institution.setInstitutionType(requestInstitution.getInstitutionType() != null ? requestInstitution.getInstitutionType() : "PA");
+        institution.setOrigin(requestInstitution.getOrigin() != null ? requestInstitution.getOrigin() : "IPA");
+        institution.setOriginId(requestInstitution.getOriginId() != null ? requestInstitution.getOriginId() : "default-origin-id");
+        institution.setTaxCode(requestInstitution.getTaxCode() != null ? requestInstitution.getTaxCode() : "12345678901");
 
-            OnboardingRootParent rootParent = requestInstitution.getRootParent();
-            if (rootParent != null) {
-                OnboardingSelfCareMessage.Institution.RootParent mappedRootParent = new OnboardingSelfCareMessage.Institution.RootParent();
-                mappedRootParent.setId(rootParent.getId());
-                mappedRootParent.setOriginId(rootParent.getOriginId());
-                mappedRootParent.setDescription(rootParent.getDescription());
-                institution.setRootParent(mappedRootParent);
-            }
-            event.setInstitution(institution);
-        } else {
-            OnboardingSelfCareMessage.Institution institution = new OnboardingSelfCareMessage.Institution();
-            institution.setInstitutionType("PA");
-            institution.setOrigin("IPA");
-            institution.setTaxCode("12345678901");
-            event.setInstitution(institution);
+        OnboardingRootParent rootParent = requestInstitution.getRootParent();
+        if (rootParent != null) {
+            OnboardingSelfCareMessage.Institution.RootParent mappedRootParent = new OnboardingSelfCareMessage.Institution.RootParent();
+            mappedRootParent.setId(rootParent.getId() != null ? rootParent.getId() : "default-root-parent-id");
+            mappedRootParent.setOriginId(rootParent.getOriginId() != null ? rootParent.getOriginId() : "default-root-parent-origin-id");
+            mappedRootParent.setDescription(rootParent.getDescription() != null ? rootParent.getDescription() : "Default Root Parent Description");
+            institution.setRootParent(mappedRootParent);
         }
+        event.setInstitution(institution);
 
-        event.setInternalInstitutionId(request.getInternalInstitutionId() != null ? request.getInternalInstitutionId() : "int-inst-" + timestamp);
+        event.setInternalIstitutionID(request.getInternalInstitutionId() != null ? request.getInternalInstitutionId() : "int-inst-" + timestamp);
         event.setOnboardingTokenId(request.getOnboardingTokenId() != null ? request.getOnboardingTokenId() : "token-" + timestamp);
 
         return event;
