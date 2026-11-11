@@ -273,6 +273,11 @@ Parameters:
     Description: 'Kafka producer payment topic'
     Default: ''
 
+  KafkaProducerOnboardingTopic:
+    Type: String
+    Description: 'Kafka producer onboarding topic'
+    Default: ''
+
 
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
@@ -326,6 +331,7 @@ Resources:
         ContainerEnvEntry23: !Sub 'PN_EXTERNALCHANNELS_ENVIROMENTTYPE=${EnvironmentType}'
         ContainerEnvEntry24: !Sub 'SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS=${KafkaBootstrapServers}'
         ContainerEnvEntry25: !Sub 'PN_EXTERNALCHANNELS_KAFKATOPICS_PAYMENTS=${KafkaProducerPaymentTopic}'
+        ContainerEnvEntry26: !Sub 'PN_EXTERNALCHANNELS_KAFKATOPICS_ONBOARDINGS=${KafkaProducerOnboardingTopic}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions

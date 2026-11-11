@@ -14,6 +14,7 @@
     "MinTasksNumber": "1",
     "MaxTasksNumber": "1",
     "KafkaBootstrapServers": "10.1.41.75:9092",
-    "KafkaProducerPaymentTopic": "payment_events"
+    "KafkaProducerPaymentTopic": "payment_events",
+    "KafkaProducerOnboardingTopic": "onboarding_events"
   }
 }

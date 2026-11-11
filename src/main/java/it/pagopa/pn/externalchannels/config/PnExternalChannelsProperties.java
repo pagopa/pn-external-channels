@@ -105,6 +105,7 @@ public class PnExternalChannelsProperties {
     @Data
     public static class KafkaTopics {
         private String payments;
+        private String onboardings;
     }
 
     private List<WebhookApikeys>  parsedApiKeys = new ArrayList<>();

@@ -1,14 +1,14 @@
 package it.pagopa.pn.externalchannels.middleware;
 
 import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
-import it.pagopa.pn.externalchannels.dto.kafka.Creditor;
-import it.pagopa.pn.externalchannels.dto.kafka.DebtorPosition;
-import it.pagopa.pn.externalchannels.dto.kafka.PaymentEvent;
-import it.pagopa.pn.externalchannels.dto.kafka.PaymentInfo;
+import it.pagopa.pn.externalchannels.dto.kafka.payment.Creditor;
+import it.pagopa.pn.externalchannels.dto.kafka.payment.DebtorPosition;
+import it.pagopa.pn.externalchannels.dto.kafka.payment.PaymentEvent;
+import it.pagopa.pn.externalchannels.dto.kafka.payment.PaymentInfo;
 import it.pagopa.pn.externalchannels.exception.KafkaUnavailableException;
 import it.pagopa.pn.externalchannels.middleware.kafka.KafkaKillSwitch;
+import it.pagopa.pn.externalchannels.mock_nodo_pagopa.KafkaProducerResponse;
 import it.pagopa.pn.externalchannels.mock_nodo_pagopa.NoticePaymentRequest;
-import it.pagopa.pn.externalchannels.mock_nodo_pagopa.NoticePaymentResponse;
 import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -26,7 +26,7 @@ public class PaymentEventProducer {
     private final KafkaKillSwitch killSwitch;
     private final PnExternalChannelsProperties properties;
 
-    public Mono<NoticePaymentResponse> send(NoticePaymentRequest request) {
+    public Mono<KafkaProducerResponse> send(NoticePaymentRequest request) {
         PaymentEvent event = toPaymentEvent(request);
         if(!killSwitch.isEnabled()) {
             log.debug("Kafka connection is disabled");
@@ -59,7 +59,7 @@ public class PaymentEventProducer {
                     return new KafkaUnavailableException(error);
                 })
                 .map(result -> {
-                    NoticePaymentResponse response = new NoticePaymentResponse();
+                    KafkaProducerResponse response = new KafkaProducerResponse();
                     response.setOffset(String.valueOf(result.getRecordMetadata().offset()));
                     response.setPartition(String.valueOf(result.getRecordMetadata().partition()));
                     return response;

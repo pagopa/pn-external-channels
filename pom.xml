@@ -306,14 +306,14 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>openapi-mock-nodo-pagopa</id>
+                        <id>openapi-mock-kafka</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <phase>process-resources</phase>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/docs/openapi/api-mock-nodo-pagopa-v1.yaml
+                                ${project.basedir}/docs/openapi/api-mock-kafka-v1.yaml
                             </inputSpec>
                             <library>spring-boot</library>
                             <generatorName>spring</generatorName>
@@ -328,6 +328,8 @@
                             <supportingFilesToGenerate>
                                 ApiUtil.java
                             </supportingFilesToGenerate>
+                            <typeMappings><typeMapping>OffsetDateTime=Instant</typeMapping></typeMappings>
+                            <importMappings><importMapping>java.time.OffsetDateTime=java.time.Instant</importMapping></importMappings>
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <apiPackage>it.pagopa.pn.externalchannels.api</apiPackage>

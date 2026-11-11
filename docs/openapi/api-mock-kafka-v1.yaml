@@ -3,16 +3,20 @@ info:
   title:  API Mock Nodo PagoPA
   version: 1.0.0
 tags:
+    - name: Connection
+      description: Endpoint per la gestione della connessione con il mock di Kafka
     - name: Payment
       description: Endpoint per la simulazione della pubblicazione di un pagamento verso il Nodo dei pagamenti
+    - name: Onboarding
+      description: Endpoint per la simulazione della pubblicazione di un onboarding verso il Nodo kafka dei contratti
 paths:
-  /external-channels/nodo-pagopa/kafka/connection:
+  /external-channels/v1/kafka/connection:
     get:
-      summary: Verifica connessione con il mock del nodo dei pagamenti
-      description: Endpoint per la verifica della connessione con il mock del nodo dei pagamenti
+      summary: Verifica connessione con il mock di kafka
+      description: Endpoint per la verifica della connessione con il mock di kafka
       tags:
-        - Payment
-      operationId: checkNodoPagopaConnection
+        - Connection
+      operationId: checkKafkaConnection
       responses:
         '200':
           description: OK
@@ -30,8 +34,8 @@ paths:
       summary: Regola la connessione con il mock kafka del nodo dei pagamenti
       description: Endpoint per la regolazione della connessione con il mock kafka del nodo dei pagamenti
       tags:
-        - Payment
-      operationId: setNodoPagopaConnection
+        - Connection
+      operationId: setKafkaConnection
       requestBody:
         required: true
         content:
@@ -51,7 +55,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /external-channels/nodo-pagopa/v1/payment:
+  /external-channels/v1/kafka/payment:
     post:
       operationId: producePayment
       tags:
@@ -71,7 +75,41 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NoticePaymentResponse'
+                $ref: '#/components/schemas/KafkaProducerResponse'
+        '400':
+          description: Bad request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Internal error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+
+  /external-channels/v1/kafka/onboarding:
+    post:
+      operationId: produceOnboarding
+      tags:
+        - Onboarding
+      summary: Simula la pubblicazione di un onboarding verso il Nodo dei contratti
+      description: >-
+        L'endpoint consente di simulare la pubblicazione di un onboarding verso il Nodo dei contratti.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KafkaProducerResponse'
         '400':
           description: Bad request
           content:
@@ -123,12 +161,119 @@ components:
           type: string
           example: "1000"
 
-    NoticePaymentResponse:
+    OnboardingRequest:
+      type: object
+      description: >- 
+        Request per la simulazione della pubblicazione di un onboarding verso il Nodo dei contratti
+        Gli attributi non sono obbligatori, se non forniti verranno generati in automatico dal mock di kafka
+      properties:
+        billing:
+          $ref: '#/components/schemas/OnboardingBilling'
+        contentType:
+          type: string
+          example: application/json
+        fileName:
+          type: string
+          example: onboarding.json
+        filePath:
+          type: string
+          example: /tmp/onboarding.json
+        id:
+          type: string
+          example: onb-123
+        institution:
+          $ref: '#/components/schemas/OnboardingInstitution'
+        internalInstitutionId:
+          type: string
+          example: int-inst-123
+        onboardingTokenId:
+          type: string
+          example: token-123
+        product:
+          type: string
+          example: prod-pn
+        state:
+          type: string
+          example: ACTIVE
+        createdAt:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:35:00Z'
+        pricingPlan:
+          type: string
+          example: free
+        zipCode:
+          type: string
+          example: '00100'
+
+    OnboardingBilling:
+      type: object
+      properties:
+        recipientCode:
+          type: string
+          example: RECIPIENT-001
+        vatNumber:
+          type: string
+          example: '12345678901'
+        publicServices:
+          type: boolean
+          example: true
+
+    OnboardingInstitution:
+      type: object
+      required:
+        - taxCode
+      properties:
+        address:
+          type: string
+          example: Via Roma 1
+        description:
+          type: string
+          example: Comune di Milano
+        digitalAddress:
+          type: string
+          example: comune@pec.it
+        institutionType:
+          type: string
+          example: PA
+        origin:
+          type: string
+          example: IPA
+        originId:
+          type: string
+          example: origin-001
+        taxCode:
+          type: string
+          description: Codice fiscale dell'ente o partita IVA in formato standard.
+          example: '01234567890'
+          pattern: '^(([A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z])|(\d{11}))$'
+        rootParent:
+          $ref: '#/components/schemas/OnboardingRootParent'
+
+    OnboardingRootParent:
+      type: object
+      properties:
+        id:
+          type: string
+          example: root-parent-1
+        originId:
+          type: string
+          example: root-origin-1
+        description:
+          type: string
+          example: Root parent description
+
+
+    KafkaProducerResponse:
       type: object
       required:
         - requestId
       description: >-
-        La risposta contiene l'identificativo della richiesta di pagamento inoltrata al Nodo dei pagamenti.
+        La risposta contiene i metadati kafka ottenuti dalla produzione di un evento verso il nodo.
       properties:
         offset:
           type: string

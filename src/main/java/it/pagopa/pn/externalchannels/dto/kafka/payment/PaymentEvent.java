@@ -1,4 +1,4 @@
-package it.pagopa.pn.externalchannels.dto.kafka;
+package it.pagopa.pn.externalchannels.dto.kafka.payment;
 
 import lombok.Builder;
 import lombok.Data;
