@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Service
 @CustomLog
@@ -69,7 +70,7 @@ public class PaymentEventProducer {
     private PaymentEvent toPaymentEvent(NoticePaymentRequest request) {
         long timestamp = Instant.now().getEpochSecond();
         return PaymentEvent.builder()
-                .id("evtAbcd"+timestamp)
+                .id(UUID.randomUUID().toString())
                 .timestamp(timestamp)
                 .creditor(Creditor.builder()
                         .companyName("Example Company")
