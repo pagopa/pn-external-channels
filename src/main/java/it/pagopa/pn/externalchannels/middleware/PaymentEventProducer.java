@@ -1,10 +1,7 @@
 package it.pagopa.pn.externalchannels.middleware;
 
 import it.pagopa.pn.externalchannels.config.PnExternalChannelsProperties;
-import it.pagopa.pn.externalchannels.dto.kafka.payment.Creditor;
-import it.pagopa.pn.externalchannels.dto.kafka.payment.DebtorPosition;
 import it.pagopa.pn.externalchannels.dto.kafka.payment.PaymentEvent;
-import it.pagopa.pn.externalchannels.dto.kafka.payment.PaymentInfo;
 import it.pagopa.pn.externalchannels.exception.KafkaUnavailableException;
 import it.pagopa.pn.externalchannels.middleware.kafka.KafkaKillSwitch;
 import it.pagopa.pn.externalchannels.mock_nodo_pagopa.KafkaProducerResponse;
@@ -72,25 +69,19 @@ public class PaymentEventProducer {
         return PaymentEvent.builder()
                 .id(UUID.randomUUID().toString())
                 .timestamp(timestamp)
-                .creditor(Creditor.builder()
-                        .companyName("Example Company")
-                        .idPA(request.getCreditorTaxId())
-                        .build())
-                .debtorPosition(DebtorPosition.builder()
-                        .modelType("1")
-                        .noticeNumber(request.getNoticeNumber())
-                        .iur("iurAbcd"+timestamp)
-                        .iuv("iuvAbcd"+timestamp)
-                        .build())
-                .paymentInfo(PaymentInfo.builder()
-                        .amount(request.getAmount() != null ? request.getAmount() : "1000")
-                        .fee("0")
-                        .dueDate("2027-01-01")
-                        .paymentDateTime(request.getPaymentDateTime())
-                        .totalNotice("1")
-                        .touchpoint("Example Touchpoint")
-                        .paymentChannel("IO")
-                        .build())
+                .companyName("Example Company")
+                .idPA(request.getCreditorTaxId())
+                .modelType("1")
+                .noticeNumber(request.getNoticeNumber())
+                .iur("iurAbcd"+timestamp)
+                .iuv("iuvAbcd"+timestamp)
+                .amount(request.getAmount() != null ? request.getAmount() : "1000")
+                .fee("0")
+                .dueDate("2027-01-01")
+                .paymentDateTime(request.getPaymentDateTime())
+                .totalNotice("1")
+                .touchpoint("Example Touchpoint")
+                .paymentChannel("IO")
                 .build();
     }
 
