@@ -65,7 +65,7 @@ public class PaymentEventProducer {
     }
 
     private PaymentEvent toPaymentEvent(NoticePaymentRequest request) {
-        long timestamp = Instant.now().getEpochSecond();
+        long timestamp = Instant.now().toEpochMilli();
         return PaymentEvent.builder()
                 .id(UUID.randomUUID().toString())
                 .timestamp(timestamp)

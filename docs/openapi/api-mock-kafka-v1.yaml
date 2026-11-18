@@ -154,7 +154,7 @@ components:
           pattern: '^\d+$'
         paymentDateTime:
           type: string
-          pattern: ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)?(Z|([+\-][0-9]{2}):([0-9]{2}))$
+          pattern: ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]+)$
           description: data e ora in formato ISO 8601
         amount:
           description: Importo del pagamento in eurocent
