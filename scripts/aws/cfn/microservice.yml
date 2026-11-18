@@ -278,6 +278,16 @@ Parameters:
     Description: 'Kafka producer onboarding topic'
     Default: ''
 
+  KafkaProducerSecurityProtocol:
+    Type: String
+    Description: 'Kafka producer security protocol'
+    Default: 'PLAINTEXT'
+
+  KafkaProducerSaslMechanism:
+    Type: String
+    Description: 'Kafka producer SASL mechanism'
+    Default: 'PLAIN'
+
 
 Conditions:
   IsNotProdAccount: !Not [ !Equals [!Ref EnvironmentType, prod ] ]
@@ -332,7 +342,10 @@ Resources:
         ContainerEnvEntry24: !Sub 'SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS=${KafkaBootstrapServers}'
         ContainerEnvEntry25: !Sub 'PN_EXTERNALCHANNELS_KAFKATOPICS_PAYMENTS=${KafkaProducerPaymentTopic}'
         ContainerEnvEntry26: !Sub 'PN_EXTERNALCHANNELS_KAFKATOPICS_ONBOARDINGS=${KafkaProducerOnboardingTopic}'
+        ContainerEnvEntry27: !Sub 'SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL=${KafkaProducerSecurityProtocol}'
+        ContainerEnvEntry28: !Sub 'SPRING_KAFKA_PROPERTIES_SASL_MECHANISM=${KafkaProducerSaslMechanism}'
         ContainerSecret1: !Sub 'PN_EXTERNALCHANNELS_EXTCHANNELWEBHOOKAPIKEY=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:ExternalChannelApiKey:AWSCURRENT:'
+        ContainerSecret2: !Sub 'KAFKA_PAYMENT_PRODUCER_SASL_JAAS_PASSWORD=arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pn-ExternalChannels-Secrets:KafkaPaymentEventsProducerSaslJaasConfig:AWSCURRENT:'
         MicroServiceSecretPrefix: pn-ExternalChannels-Secrets
         JavaToolOptions: !Ref JavaToolOptions
         MappedPaths: '/external-channels/*,/historical/*,/progress-event/*,/piattaforma-notifiche-ingress/*,/send-normalizzatore-ingress/*'
